@@ -1,6 +1,6 @@
   import React from "react";
   import { FaChevronLeft, FaChevronRight, FaSearch } from "react-icons/fa";
-  import spotifyLogo from "../../assets/spotify.png";
+  import spotifyLogo from "../../assets/images/spotify.png";
 
 
   const Navbar = () => {
