@@ -26,10 +26,6 @@ const LeftSidebar = () => {
         <h2>Playlists</h2>
         <ul
           className="playlist-list"
-          style={{
-            maxHeight: '400px', // Giới hạn chiều cao danh sách playlist
-            overflowY: 'auto',  // Bật cuộn dọc
-          }}
         >
           <li>🎵 Urban Nights</li>
           <li>🎶 Coastal Dreaming</li>
