@@ -9,12 +9,12 @@ const RightSidebar = () => {
 
   return (
     <>
-      <h2 className="playlists-section h2">Friend Activity</h2>
+      <h2 className="playlists-section h2">Bạn bè</h2>
       <div
         style={{
           marginTop: '1rem',
-          maxHeight: '300px', // Giới hạn chiều cao (tùy chỉnh theo nhu cầu)
-          overflowY: 'auto',  // Bật cuộn dọc
+          overflowY: 'auto',  
+          maxHeight: '300px',
         }}
       >
         {friends.map((friend, index) => (

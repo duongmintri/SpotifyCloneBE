@@ -7,15 +7,7 @@ const LeftSidebar = () => {
       <ul className="nav-menu">
         <li className="active">
           <FaHome />
-          <span>Home</span>
-        </li>
-        <li>
-          <FaSearch />
-          <span>Search</span>
-        </li>
-        <li>
-          <FaBook />
-          <span>Your Library</span>
+          <span>Thư viện của bạn</span>
         </li>
       </ul>
       
