@@ -53,6 +53,11 @@ body {
   background-color: #000000;
 }
 
+.spotify-logo {
+  height: 40px; /* Điều chỉnh kích thước theo ý muốn */
+  margin-right: 1rem; /* Giữ khoảng cách với navigation */
+}
+
 .spotify-navbar .btn {
   border-radius: 23px;
   padding: 0.5rem 1.25rem;
