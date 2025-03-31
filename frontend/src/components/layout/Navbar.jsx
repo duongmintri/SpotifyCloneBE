@@ -11,17 +11,12 @@
           <img src={spotifyLogo} alt="Spotify Logo" className="spotify-logo" />
         </div>
   
-        {/* <div className="navigation-controls">
-          <FaChevronLeft className="me-3" style={{ fontSize: '1.5rem', opacity: 0.7 }} />
-          <FaChevronRight style={{ fontSize: '1.5rem', opacity: 0.7 }} />
-        </div> */}
-  
         <div className="search-container" style={{ flex: 1, marginLeft: '1rem' }}>
           <div style={{ position: 'relative', maxWidth: '365px' }}>
             <FaSearch style={{ position: 'absolute', left: '10px', top: '10px', color: '#b3b3b3' }} />
             <input 
               type="text" 
-              placeholder="Search for Artists, Songs, or Podcasts" 
+              placeholder="Tìm kiếm theo bài hát, nghệ sĩ hoặc album" 
               style={{
                 backgroundColor: 'white',
                 border: 'none',
@@ -35,7 +30,7 @@
         </div>
   
         <div>
-          <button className="btn btn-login">Login</button>
+          <button className="btn btn-login">Đăng nhập</button>
         </div>
       </div>
     );
