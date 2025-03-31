@@ -10,13 +10,7 @@ const RightSidebar = () => {
   return (
     <>
       <h2 className="playlists-section h2">Bạn bè</h2>
-      <div
-        style={{
-          marginTop: '1rem',
-          overflowY: 'auto',  
-          maxHeight: '300px',
-        }}
-      >
+      <div>
         {friends.map((friend, index) => (
           <div key={index} className="friend-row">
             <img src={friend.img} alt={friend.name} className="friend-avatar" />
