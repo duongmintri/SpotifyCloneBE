@@ -30,6 +30,7 @@
         </div>
   
         <div>
+          <button className="btn btn-signup" style={{ marginRight: '10px' }}>Đăng ký</button>
           <button className="btn btn-login">Đăng nhập</button>
         </div>
       </div>
