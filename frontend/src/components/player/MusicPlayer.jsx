@@ -5,7 +5,7 @@ const MusicPlayer = () => {
   return (
     <div className="player-container">
       <div className="song-info">
-        <img src="https://dummyimage.com/300/444444" alt="Inner Light" className="song-img" />
+        <img src="/src/assets/images/cover-images/3.jpg" alt="Inner Light" className="song-img" />
         <div className="song-details">
           <div className="song-title">Inner Light</div>
           <div className="song-artist">Shocking Lemon</div>
