@@ -7,7 +7,7 @@ import {
 } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 
-const LoginModal = ({ isOpen, onClose }) => {
+const LoginModal = ({ isOpen, onClose, switchToSignup}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -125,7 +125,7 @@ const LoginModal = ({ isOpen, onClose }) => {
           <div className="modal-footer">
             <p>
               Chưa có tài khoản?{" "}
-              <a href="#" onClick={onClose}>
+              <a href="#" onClick={switchToSignup}>
                 Đăng ký Spotify
               </a>
             </p>

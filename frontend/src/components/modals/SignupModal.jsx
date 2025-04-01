@@ -8,7 +8,7 @@ import {
 } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
 
-const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
+const SignupModal = ({ isOpen, onClose, switchToLogin }) => {
   const [email, setEmail] = useState("");
   const [confirmEmail, setConfirmEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -260,7 +260,7 @@ const SignupModal = ({ isOpen, onClose, openLoginModal }) => {
             <div className="login-link">
               <p>
                 Đã có tài khoản?{" "}
-                <a href="#" onClick={openLoginModal}>
+                <a href="#" onClick={switchToLogin}>
                   Đăng nhập
                 </a>
               </p>

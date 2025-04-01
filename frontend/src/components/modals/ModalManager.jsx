@@ -22,14 +22,33 @@ const ModalManager = ({ openLoginModal, openSignupModal }) => {
     setShowSignupModal(false);
   };
 
+  // Thêm hàm để chuyển đổi giữa hai modal
+  const switchToLogin = () => {
+    setShowSignupModal(false);
+    setShowLoginModal(true);
+  };
+
+  const switchToSignup = () => {
+    setShowLoginModal(false);
+    setShowSignupModal(true);
+  };
+
   // Gán hàm từ props để Navbar có thể gọi
   if (openLoginModal) openLoginModal.current = handleOpenLoginModal;
   if (openSignupModal) openSignupModal.current = handleOpenSignupModal;
 
   return (
     <>
-      <LoginModal isOpen={showLoginModal} onClose={closeModals} />
-      <SignupModal isOpen={showSignupModal} onClose={closeModals} />
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={closeModals}
+        switchToSignup={switchToSignup} // Truyền hàm để chuyển sang Signup
+      />
+      <SignupModal
+        isOpen={showSignupModal}
+        onClose={closeModals}
+        switchToLogin={switchToLogin} // Truyền hàm để chuyển sang Login
+      />
     </>
   );
 };
