@@ -109,6 +109,8 @@ body {
   padding: 1.5rem 1rem;
 }
 
+
+
 /* Navigation menu */
 .nav-menu {
   list-style: none;
@@ -221,6 +223,12 @@ body {
 .music-card:hover .play-icon {
   opacity: 1;
   transform: translateY(0);
+}
+
+.music-card :active {
+  background-color: var(--spotify-hover);
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
 }
 
 .card-img-container {
