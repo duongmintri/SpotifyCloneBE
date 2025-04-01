@@ -14,11 +14,11 @@ const LeftSidebar = () => {
       <ul className="nav-menu">
         <li>
           <FaPlus style={{ backgroundColor: '#b3b3b3', color: 'black', padding: '5px', borderRadius: '2px', fontSize: '1.2rem' }} />
-          <span>Create Playlist</span>
+          <span>Tạo playlist của riêng bạn</span>
         </li>
         <li>
           <FaHeart style={{ background: 'linear-gradient(135deg, #450af5, #c4efd9)', padding: '5px', borderRadius: '2px', fontSize: '1.2rem' }} />
-          <span>Liked Songs</span>
+          <span>Các bài hát bạn yêu thích</span>
         </li>
       </ul>
       
