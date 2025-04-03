@@ -1,7 +1,10 @@
-import React from "react";
-import { FaPlay, FaStepBackward, FaStepForward, FaRandom, FaRedo, FaVolumeUp } from "react-icons/fa";
+import React from 'react';
+import { FaPlay, FaStepBackward, FaStepForward, FaRandom, FaRedo, FaVolumeUp, FaVideo, FaList } from 'react-icons/fa';
+import useModalStore from '../../store/modalStore.jsx'; // Điều chỉnh đường dẫn nếu cần
 
 const MusicPlayer = () => {
+  const { openPlaylistModal } = useModalStore();
+
   return (
     <div className="player-container">
       <div className="song-info">
@@ -11,26 +14,26 @@ const MusicPlayer = () => {
           <div className="song-artist">Shocking Lemon</div>
         </div>
       </div>
-      
+
       <div className="player-controls">
         <div className="control-buttons">
           <button className="control-btn">
-            <FaRandom />
+            <FaRandom title="Bật phát nhạc ngẫu nhiên"/>
           </button>
           <button className="control-btn">
-            <FaStepBackward />
+            <FaStepBackward title="Chuyển về bài trước"/>
           </button>
           <button className="play-btn">
-            <FaPlay />
+            <FaPlay title="Ngừng/Tiếp tục"/>
           </button>
           <button className="control-btn">
-            <FaStepForward />
+            <FaStepForward title="Chuyển qua bài tiếp theo"/>
           </button>
           <button className="control-btn">
-            <FaRedo />
+            <FaRedo title="Bật lặp lại"/>
           </button>
         </div>
-        
+
         <div className="progress-container">
           <div className="progress-time">1:23</div>
           <div className="progress-bar">
@@ -40,9 +43,27 @@ const MusicPlayer = () => {
           <div className="progress-time">3:45</div>
         </div>
       </div>
-      
-      <div className="volume-container">
-        <FaVolumeUp className="volume-icon" />
+
+      <div className="volume-container" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        {/* Nút mở video pop-up */}
+        <button
+          className="control-btn"
+          onClick={() => console.log('Mở video pop-up (chưa có chức năng)')} // Tạm log, để sau thêm logic
+          title="Xem video"
+        >
+          <FaVideo />
+        </button>
+        {/* Nút mở modal playlist */}
+        <button
+          className="control-btn"
+          onClick={openPlaylistModal}
+          title="Xem playlist hiện tại"
+        >
+          <FaList />
+        </button>
+        {/* Nút âm lượng hiện có */}
+        <FaVolumeUp className="volume-icon" title="Điều chỉnh âm lượng" />
+        
         <div className="volume-slider">
           <div className="volume-slider-fill"></div>
         </div>

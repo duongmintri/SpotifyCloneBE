@@ -1,5 +1,4 @@
-// src/App.jsx
-import React, { useRef } from "react";
+import React from "react";
 import "./App.css";
 import Navbar from "./components/layout/Navbar";
 import LeftSidebar from "./components/layout/LeftSidebar";
@@ -9,13 +8,10 @@ import MusicPlayer from "./components/player/MusicPlayer";
 import ModalManager from "./components/modals/ModalManager";
 
 const App = () => {
-  const openLoginModal = useRef(null);
-  const openSignupModal = useRef(null);
-
   return (
     <div className="app">
       <div className="app-navbar">
-        <Navbar openLoginModal={openLoginModal} openSignupModal={openSignupModal} />
+        <Navbar />
       </div>
       <div className="main-container">
         <div className="sidebar left-sidebar">
@@ -29,7 +25,7 @@ const App = () => {
       <div className="music-player">
         <MusicPlayer />
       </div>
-      <ModalManager openLoginModal={openLoginModal} openSignupModal={openSignupModal} />
+      <ModalManager />
     </div>
   );
 };
