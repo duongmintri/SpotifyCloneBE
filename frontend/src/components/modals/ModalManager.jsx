@@ -1,14 +1,16 @@
 import React from 'react';
 import LoginModal from './LoginModal';
 import SignupModal from './SignupModal';
-import AddFriendModal from './AddFriendModal'; // Thêm import
-import useModalStore from '../../store/modalStore.jsx'; // Điều chỉnh đường dẫn nếu cần
+import AddFriendModal from './AddFriendModal';
+import PlaylistModal from './PlaylistModal'; // Thêm import
+import useModalStore from '../../store/modalStore.jsx';
 
 const ModalManager = () => {
   const {
     isLoginModalOpen,
     isSignupModalOpen,
-    isAddFriendModalOpen, // Thêm trạng thái mới
+    isAddFriendModalOpen,
+    isPlaylistModalOpen, // Thêm trạng thái mới
     closeModals,
     switchToLogin,
     switchToSignup,
@@ -19,6 +21,7 @@ const ModalManager = () => {
       <LoginModal isOpen={isLoginModalOpen} onClose={closeModals} switchToSignup={switchToSignup} />
       <SignupModal isOpen={isSignupModalOpen} onClose={closeModals} switchToLogin={switchToLogin} />
       <AddFriendModal isOpen={isAddFriendModalOpen} onClose={closeModals} />
+      <PlaylistModal isOpen={isPlaylistModalOpen} onClose={closeModals} />
     </>
   );
 };
