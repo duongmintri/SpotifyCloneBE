@@ -822,6 +822,11 @@ body {
   margin-top: 8px;
 }
 
+.addFriendModal submit-btn{
+  padding: 10px 20px;
+  justify-content: center;
+}
+
 .submit-btn:hover {
   background-color: #1ed760;
   transform: scale(1.02);
@@ -860,25 +865,3 @@ body {
 .modal-footer a:hover {
   color: var(--spotify-green);
 }
-
-/* Đảm bảo các form responsive trên thiết bị nhỏ */
-/* @media (max-width: 550px) {
-  .modal-container {
-    max-width: 90%;
-    max-height: 80vh;
-  }
-  
-  .birth-date-inputs {
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .gender-options {
-    flex-direction: column;
-    gap: 12px;
-  }
-  
-  .modal-content {
-    padding: 20px;
-  }
-} */
