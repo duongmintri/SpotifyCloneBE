@@ -18,19 +18,19 @@ const MusicPlayer = () => {
       <div className="player-controls">
         <div className="control-buttons">
           <button className="control-btn">
-            <FaRandom />
+            <FaRandom title="Bật phát nhạc ngẫu nhiên"/>
           </button>
           <button className="control-btn">
-            <FaStepBackward />
+            <FaStepBackward title="Chuyển về bài trước"/>
           </button>
           <button className="play-btn">
-            <FaPlay />
+            <FaPlay title="Ngừng/Tiếp tục"/>
           </button>
           <button className="control-btn">
-            <FaStepForward />
+            <FaStepForward title="Chuyển qua bài tiếp theo"/>
           </button>
           <button className="control-btn">
-            <FaRedo />
+            <FaRedo title="Bật lặp lại"/>
           </button>
         </div>
 
@@ -62,7 +62,8 @@ const MusicPlayer = () => {
           <FaList />
         </button>
         {/* Nút âm lượng hiện có */}
-        <FaVolumeUp className="volume-icon" />
+        <FaVolumeUp className="volume-icon" title="Điều chỉnh âm lượng" />
+        
         <div className="volume-slider">
           <div className="volume-slider-fill"></div>
         </div>
