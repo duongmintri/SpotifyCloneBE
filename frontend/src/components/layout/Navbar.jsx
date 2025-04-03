@@ -1,9 +1,11 @@
-// src/components/layout/Navbar.jsx
 import React from "react";
 import { FaSearch } from "react-icons/fa";
 import spotifyLogo from "../../assets/images/spotify.png";
+import useModalStore from '../../store/modalStore';
 
-const Navbar = ({ openLoginModal, openSignupModal }) => {
+const Navbar = () => {
+  const { openLoginModal, openSignupModal } = useModalStore();
+
   return (
     <div className="spotify-navbar">
       <div className="logo-container">
@@ -27,14 +29,17 @@ const Navbar = ({ openLoginModal, openSignupModal }) => {
         </div>
       </div>
       <div>
-        <button
-          className="btn btn-signup"
-          style={{ marginRight: "10px" }}
-          onClick={() => openSignupModal.current()}
+        <button 
+          className="btn btn-signup" 
+          style={{ marginRight: "10px" }} 
+          onClick={openSignupModal}
         >
           Đăng ký
         </button>
-        <button className="btn btn-login" onClick={() => openLoginModal.current()}>
+        <button 
+          className="btn btn-login" 
+          onClick={openLoginModal}
+        >
           Đăng nhập
         </button>
       </div>

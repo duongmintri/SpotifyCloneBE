@@ -1,53 +1,28 @@
-// src/components/modals/ModalManager.jsx
-import React, { useState } from "react";
-import LoginModal from "./LoginModal";
-import SignupModal from "./SignupModal";
+import React from 'react';
+import LoginModal from './LoginModal';
+import SignupModal from './SignupModal';
+import useModalStore from '../../store/modalStore.jsx';
 
-const ModalManager = ({ openLoginModal, openSignupModal }) => {
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSignupModal, setShowSignupModal] = useState(false);
-
-  const handleOpenLoginModal = () => {
-    setShowLoginModal(true);
-    setShowSignupModal(false);
-  };
-
-  const handleOpenSignupModal = () => {
-    setShowSignupModal(true);
-    setShowLoginModal(false);
-  };
-
-  const closeModals = () => {
-    setShowLoginModal(false);
-    setShowSignupModal(false);
-  };
-
-  // Thêm hàm để chuyển đổi giữa hai modal
-  const switchToLogin = () => {
-    setShowSignupModal(false);
-    setShowLoginModal(true);
-  };
-
-  const switchToSignup = () => {
-    setShowLoginModal(false);
-    setShowSignupModal(true);
-  };
-
-  // Gán hàm từ props để Navbar có thể gọi
-  if (openLoginModal) openLoginModal.current = handleOpenLoginModal;
-  if (openSignupModal) openSignupModal.current = handleOpenSignupModal;
+const ModalManager = () => {
+  const {
+    isLoginModalOpen,
+    isSignupModalOpen,
+    closeModals,
+    switchToLogin,
+    switchToSignup,
+  } = useModalStore();
 
   return (
     <>
       <LoginModal
-        isOpen={showLoginModal}
+        isOpen={isLoginModalOpen}
         onClose={closeModals}
-        switchToSignup={switchToSignup} // Truyền hàm để chuyển sang Signup
+        switchToSignup={switchToSignup}
       />
       <SignupModal
-        isOpen={showSignupModal}
+        isOpen={isSignupModalOpen}
         onClose={closeModals}
-        switchToLogin={switchToLogin} // Truyền hàm để chuyển sang Login
+        switchToLogin={switchToLogin}
       />
     </>
   );
