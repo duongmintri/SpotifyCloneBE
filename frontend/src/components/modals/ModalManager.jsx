@@ -10,7 +10,7 @@ const ModalManager = () => {
     isLoginModalOpen,
     isSignupModalOpen,
     isAddFriendModalOpen,
-    isPlaylistModalOpen, // Thêm trạng thái mới
+    isPlaylistModalOpen,
     closeModals,
     switchToLogin,
     switchToSignup,
