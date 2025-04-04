@@ -1,6 +1,5 @@
 import React from 'react';
 import { FaTimes } from 'react-icons/fa';
-import useModalStore from '../../store/modalStore.jsx'; // Điều chỉnh đường dẫn nếu cần
 
 const PlaylistModal = ({ isOpen, onClose }) => {
   // Dữ liệu tạm thời cho playlist
