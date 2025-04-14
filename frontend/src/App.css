@@ -1024,6 +1024,7 @@ body {
 
 .playlist-tracks {
   padding: 0 24px 24px;
+  overflow-x: hidden;
 }
 
 .playlist-table-header {
@@ -1204,6 +1205,7 @@ body {
   animation: popupFadeIn 0.2s ease forwards;
   border: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
+  overflow-x: hidden; /* Prevent horizontal overflow */
 }
 
 @keyframes popupFadeIn {
@@ -1337,6 +1339,7 @@ body {
 .playlist-tracks-list {
   max-height: 300px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .playlist-popup-container .playlist-track {
@@ -1412,6 +1415,15 @@ body {
 
 .playlist-popup-container .playlist-track:hover .track-action-btn {
   opacity: 1;
+}
+
+.playlist-track {
+  /* Existing styles */
+  user-select: none; /* Prevent text selection during drag */
+}
+
+.playlist-track:active {
+  cursor: grabbing;
 }
 
 .playlist-popup-container .track-action-btn:hover {
