@@ -9,7 +9,7 @@ import {
   FaVideo,
   FaList,
   FaDownload,
-  FaLightHeart,
+  FaHeart,
 } from "react-icons/fa";
 import useModalStore from "../../store/modalStore.jsx"; // Điều chỉnh đường dẫn nếu cần
 
@@ -97,12 +97,13 @@ const MusicPlayer = () => {
         >
           <FaVideo />
         </button>
-        {/* Nút mở modal playlist */}
+        
         <button
           className="control-btn"
           onClick={openPlaylistModal}
           title="Xem playlist hiện tại"
         >
+          
           <FaList />
         </button>
         {/* Nút âm lượng hiện có */}
