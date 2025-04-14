@@ -1140,7 +1140,7 @@ body {
   cursor: pointer;
   transition: background-color 0.3s ease;
   width: 140%;
-  transform: translateX(-30px);
+  transform: translateX(-35px);
 }
 
 .playlist-card:hover {
