@@ -56,20 +56,6 @@ const LoginModal = ({ isOpen, onClose, switchToSignup}) => {
 
         {/* Phần còn lại của modal giữ nguyên */}
         <div className="modal-content">
-          <div className="social-login-buttons">
-            <button className="social-btn facebook-btn">
-              <FaFacebook />
-              <span>Tiếp tục với Facebook</span>
-            </button>
-            <button className="social-btn google-btn">
-              <FaGoogle />
-              <span>Tiếp tục với Google</span>
-            </button>
-          </div>
-
-          <div className="divider">
-            <span>hoặc</span>
-          </div>
 
           <form className="login-form">
             <div className="form-group">

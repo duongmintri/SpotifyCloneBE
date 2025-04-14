@@ -7,6 +7,8 @@ import {
   FaEyeSlash,
 } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
+import { Form, Button, InputGroup } from "react-bootstrap";
+
 
 const SignupModal = ({ isOpen, onClose, switchToLogin }) => {
   const [email, setEmail] = useState("");
@@ -76,21 +78,6 @@ const SignupModal = ({ isOpen, onClose, switchToLogin }) => {
 
         {/* Phần nội dung còn lại giữ nguyên */}
         <div className="modal-content">
-          <div className="social-login-buttons">
-            <button className="social-btn facebook-btn">
-              <FaFacebook />
-              <span>Đăng ký với Facebook</span>
-            </button>
-            <button className="social-btn google-btn">
-              <FaGoogle />
-              <span>Đăng ký với Google</span>
-            </button>
-          </div>
-
-          <div className="divider">
-            <span>hoặc</span>
-          </div>
-
           <form className="signup-form">
             <div className="form-group">
               <label htmlFor="email">Email của bạn là gì?</label>
@@ -200,59 +187,6 @@ const SignupModal = ({ isOpen, onClose, switchToLogin }) => {
                 </div>
               </div>
             </div>
-
-            <div className="form-group">
-              <label>Giới tính của bạn là gì?</label>
-              <div className="gender-options">
-                <div className="radio-option">
-                  <input
-                    type="radio"
-                    id="gender-male"
-                    name="gender"
-                    value="Nam"
-                    checked={gender === "Nam"}
-                    onChange={(e) => setGender(e.target.value)}
-                  />
-                  <label htmlFor="gender-male">Nam</label>
-                </div>
-                <div className="radio-option">
-                  <input
-                    type="radio"
-                    id="gender-female"
-                    name="gender"
-                    value="Nữ"
-                    checked={gender === "Nữ"}
-                    onChange={(e) => setGender(e.target.value)}
-                  />
-                  <label htmlFor="gender-female">Nữ</label>
-                </div>
-                <div className="radio-option">
-                  <input
-                    type="radio"
-                    id="gender-non-binary"
-                    name="gender"
-                    value="Không phân biệt"
-                    checked={gender === "Không phân biệt"}
-                    onChange={(e) => setGender(e.target.value)}
-                  />
-                  <label htmlFor="gender-non-binary">Không phân biệt</label>
-                </div>
-              </div>
-            </div>
-
-            <div className="form-group checkbox-group">
-              <input
-                type="checkbox"
-                id="accept-terms"
-                checked={acceptTerms}
-                onChange={() => setAcceptTerms(!acceptTerms)}
-              />
-              <label htmlFor="accept-terms">
-                Tôi đồng ý với <a href="#">Điều khoản và Điều kiện sử dụng</a>{" "}
-                của Spotify
-              </label>
-            </div>
-
             <button type="submit" className="submit-btn">
               Đăng ký
             </button>
