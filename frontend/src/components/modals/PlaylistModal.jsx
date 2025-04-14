@@ -1,50 +1,72 @@
 import React from 'react';
-import { FaTimes } from 'react-icons/fa';
-import useModalStore from '../../store/modalStore.jsx'; // Điều chỉnh đường dẫn nếu cần
+import { FaTimes, FaPlay, FaEllipsisH } from 'react-icons/fa';
 
 const PlaylistModal = ({ isOpen, onClose }) => {
-  // Dữ liệu tạm thời cho playlist
-  const currentPlaylist = [
-    { title: 'Inner Light', artist: 'Shocking Lemon', duration: '3:45' },
-    { title: 'Starlight', artist: 'Another Artist', duration: '4:12' },
-    { title: 'Purple Sunset', artist: 'Jazz Combo', duration: '3:30' },
+  // Dữ liệu playlist mẫu
+  const playlist = [
+    { id: 1, title: 'Inner Light', artist: 'Shocking Lemon', duration: '3:45', current: true },
+    { id: 2, title: 'Blue Bird', artist: 'Ikimono Gakari', duration: '3:38', current: false },
+    { id: 3, title: 'Sign', artist: 'FLOW', duration: '4:01', current: false },
+    { id: 4, title: 'Silhouette', artist: 'KANA-BOON', duration: '4:23', current: false },
+    { id: 5, title: 'Haruka Kanata', artist: 'ASIAN KUNG-FU GENERATION', duration: '3:40', current: false },
+    { id: 6, title: 'GO!!!', artist: 'FLOW', duration: '4:05', current: false },
+    { id: 7, title: 'Diver', artist: 'NICO Touches the Walls', duration: '3:51', current: false },
   ];
 
   if (!isOpen) return null;
 
   return (
-    <div
-      className="modal-overlay"
-      onClick={(e) => {
-        if (e.target.classList.contains('modal-overlay')) {
-          onClose();
-        }
-      }}
-    >
-      <div className="modal-container playlist-modal">
-        <div className="modal-header">
-          <h2 className="modal-title">Playlist hiện tại</h2>
-          <button className="modal-close-btn" onClick={onClose}>
+    <div className="playlist-modal-overlay" onClick={(e) => e.target.classList.contains('playlist-modal-overlay') && onClose()}>
+      <div className="playlist-modal-container">
+        <div className="playlist-modal-header">
+          <h2>Danh sách phát hiện tại</h2>
+          <button
+            className="playlist-modal-close-btn"
+            onClick={onClose}
+            aria-label="Đóng"
+          >
             <FaTimes />
           </button>
         </div>
-        <div className="modal-content">
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {currentPlaylist.map((song, index) => (
-              <li
-                key={index}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '10px',
-                  borderBottom: '1px solid #ccc',
-                }}
+        <div className="playlist-modal-content">
+          <div className="playlist-info">
+            <div className="playlist-cover">
+              <img src="/src/assets/images/cover-images/3.jpg" alt="Playlist Cover" />
+              <div className="playlist-play-btn">
+                <FaPlay />
+              </div>
+            </div>
+            <div className="playlist-details">
+              <h3 className="playlist-title">Anime Hits</h3>
+              <p className="playlist-subtitle">7 bài hát • 27 phút</p>
+            </div>
+          </div>
+          <div className="playlist-tracks">
+            <div className="playlist-table-header">
+              <div className="track-number">#</div>
+              <div className="track-info">Tiêu đề</div>
+              <div className="track-duration">Thời lượng</div>
+              <div className="track-actions"></div>
+            </div>
+            {playlist.map((track, index) => (
+              <div
+                key={track.id}
+                className={`playlist-track ${track.current ? 'current-track' : ''}`}
               >
-                <span>{song.title} - {song.artist}</span>
-                <span>{song.duration}</span>
-              </li>
+                <div className="track-number">{index + 1}</div>
+                <div className="track-info">
+                  <div className="track-title">{track.title}</div>
+                  <div className="track-artist">{track.artist}</div>
+                </div>
+                <div className="track-duration">{track.duration}</div>
+                <div className="track-actions">
+                  <button className="track-action-btn">
+                    <FaEllipsisH />
+                  </button>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       </div>
     </div>
