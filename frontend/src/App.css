@@ -1158,11 +1158,6 @@ body {
   background-color: var(--spotify-hover);
 }
 
-.playlist-card:hover .play-icon {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 .playlist-card-img-container {
   position: relative;
   width: 48px;

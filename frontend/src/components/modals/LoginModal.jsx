@@ -59,11 +59,11 @@ const LoginModal = ({ isOpen, onClose, switchToSignup}) => {
 
           <form className="login-form">
             <div className="form-group">
-              <label htmlFor="email">Email hoặc tên người dùng</label>
+              <label htmlFor="email">Tên người dùng</label>
               <input
                 type="text"
                 id="email"
-                placeholder="Email hoặc tên người dùng"
+                placeholder="Tên người dùng"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -78,6 +78,7 @@ const LoginModal = ({ isOpen, onClose, switchToSignup}) => {
                   placeholder="Mật khẩu"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  
                 />
                 <button
                   type="button"

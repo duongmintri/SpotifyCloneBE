@@ -122,7 +122,7 @@ const SignupModal = ({ isOpen, onClose, switchToLogin }) => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="username">Tên hiển thị</label>
+              <label htmlFor="username">Tên người dùng</label>
               <input
                 type="text"
                 id="username"
@@ -130,9 +130,6 @@ const SignupModal = ({ isOpen, onClose, switchToLogin }) => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
-              <span className="form-hint">
-                Tên này sẽ xuất hiện trên hồ sơ của bạn
-              </span>
             </div>
 
             <div className="form-group">
