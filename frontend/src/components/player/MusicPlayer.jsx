@@ -9,6 +9,7 @@ import {
   FaVideo,
   FaList,
   FaDownload,
+  FaLightHeart,
 } from "react-icons/fa";
 import useModalStore from "../../store/modalStore.jsx"; // Điều chỉnh đường dẫn nếu cần
 
@@ -62,7 +63,11 @@ const MusicPlayer = () => {
         className="volume-container"
         style={{ display: "flex", alignItems: "center", gap: "10px" }}
       >
-        {/* {Nút tải xuống} */}
+        {/* Nút yêu thích */}
+        <button className="control-btn" title="Yêu thích">
+          <FaHeart />
+        </button>
+
         {/* Nút download */}
         <div className="dropdown">
           <button className="control-btn dropdown-toggle" title="Tải xuống">

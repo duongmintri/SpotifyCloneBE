@@ -91,17 +91,6 @@ const SignupModal = ({ isOpen, onClose, switchToLogin }) => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="confirm-email">Xác nhận email của bạn</label>
-              <input
-                type="email"
-                id="confirm-email"
-                placeholder="Nhập lại email của bạn"
-                value={confirmEmail}
-                onChange={(e) => setConfirmEmail(e.target.value)}
-              />
-            </div>
-
-            <div className="form-group">
               <label htmlFor="signup-password">Tạo mật khẩu</label>
               <div className="password-input-container">
                 <input
@@ -110,6 +99,7 @@ const SignupModal = ({ isOpen, onClose, switchToLogin }) => {
                   placeholder="Tạo mật khẩu"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="input-field"
                 />
                 <button
                   type="button"
@@ -126,9 +116,10 @@ const SignupModal = ({ isOpen, onClose, switchToLogin }) => {
               <input
                 type="text"
                 id="username"
-                placeholder="Tên hiển thị"
+                placeholder="Tên người dùng"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                className="input-field"
               />
             </div>
 
