@@ -1,0 +1,11 @@
+# Kiểm tra trạng thái PostgreSQL
+sudo systemctl status postgresql
+
+# Khởi động PostgreSQL
+sudo systemctl start postgresql
+
+# Dừng PostgreSQL
+sudo systemctl stop postgresql
+
+# Khởi động lại PostgreSQL
+sudo systemctl restart postgresql
