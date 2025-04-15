@@ -79,6 +79,44 @@ body {
   background-color: rgba(255, 255, 255, 0.1); 
 }
 
+.logo-container {
+  display: flex;
+  align-items: center;
+}
+
+.spotify-logo {
+  height: 40px;
+}
+
+.search-container {
+  flex: 1;
+  margin-left: 1rem;
+}
+
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Style cho nút đăng xuất */
+.btn-logout {
+  background-color: transparent;
+  border: 1px solid #b3b3b3;
+  color: #b3b3b3;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  background-color: #1db954;
+  border-color: #1db954;
+  color: #fff;
+}
+
 /* Main container styles */
 .main-container {
   flex: 1;
