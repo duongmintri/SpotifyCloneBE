@@ -1,18 +1,17 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import "../styles/AuthStyles.css";
 
 const SignupPage = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // Trường nhập lại mật khẩu
-  const [gender, setGender] = useState(""); // Trường giới tính
-  const [dateOfBirth, setDateOfBirth] = useState(""); // Trường ngày sinh
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [gender, setGender] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     // Kiểm tra mật khẩu và nhập lại mật khẩu có khớp không
@@ -27,26 +26,16 @@ const SignupPage = () => {
       return;
     }
 
-    try {
-      const response = await axios.post("http://127.0.0.1:8000/api/auth/register/", {
-        username,
-        email,
-        password,
-        gender, // Gửi giới tính
-        date_of_birth: dateOfBirth, // Gửi ngày sinh (đổi tên để khớp với backend)
-      });
-      console.log("Đăng ký thành công:", response.data);
-      window.location.href = "/login"; // Chuyển hướng về trang đăng nhập sau khi đăng ký
-    } catch (err) {
-      setError(err.response?.data?.error || "Đăng ký thất bại");
-    }
+    // Giả lập đăng ký thành công
+    console.log("Đăng ký giả lập thành công:", { username, email, password, gender, dateOfBirth });
+    window.location.href = "/login"; // Chuyển hướng về trang đăng nhập
   };
 
   return (
     <div className="auth-page">
       <div className="auth-container">
         <h2 className="auth-title">Đăng ký Spotify</h2>
-        {error && <p style={{ color: "red", textAlign: "center", padding: "6px" }}>{error}</p>}
+        {error && <p style={{ color: "red", textAlign: "center", padding: "5px" }}>{error}</p>}
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="username">Tên người dùng</label>
@@ -81,7 +70,6 @@ const SignupPage = () => {
               <option value="">Chọn giới tính</option>
               <option value="male">Nam</option>
               <option value="female">Nữ</option>
-              <option value="other">Khác</option>
             </select>
           </div>
           <div className="form-group">

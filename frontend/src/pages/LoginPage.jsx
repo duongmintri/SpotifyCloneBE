@@ -1,13 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  FaFacebook,
-  FaGoogle,
-  FaEye,
-  FaEyeSlash,
-} from "react-icons/fa";
-import axios from "axios";
-import "../styles/AuthStyles.css"; // Tái sử dụng style từ ModalStyles.css
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import "../styles/AuthStyles.css";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -17,26 +11,26 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post("http://127.0.0.1:8000/api/auth/login/", {
-        email,
-        password,
-      });
-      console.log("Đăng nhập thành công:", response.data);
-      localStorage.setItem("token", response.data.token); // Lưu token nếu backend trả về
-      navigate("/"); // Chuyển hướng về trang chủ sau khi đăng nhập
-    } catch (err) {
-      setError(err.response?.data?.error || "Đăng nhập thất bại");
+
+    // Giả lập kiểm tra đăng nhập (bỏ qua backend)
+    if (!email || !password) {
+      setError("Vui lòng điền đầy đủ thông tin");
+      return;
     }
+
+    // Giả lập đăng nhập thành công
+    localStorage.setItem("token", "fake-token"); // Lưu token giả vào localStorage
+    console.log("Đăng nhập giả lập thành công:", { email, password });
+    navigate("/home"); // Chuyển hướng đến trang chính
   };
 
   return (
     <div className="auth-page">
       <div className="auth-container">
         <h2 className="auth-title">Đăng nhập vào Spotify</h2>
-        {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
+        {error && <p style={{ color: "red", textAlign: "center", padding: "5px"}}>{error}</p>}
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">Tên người dùng</label>
@@ -75,9 +69,9 @@ const LoginPage = () => {
             Đăng nhập
           </button>
 
-          {/* <div className="forgot-password">
+          <div className="forgot-password">
             <Link to="#">Quên mật khẩu?</Link>
-          </div> */}
+          </div>
         </form>
 
         <div className="auth-footer">
