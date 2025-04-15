@@ -1,10 +1,15 @@
 import React from "react";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaUser, FaBell, FaSignOutAlt } from "react-icons/fa"; // Thêm icon user, bell, và sign-out
+import { useNavigate } from "react-router-dom"; // Để chuyển hướng sau khi đăng xuất
 import spotifyLogo from "../../assets/images/spotify.png";
-import useModalStore from '../../store/modalStore';
 
 const Navbar = () => {
-  const { openLoginModal, openSignupModal } = useModalStore();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token"); // Xóa token khỏi localStorage
+    navigate("/login"); // Chuyển hướng về trang đăng nhập
+  };
 
   return (
     <div className="spotify-navbar">
@@ -28,19 +33,11 @@ const Navbar = () => {
           />
         </div>
       </div>
-      <div>
-        <button 
-          className="btn btn-signup" 
-          style={{ marginRight: "10px" }} 
-          onClick={openSignupModal}
-        >
-          Đăng ký
-        </button>
-        <button 
-          className="btn btn-login" 
-          onClick={openLoginModal}
-        >
-          Đăng nhập
+      <div className="user-actions" style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+        <FaBell style={{ color: "#b3b3b3", fontSize: "1.5rem", cursor: "pointer" }} title="Thông báo" />
+        <FaUser style={{ color: "#b3b3b3", fontSize: "1.5rem", cursor: "pointer" }} title="Tài khoản" />
+        <button className="btn btn-logout" onClick={handleLogout}>
+          Đăng xuất
         </button>
       </div>
     </div>
