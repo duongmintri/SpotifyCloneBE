@@ -1,39 +1,64 @@
-import React from "react";
-import "./App.css";
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import "./styles/App.css";
+import "./styles/AuthStyles.css";
 import Navbar from "./components/layout/Navbar";
 import LeftSidebar from "./components/layout/LeftSidebar";
 import RightSidebar from "./components/layout/RightSidebar";
 import MainContent from "./components/content/MainContent";
 import MusicPlayer from "./components/player/MusicPlayer";
 import ModalManager from "./components/modals/ModalManager";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+
+// Component để xử lý redirect
+const RedirectToLogin = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+    }
+  }, [navigate]);
+  return null;
+};
+
+// Component trang chính
+const HomePage = () => (
+  <div className="app">
+    <div className="app-navbar">
+      <Navbar />
+    </div>
+    <div className="main-container">
+      <div className="sidebar left-sidebar">
+        <LeftSidebar />
+      </div>
+      <MainContent />
+      <div className="sidebar right-sidebar">
+        <RightSidebar />
+      </div>
+    </div>
+    <div className="music-player">
+      <MusicPlayer />
+    </div>
+    <ModalManager />
+  </div>
+);
 
 const App = () => {
   return (
-    <div className="app">
-      <div className="app-navbar">
-        <Navbar />
-      </div>
-      <div className="main-container">
-        <div className="sidebar left-sidebar">
-          <LeftSidebar />
-        </div>
-        <MainContent />
-        <div className="sidebar right-sidebar">
-          <RightSidebar />
-        </div>
-      </div>
-      <div className="music-player">
-        <MusicPlayer />
-      </div>
-      <ModalManager />
-    </div>
+    <Router>
+      <Routes>
+        {/* Trang chính (home), chỉ hiển thị nếu đã đăng nhập */}
+        <Route path="/" element={<RedirectToLogin />} />
+        <Route path="/home" element={<HomePage />} />
+        {/* Trang đăng nhập */}
+        <Route path="/login" element={<LoginPage />} />
+        {/* Trang đăng ký */}
+        <Route path="/signup" element={<SignupPage />} />
+      </Routes>
+    </Router>
   );
 };
 
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-  integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-  crossorigin="anonymous"
-/>
 export default App;
