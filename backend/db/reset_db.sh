@@ -1,12 +1,9 @@
 #!/bin/bash
-
-DB_USER="postgres"
-DB_PASS="123456"
-SQL_FILE="spotify_clone.sql"
+set -a
+source ../.env
+set +a
 
 echo "🔄 Resetting database using $SQL_FILE..."
-
-# Gọi psql với mật khẩu
 PGPASSWORD=$DB_PASS psql -U $DB_USER -h localhost -f $SQL_FILE
 
 if [ $? -eq 0 ]; then
