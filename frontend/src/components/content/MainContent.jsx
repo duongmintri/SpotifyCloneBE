@@ -27,7 +27,7 @@ const MainContent = () => {
 
   return (
     <div className="main-content">
-      <h1 className="section-title">Good afternoon</h1>
+      <h1 className="section-title">How is your day?</h1>
       
       <div className="card-row">
         {recentlyPlayed.map((item, index) => (
