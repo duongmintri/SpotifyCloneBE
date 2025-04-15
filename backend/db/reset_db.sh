@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DB_USER="postgres"
-DB_PASS="123456"     # ← sửa lại đúng mật khẩu của bạn
+DB_PASS="123456"
 SQL_FILE="spotify_clone.sql"
 
 echo "🔄 Resetting database using $SQL_FILE..."
