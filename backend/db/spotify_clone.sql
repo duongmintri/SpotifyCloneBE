@@ -60,10 +60,14 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(128) NOT NULL,  -- Thêm cột password cho mật khẩu mã hóa
     full_name VARCHAR(100),
     gender VARCHAR(10) CHECK (gender IN ('male', 'female', 'other')),
     date_of_birth DATE,
     is_premium BOOLEAN DEFAULT FALSE,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,  -- Thêm cột is_active
+    is_superuser BOOLEAN NOT NULL DEFAULT FALSE,  -- Thêm cột is_superuser
+    last_login TIMESTAMP,  -- Thêm cột last_login
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
