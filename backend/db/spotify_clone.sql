@@ -39,6 +39,7 @@ CREATE TABLE songs (
     album_id INT REFERENCES albums(id) ON DELETE SET NULL,
     duration INT NOT NULL, -- Duration in seconds
     file_path VARCHAR(255) NOT NULL,
+    cover_image VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -72,6 +73,7 @@ CREATE TABLE playlists (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    cover_image VARCHAR(255),
     is_public BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
