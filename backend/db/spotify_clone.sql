@@ -18,6 +18,7 @@ CREATE TABLE artists (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) UNIQUE NOT NULL,
     bio TEXT,
+    cover_image VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -40,6 +41,7 @@ CREATE TABLE songs (
     duration INT NOT NULL, -- Duration in seconds
     file_path VARCHAR(255) NOT NULL,
     cover_image VARCHAR(255),
+    is_premium BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
