@@ -65,8 +65,8 @@ CREATE TABLE users (
     gender VARCHAR(10) CHECK (gender IN ('male', 'female', 'other')),
     date_of_birth DATE,
     is_premium BOOLEAN DEFAULT FALSE,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,  -- Thêm cột is_active
-    is_superuser BOOLEAN NOT NULL DEFAULT FALSE,  -- Thêm cột is_superuser
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_superuser BOOLEAN NOT NULL DEFAULT FALSE,
     last_login TIMESTAMP,  -- Thêm cột last_login
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
