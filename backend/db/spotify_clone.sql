@@ -18,6 +18,7 @@ CREATE TABLE artists (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) UNIQUE NOT NULL,
     bio TEXT,
+    cover_image VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -40,6 +41,7 @@ CREATE TABLE songs (
     duration INT NOT NULL, -- Duration in seconds
     file_path VARCHAR(255) NOT NULL,
     cover_image VARCHAR(255),
+    is_premium BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -65,8 +67,8 @@ CREATE TABLE users (
     gender VARCHAR(10) CHECK (gender IN ('male', 'female', 'other')),
     date_of_birth DATE,
     is_premium BOOLEAN DEFAULT FALSE,
-    is_active BOOLEAN NOT NULL DEFAULT TRUE,  -- Thêm cột is_active
-    is_superuser BOOLEAN NOT NULL DEFAULT FALSE,  -- Thêm cột is_superuser
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    is_superuser BOOLEAN NOT NULL DEFAULT FALSE,
     last_login TIMESTAMP,  -- Thêm cột last_login
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
