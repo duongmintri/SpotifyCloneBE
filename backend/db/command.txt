@@ -9,3 +9,15 @@ sudo systemctl stop postgresql
 
 # Khởi động lại PostgreSQL
 sudo systemctl restart postgresql
+
+# Xoá và tạo lại DB
+psql -U postgres -c "DROP DATABASE spotify_clone;"
+psql -U postgres -c "CREATE DATABASE spotify_clone;"
+
+# Xoá migration nếu cần
+rm -rf accounts/migrations/*
+rm -rf music/migrations/*
+
+# Tạo và apply migration
+python manage.py makemigrations
+python manage.py migrate
