@@ -21,3 +21,6 @@ rm -rf music/migrations/*
 # Tạo và apply migration
 python manage.py makemigrations
 python manage.py migrate
+
+
+psql -U postgres -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='spotify_clone';"
