@@ -20,6 +20,10 @@ rm -rf music/migrations/*
 
 # Tạo và apply migration
 python manage.py makemigrations
+
+python manage.py makemigrations music
+
+#Nêu không nhận thì tạo migration cụ thể như music
 python manage.py migrate
 
 

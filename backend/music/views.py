@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from django.http import StreamingHttpResponse, HttpResponse
+from django.shortcuts import get_object_or_404
 from .models import Song, Playlist
 from .serializers import SongSerializer, PlaylistSerializer
 
@@ -24,6 +26,36 @@ class SongDetailView(APIView):
             return Response(serializer.data)
         except Song.DoesNotExist:
             return Response({"detail": "Song not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+class SongStreamView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, pk):
+        song = get_object_or_404(Song, pk=pk)
+        if song.is_premium and not request.user.is_premium:
+            return Response({"detail": "Premium content"}, status=status.HTTP_403_FORBIDDEN)
+        file_path = song.file_path.path
+        try:
+            with open(file_path, 'rb') as f:
+                response = StreamingHttpResponse(f, content_type='audio/mpeg')
+                response['Content-Disposition'] = f'inline; filename="{song.title}.mp3"'
+                return response
+        except FileNotFoundError:
+            return Response({"detail": "File not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class SongDownloadView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request, pk):
+        song = get_object_or_404(Song, pk=pk)
+        if song.is_premium and not request.user.is_premium:
+            return Response({"detail": "Premium content"}, status=status.HTTP_403_FORBIDDEN)
+        file_path = song.file_path.path
+        try:
+            with open(file_path, 'rb') as f:
+                response = HttpResponse(f.read(), content_type='application/octet-stream')
+                response['Content-Disposition'] = f'attachment; filename="{song.title}.mp3"'
+                return response
+        except FileNotFoundError:
+            return Response({"detail": "File not found"}, status=status.HTTP_404_NOT_FOUND)
         
 class PlaylistListView(APIView):
     permission_classes = [IsAuthenticated]
