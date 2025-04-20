@@ -1,8 +1,10 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from music.models import Artist, Album, Song, Playlist
+from django.core.files import File
 from datetime import date
 import random
+import os
 
 User = get_user_model()
 
@@ -59,15 +61,29 @@ class Command(BaseCommand):
 
         # Create songs
         songs = [
-            {'title': 'Song One', 'artist': artist_objects[0], 'album': album_objects[0], 'duration': 180, 'file_path': 'http://example.com/song1.mp3', 'is_premium': False, 'cover_image': 'http://example.com/song1.jpg'},
-            {'title': 'Song Two', 'artist': artist_objects[1], 'album': album_objects[1], 'duration': 200, 'file_path': 'http://example.com/song2.mp3', 'is_premium': True, 'cover_image': 'http://example.com/song2.jpg'},
-            {'title': 'Song Three', 'artist': artist_objects[0], 'album': album_objects[0], 'duration': 220, 'file_path': 'http://example.com/song3.mp3', 'is_premium': False, 'cover_image': 'http://example.com/song3.jpg'},
+            {'title': 'Song One', 'artist': artist_objects[0], 'album': album_objects[0], 'duration': 180, 'filename': 'sample.mp3', 'is_premium': False, 'cover_image': 'http://example.com/song1.jpg'},
+            {'title': 'Song Two', 'artist': artist_objects[1], 'album': album_objects[1], 'duration': 200, 'filename': 'sample.mp3', 'is_premium': True, 'cover_image': 'http://example.com/song2.jpg'},
+            {'title': 'Song Three', 'artist': artist_objects[0], 'album': album_objects[0], 'duration': 220, 'filename': 'sample.mp3', 'is_premium': False, 'cover_image': 'http://example.com/song3.jpg'},
         ]
         song_objects = []
         for song_data in songs:
-            song = Song.objects.create(**song_data)
-            song_objects.append(song)
-            self.stdout.write(self.style.SUCCESS(f'Created song: {song.title}'))
+            song = Song(
+                title=song_data['title'],
+                artist=song_data['artist'],
+                album=song_data['album'],
+                duration=song_data['duration'],
+                is_premium=song_data['is_premium'],
+                cover_image=song_data['cover_image']
+            )
+            file_path = os.path.join('media/songs/', song_data['filename'])
+            if os.path.exists(file_path):
+                with open(file_path, 'rb') as f:
+                    song.file_path.save(song_data['filename'], File(f))
+                song.save()
+                song_objects.append(song)
+                self.stdout.write(self.style.SUCCESS(f'Created song: {song.title}'))
+            else:
+                self.stdout.write(self.style.WARNING(f'Skipped song: {song.title} (file {file_path} not found)'))
 
         # Create playlists
         for user in user_objects:
@@ -78,7 +94,7 @@ class Command(BaseCommand):
                 cover_image='http://example.com/playlist.jpg'
             )
             # Add random songs to playlist
-            playlist.songs.add(*random.sample(song_objects, k=2))
+            playlist.songs.add(*random.sample(song_objects, k=min(2, len(song_objects))))
             self.stdout.write(self.style.SUCCESS(f'Created playlist: {playlist.name} for user: {user.username}'))
 
         self.stdout.write(self.style.SUCCESS('Database seeding completed!'))
