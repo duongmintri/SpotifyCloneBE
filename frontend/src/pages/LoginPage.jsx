@@ -1,29 +1,54 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import "../styles/AuthStyles.css";
+import { loginUser, saveAuthData, isAuthenticated } from "../services/api";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  // Kiểm tra nếu đã đăng nhập thì chuyển hướng đến trang chính
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate("/home");
+    }
+  }, [navigate]);
 
-    // Giả lập kiểm tra đăng nhập (bỏ qua backend)
-    if (!email || !password) {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    // Kiểm tra các trường bắt buộc
+    if (!username || !password) {
       setError("Vui lòng điền đầy đủ thông tin");
       return;
     }
 
-    // Giả lập đăng nhập thành công
-    localStorage.setItem("token", "fake-token"); // Lưu token giả vào localStorage
-    console.log("Đăng nhập giả lập thành công:", { email, password });
-    navigate("/home"); // Chuyển hướng đến trang chính
+    try {
+      setLoading(true);
+      console.log("Đang đăng nhập với:", { username, password });
+
+      // Gọi API đăng nhập
+      const data = await loginUser({ username, password });
+      console.log("Đăng nhập thành công, nhận được data:", data);
+
+      // Lưu thông tin đăng nhập vào localStorage
+      saveAuthData(data);
+
+      // Chuyển hướng đến trang chính
+      navigate("/home");
+    } catch (error) {
+      console.error("Lỗi đăng nhập:", error);
+      setError(error.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -33,13 +58,13 @@ const LoginPage = () => {
         {error && <p style={{ color: "red", textAlign: "center", padding: "5px"}}>{error}</p>}
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="email">Tên người dùng</label>
+            <label htmlFor="username">Tên người dùng</label>
             <input
               type="text"
-              id="email"
+              id="username"
               placeholder="Tên người dùng"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="input-field"
             />
           </div>
@@ -65,8 +90,8 @@ const LoginPage = () => {
             </div>
           </div>
 
-          <button type="submit" className="submit-btn">
-            Đăng nhập
+          <button type="submit" className="submit-btn" disabled={loading}>
+            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
 
           <div className="forgot-password">

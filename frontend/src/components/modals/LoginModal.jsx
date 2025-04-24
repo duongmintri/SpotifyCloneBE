@@ -6,13 +6,18 @@ import {
   FaEyeSlash,
 } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
+import { loginUser, saveAuthData } from "../../services/api";
 
 const LoginModal = ({ isOpen, onClose, switchToSignup}) => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const modalRef = useRef(null);
+  const navigate = useNavigate();
 
   // Khi modal mở, vô hiệu hóa cuộn trang
   useEffect(() => {
@@ -34,6 +39,38 @@ const LoginModal = ({ isOpen, onClose, switchToSignup}) => {
       document.body.style.overflow = "auto";
     };
   }, [isOpen]);
+
+  // Xử lý đăng nhập
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    // Kiểm tra các trường bắt buộc
+    if (!username || !password) {
+      setError("Vui lòng điền đầy đủ thông tin");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      // Gọi API đăng nhập
+      const data = await loginUser({ username, password });
+
+      // Lưu thông tin đăng nhập vào localStorage
+      saveAuthData(data);
+
+      // Đóng modal
+      onClose();
+
+      // Chuyển hướng đến trang chính
+      navigate("/home");
+    } catch (error) {
+      console.error("Lỗi đăng nhập:", error);
+      setError(error.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Xử lý sự kiện click bên ngoài modal để đóng
   const handleOverlayClick = (e) => {
@@ -57,15 +94,16 @@ const LoginModal = ({ isOpen, onClose, switchToSignup}) => {
         {/* Phần còn lại của modal giữ nguyên */}
         <div className="modal-content">
 
-          <form className="login-form">
+          {error && <p style={{ color: "red", textAlign: "center", padding: "5px"}}>{error}</p>}
+          <form className="login-form" onSubmit={handleLogin}>
             <div className="form-group">
-              <label htmlFor="email">Tên người dùng</label>
+              <label htmlFor="username">Tên người dùng</label>
               <input
                 type="text"
-                id="email"
+                id="username"
                 placeholder="Tên người dùng"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="input-field"
               />
             </div>
@@ -101,8 +139,8 @@ const LoginModal = ({ isOpen, onClose, switchToSignup}) => {
               <label htmlFor="remember-me">Ghi nhớ đăng nhập</label>
             </div>
 
-            <button type="submit" className="submit-btn">
-              Đăng nhập
+            <button type="submit" className="submit-btn" disabled={loading}>
+              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
 
             <div className="forgot-password">

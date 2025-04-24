@@ -10,40 +10,53 @@ import MusicPlayer from "./components/player/MusicPlayer";
 import ModalManager from "./components/modals/ModalManager";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import { isAuthenticated } from "./services/api";
 
 // Component để xử lý redirect
 const RedirectToLogin = () => {
   const navigate = useNavigate();
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    if (!isAuthenticated()) {
       navigate("/login");
+    } else {
+      navigate("/home");
     }
   }, [navigate]);
   return null;
 };
 
 // Component trang chính
-const HomePage = () => (
-  <div className="app">
-    <div className="app-navbar">
-      <Navbar />
-    </div>
-    <div className="main-container">
-      <div className="sidebar left-sidebar">
-        <LeftSidebar />
+const HomePage = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Kiểm tra xem người dùng đã đăng nhập chưa
+    if (!isAuthenticated()) {
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  return (
+    <div className="app">
+      <div className="app-navbar">
+        <Navbar />
       </div>
-      <MainContent />
-      <div className="sidebar right-sidebar">
-        <RightSidebar />
+      <div className="main-container">
+        <div className="sidebar left-sidebar">
+          <LeftSidebar />
+        </div>
+        <MainContent />
+        <div className="sidebar right-sidebar">
+          <RightSidebar />
+        </div>
       </div>
+      <div className="music-player">
+        <MusicPlayer />
+      </div>
+      <ModalManager />
     </div>
-    <div className="music-player">
-      <MusicPlayer />
-    </div>
-    <ModalManager />
-  </div>
-);
+  );
+};
 
 const App = () => {
   return (
