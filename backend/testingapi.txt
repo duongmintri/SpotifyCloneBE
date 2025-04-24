@@ -1,0 +1,80 @@
+1. Đăng ký tài khoản
+POST http://localhost:8000/api/accounts/register/
+Content-Type: application/json
+Body:
+{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "your_password",
+    "full_name": "Test User"
+}
+
+2. Đăng nhập
+POST http://localhost:8000/api/token/
+Content-Type: application/json
+Body:
+{
+    "username": "testuser",
+    "password": "your_password"
+}
+Response sẽ trả về access_token và refresh_token
+
+3. Refresh Token
+POST http://localhost:8000/api/token/refresh/
+Content-Type: application/json
+Body:
+{
+    "refresh": "your_refresh_token"
+}
+
+4. Xem thông tin profile
+GET http://localhost:8000/api/accounts/profile/
+Authorization: Bearer your_access_token
+
+1. Lấy danh sách bài hát
+GET http://localhost:8000/api/songs/
+Authorization: Bearer your_access_token
+
+2. Xem chi tiết bài hát
+GET http://localhost:8000/api/songs/{song_id}/
+Authorization: Bearer your_access_token
+
+3. Stream bài hát
+GET http://localhost:8000/api/songs/{song_id}/stream/
+Authorization: Bearer your_access_token
+
+4. Download bài hát
+GET http://localhost:8000/api/songs/{song_id}/download/
+Authorization: Bearer your_access_token
+
+5. Lấy danh sách playlist
+GET http://localhost:8000/api/playlists/
+Authorization: Bearer your_access_token
+
+6. Tạo playlist mới
+POST http://localhost:8000/api/playlists/
+Authorization: Bearer your_access_token
+Content-Type: application/json
+Body:
+{
+    "name": "My Playlist",
+    "is_public": true
+}
+
+7. Thêm bài hát vào playlist
+POST http://localhost:8000/api/playlists/{playlist_id}/add-song/
+Authorization: Bearer your_access_token
+Content-Type: application/json
+Body:
+{
+    "song_id": 1
+}
+
+8. Xóa bài hát khỏi playlist
+POST http://localhost:8000/api/playlists/{playlist_id}/remove-song/
+Authorization: Bearer your_access_token
+Content-Type: application/json
+Body:
+{
+    "song_id": 1
+}
