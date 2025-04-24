@@ -1,14 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaSearch, FaUser, FaBell, FaSignOutAlt } from "react-icons/fa"; // Thêm icon user, bell, và sign-out
 import { useNavigate } from "react-router-dom"; // Để chuyển hướng sau khi đăng xuất
 import spotifyLogo from "../../assets/images/spotify.png";
+import { clearAuthData, getUser } from "../../services/api";
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const user = getUser();
 
   const handleLogout = () => {
-    localStorage.removeItem("token"); // Xóa token khỏi localStorage
-    navigate("/login"); // Chuyển hướng về trang đăng nhập
+    setLoading(true);
+    // Xóa thông tin đăng nhập khỏi localStorage
+    clearAuthData();
+    // Chuyển hướng về trang đăng nhập
+    navigate("/login");
+    setLoading(false);
   };
 
   return (
@@ -35,9 +42,12 @@ const Navbar = () => {
       </div>
       <div className="user-actions" style={{ display: "flex", alignItems: "center", gap: "15px" }}>
         <FaBell style={{ color: "#b3b3b3", fontSize: "1.5rem", cursor: "pointer" }} title="Thông báo" />
-        <FaUser style={{ color: "#b3b3b3", fontSize: "1.5rem", cursor: "pointer" }} title="Tài khoản" />
-        <button className="btn btn-logout" onClick={handleLogout}>
-          Đăng xuất
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <FaUser style={{ color: "#b3b3b3", fontSize: "1.5rem", cursor: "pointer" }} title="Tài khoản" />
+          <span style={{ color: "white" }}>{user?.username || 'Người dùng'}</span>
+        </div>
+        <button className="btn btn-logout" onClick={handleLogout} disabled={loading}>
+          {loading ? "Đang đăng xuất..." : "Đăng xuất"}
         </button>
       </div>
     </div>

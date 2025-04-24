@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FaTimes, FaPlay, FaEllipsisH } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaTimes, FaPlay, FaEllipsisH, FaPause } from 'react-icons/fa';
 import {
   DndContext,
   closestCenter,
@@ -17,9 +17,34 @@ import {
 } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
+import usePlayerStore from '../../store/playerStore';
+import ImageLoader from '../player/ImageLoader';
 
 // SortableTrack component for individual draggable tracks
-const SortableTrack = ({ track, index }) => {
+const SortableTrack = ({ track, index, isCurrentSong, isPlaying, onPlaySong }) => {
+  // Kiểm tra xem track có hợp lệ không
+  if (!track || typeof track !== 'object') {
+    console.warn("SortableTrack: track không hợp lệ", track);
+    return null;
+  }
+
+  // Lấy các thuộc tính cần thiết một cách an toàn
+  const id = track.id || Math.random().toString();
+  const title = track.title || "Bài hát không tên";
+
+  // Đảm bảo artist luôn là một chuỗi
+  let artist = "Nghệ sĩ không xác định";
+  if (track.artist) {
+    if (typeof track.artist === 'string') {
+      artist = track.artist;
+    } else if (typeof track.artist === 'object') {
+      // Nếu artist là một đối tượng, thử lấy thuộc tính name hoặc id
+      artist = track.artist.name || track.artist.id || JSON.stringify(track.artist);
+    }
+  }
+
+  const duration = track.duration || 0;
+
   const {
     attributes,
     listeners,
@@ -27,7 +52,7 @@ const SortableTrack = ({ track, index }) => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: track.id });
+  } = useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -36,20 +61,41 @@ const SortableTrack = ({ track, index }) => {
     cursor: 'grab',
   };
 
+  // Format thời gian từ giây sang mm:ss
+  const formatTime = (timeInSeconds) => {
+    if (isNaN(timeInSeconds)) return "0:00";
+
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
-      className={`playlist-track ${track.current ? 'current-track' : ''}`}
+      className={`playlist-track ${isCurrentSong ? 'current-track' : ''}`}
     >
-      <div className="track-number">{index + 1}</div>
-      <div className="track-info">
-        <div className="track-title">{track.title}</div>
-        <div className="track-artist">{track.artist}</div>
+      <div className="track-number">
+        {isCurrentSong ? (
+          <button
+            className="track-play-btn"
+            onClick={() => onPlaySong(track)}
+            title={isPlaying ? "Tạm dừng" : "Phát"}
+          >
+            {isPlaying ? <FaPause /> : <FaPlay />}
+          </button>
+        ) : (
+          index + 1
+        )}
       </div>
-      <div className="track-duration">{track.duration}</div>
+      <div className="track-info" onClick={() => onPlaySong(track)}>
+        <div className="track-title">{title}</div>
+        <div className="track-artist">{artist}</div>
+      </div>
+      <div className="track-duration">{formatTime(duration)}</div>
       <div className="track-actions">
         <button className="track-action-btn">
           <FaEllipsisH />
@@ -59,17 +105,9 @@ const SortableTrack = ({ track, index }) => {
   );
 };
 
-const PlaylistPopup = ({ isOpen, onClose }) => {
-  // State to manage playlist
-  const [playlist, setPlaylist] = useState([
-    { id: 1, title: 'Inner Light', artist: 'Shocking Lemon', duration: '3:45', current: true },
-    { id: 2, title: 'Blue Bird', artist: 'Ikimono Gakari', duration: '3:38', current: false },
-    { id: 3, title: 'Sign', artist: 'FLOW', duration: '4:01', current: false },
-    { id: 4, title: 'Silhouette', artist: 'KANA-BOON', duration: '4:23', current: false },
-    { id: 5, title: 'Haruka Kanata', artist: 'ASIAN KUNG-FU GENERATION', duration: '3:40', current: false },
-    { id: 6, title: 'GO!!!', artist: 'FLOW', duration: '4:05', current: false },
-    { id: 7, title: 'Diver', artist: 'NICO Touches the Walls', duration: '3:51', current: false },
-  ]);
+const PlaylistPopup = ({ isOpen, onClose, playlist = [], currentSong = null, onPlaySong }) => {
+  // Lấy state từ playerStore
+  const { isPlaying, queue, reorderQueue } = usePlayerStore();
 
   // Sensors for drag-and-drop (mouse and keyboard support)
   const sensors = useSensors(
@@ -84,15 +122,30 @@ const PlaylistPopup = ({ isOpen, onClose }) => {
     const { active, over } = event;
 
     if (active.id !== over.id) {
-      setPlaylist((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
-      });
+      const oldIndex = playlist.findIndex((item) => item.id === active.id);
+      const newIndex = playlist.findIndex((item) => item.id === over.id);
+
+      // Cập nhật thứ tự trong store
+      reorderQueue(oldIndex, newIndex);
     }
   };
 
   if (!isOpen) return null;
+
+  // Tính tổng thời lượng của playlist
+  const totalDuration = playlist.reduce((total, track) => total + (track.duration || 0), 0);
+
+  // Format tổng thời lượng
+  const formatTotalDuration = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) {
+      return `${minutes} phút`;
+    } else {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      return `${hours} giờ ${remainingMinutes} phút`;
+    }
+  };
 
   return (
     <div className="playlist-popup-container">
@@ -109,14 +162,30 @@ const PlaylistPopup = ({ isOpen, onClose }) => {
       <div className="playlist-popup-content">
         <div className="playlist-info">
           <div className="playlist-cover">
-            <img src="/src/assets/images/cover-images/3.jpg" alt="Playlist Cover" />
-            <div className="playlist-play-btn">
-              <FaPlay />
-            </div>
+            <ImageLoader
+              songId={currentSong?.id}
+              coverImage={currentSong?.cover_image}
+              fallbackSrc="/src/assets/images/cover-images/3.jpg"
+              alt="Playlist Cover"
+            />
+            <button
+              className="playlist-play-btn"
+              onClick={() => {
+                if (playlist.length > 0) {
+                  const { togglePlay, isPlaying } = usePlayerStore.getState();
+                  togglePlay();
+                }
+              }}
+              disabled={playlist.length === 0}
+            >
+              {isPlaying ? <FaPause /> : <FaPlay />}
+            </button>
           </div>
           <div className="playlist-details">
-            <h3 className="playlist-title">Anime Hits</h3>
-            <p className="playlist-subtitle">7 bài hát • 27 phút</p>
+            <h3 className="playlist-title">Danh sách phát</h3>
+            <p className="playlist-subtitle">
+              {playlist.length} bài hát • {formatTotalDuration(totalDuration)}
+            </p>
           </div>
         </div>
         <div className="playlist-tracks">
@@ -126,27 +195,36 @@ const PlaylistPopup = ({ isOpen, onClose }) => {
             <div className="track-duration">Thời lượng</div>
             <div className="track-actions"></div>
           </div>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-            modifiers={[restrictToVerticalAxis]} // Add this to lock to vertical
-          >
-            <SortableContext
-              items={playlist.map((track) => track.id)}
-              strategy={verticalListSortingStrategy}
+          {playlist.length > 0 ? (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+              modifiers={[restrictToVerticalAxis]}
             >
-              <div className="playlist-tracks-list">
-                {playlist.map((track, index) => (
-                  <SortableTrack
-                    key={track.id}
-                    track={track}
-                    index={index}
-                  />
-                ))}
-              </div>
-            </SortableContext>
-          </DndContext>
+              <SortableContext
+                items={playlist.map((track) => track.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="playlist-tracks-list">
+                  {playlist.map((track, index) => (
+                    <SortableTrack
+                      key={track.id}
+                      track={track}
+                      index={index}
+                      isCurrentSong={currentSong && currentSong.id === track.id}
+                      isPlaying={isPlaying && currentSong && currentSong.id === track.id}
+                      onPlaySong={onPlaySong}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
+          ) : (
+            <div className="empty-playlist">
+              <p>Danh sách phát trống</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
