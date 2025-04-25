@@ -24,22 +24,17 @@ const usePlayerStore = create((set, get) => ({
 
   // Phát/tạm dừng
   togglePlay: () => {
-    const { isPlaying, audioElement } = get();
-    if (audioElement) {
-      if (isPlaying) {
-        audioElement.pause();
-      } else {
-        audioElement.play();
-      }
-      set({ isPlaying: !isPlaying });
-    }
+    const { isPlaying } = get();
+    // Chỉ thay đổi trạng thái, AudioPlayer component sẽ xử lý phần còn lại
+    set({ isPlaying: !isPlaying });
+    console.log(`playerStore - togglePlay: isPlaying=${!isPlaying}`);
   },
 
   // Cập nhật trạng thái phát
   setIsPlaying: (isPlaying) => set({ isPlaying }),
 
   // Cập nhật bài hát hiện tại
-  setCurrentSong: (song) => {
+  setCurrentSong: (song, resetTime = true) => {
     if (!song || !song.id) {
       console.error("Không thể phát bài hát không hợp lệ:", song);
       return;
@@ -47,10 +42,22 @@ const usePlayerStore = create((set, get) => ({
 
     console.log("Đang đặt bài hát hiện tại:", song);
 
+    // Lấy bài hát hiện tại và thời gian hiện tại để so sánh
+    const { currentSong, currentTime } = get();
+
+    // Nếu là bài hát mới, reset thời gian về 0
+    // Nếu là bài hát cũ (cùng ID), giữ nguyên thời gian hiện tại
+    const isSameSong = currentSong && currentSong.id === song.id;
+
+    // Lưu thời gian hiện tại nếu là cùng một bài hát và không yêu cầu reset
+    const newTime = (isSameSong && !resetTime) ? currentTime : 0;
+
+    console.log(`setCurrentSong: isSameSong=${isSameSong}, resetTime=${resetTime}, newTime=${newTime}`);
+
     set({
       currentSong: song,
       isPlaying: false,
-      currentTime: 0
+      currentTime: newTime
     });
 
     // Xử lý audio element sẽ được thực hiện trong MusicPlayer.jsx
@@ -65,20 +72,16 @@ const usePlayerStore = create((set, get) => ({
 
   // Cập nhật âm lượng
   setVolume: (volume) => {
-    const { audioElement } = get();
-    if (audioElement) {
-      audioElement.volume = volume;
-    }
+    // Chỉ cập nhật state, AudioPlayer component sẽ xử lý phần còn lại
+    console.log(`playerStore - setVolume: ${volume}`);
     set({ volume });
   },
 
   // Tìm kiếm đến thời điểm cụ thể
   seekTo: (time) => {
-    const { audioElement } = get();
-    if (audioElement) {
-      audioElement.currentTime = time;
-      set({ currentTime: time });
-    }
+    // Chỉ cập nhật state, AudioPlayer component sẽ xử lý phần còn lại
+    console.log(`playerStore - seekTo: ${time}`);
+    set({ currentTime: time });
   },
 
   // Cập nhật danh sách phát
