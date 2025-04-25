@@ -2,7 +2,7 @@
 cd backend
 
 # Tạo môi trường ảo
-python -m venv venv
+python3 -m venv venv
 
 # Kích hoạt môi trường ảo
 source venv/bin/activate
