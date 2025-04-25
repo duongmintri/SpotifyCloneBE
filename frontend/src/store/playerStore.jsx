@@ -16,18 +16,10 @@ const usePlayerStore = create((set, get) => ({
   isShuffled: false,
   repeatMode: 'none', // 'none', 'all', 'one'
 
-  // Audio element
-  audioElement: null,
-
-  // Actions
-  setAudioElement: (element) => set({ audioElement: element }),
-
   // Phát/tạm dừng
   togglePlay: () => {
     const { isPlaying } = get();
-    // Chỉ thay đổi trạng thái, AudioPlayer component sẽ xử lý phần còn lại
     set({ isPlaying: !isPlaying });
-    console.log(`playerStore - togglePlay: isPlaying=${!isPlaying}`);
   },
 
   // Cập nhật trạng thái phát
@@ -40,49 +32,28 @@ const usePlayerStore = create((set, get) => ({
       return;
     }
 
-    console.log("Đang đặt bài hát hiện tại:", song);
-
-    // Lấy bài hát hiện tại và thời gian hiện tại để so sánh
     const { currentSong, currentTime } = get();
-
-    // Nếu là bài hát mới, reset thời gian về 0
-    // Nếu là bài hát cũ (cùng ID), giữ nguyên thời gian hiện tại
     const isSameSong = currentSong && currentSong.id === song.id;
-
-    // Lưu thời gian hiện tại nếu là cùng một bài hát và không yêu cầu reset
     const newTime = (isSameSong && !resetTime) ? currentTime : 0;
-
-    console.log(`setCurrentSong: isSameSong=${isSameSong}, resetTime=${resetTime}, newTime=${newTime}`);
 
     set({
       currentSong: song,
       isPlaying: false,
       currentTime: newTime
     });
-
-    // Xử lý audio element sẽ được thực hiện trong MusicPlayer.jsx
-    // để tránh xung đột giữa store và component
   },
 
   // Cập nhật thời gian hiện tại
   setCurrentTime: (time) => set({ currentTime: time }),
 
   // Cập nhật thời lượng
-  setDuration: (duration) => set({ duration: duration }),
+  setDuration: (duration) => set({ duration }),
 
   // Cập nhật âm lượng
-  setVolume: (volume) => {
-    // Chỉ cập nhật state, AudioPlayer component sẽ xử lý phần còn lại
-    console.log(`playerStore - setVolume: ${volume}`);
-    set({ volume });
-  },
+  setVolume: (volume) => set({ volume }),
 
   // Tìm kiếm đến thời điểm cụ thể
-  seekTo: (time) => {
-    // Chỉ cập nhật state, AudioPlayer component sẽ xử lý phần còn lại
-    console.log(`playerStore - seekTo: ${time}`);
-    set({ currentTime: time });
-  },
+  seekTo: (time) => set({ currentTime: time }),
 
   // Cập nhật danh sách phát
   setQueue: (songs, startIndex = 0) => {
@@ -151,7 +122,9 @@ const usePlayerStore = create((set, get) => ({
   },
 
   // Bật/tắt chế độ phát ngẫu nhiên
-  toggleShuffle: () => set({ isShuffled: !get().isShuffled }),
+  toggleShuffle: () => {
+    set({ isShuffled: !get().isShuffled });
+  },
 
   // Thay đổi chế độ lặp lại
   toggleRepeat: () => {
@@ -159,17 +132,10 @@ const usePlayerStore = create((set, get) => ({
     let newMode;
 
     switch (repeatMode) {
-      case 'none':
-        newMode = 'all';
-        break;
-      case 'all':
-        newMode = 'one';
-        break;
-      case 'one':
-        newMode = 'none';
-        break;
-      default:
-        newMode = 'none';
+      case 'none': newMode = 'all'; break;
+      case 'all': newMode = 'one'; break;
+      case 'one': newMode = 'none'; break;
+      default: newMode = 'none';
     }
 
     set({ repeatMode: newMode });

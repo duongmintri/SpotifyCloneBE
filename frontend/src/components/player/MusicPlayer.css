@@ -19,6 +19,28 @@
 
 .music-player .control-btn.active {
   color: #1db954;
+  position: relative;
+}
+
+/* Hiệu ứng khi nút active */
+.music-player .control-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background-color: #1db954;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+/* Hiệu ứng khi hover nút active */
+.music-player .control-btn.active:hover::after {
+  width: 6px;
+  height: 6px;
+  box-shadow: 0 0 4px rgba(29, 185, 84, 0.8);
 }
 
 .music-player .control-btn:disabled {
@@ -173,6 +195,31 @@
 }
 
 @keyframes play-btn-ripple {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+/* Hiệu ứng ripple khi click nút control */
+.music-player .control-btn-ripple {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  background: rgba(29, 185, 84, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  animation: control-btn-ripple 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes control-btn-ripple {
   0% {
     transform: translate(-50%, -50%) scale(0);
     opacity: 1;

@@ -51,20 +51,15 @@ const MusicPlayer = () => {
 
   // Hàm toggle play/pause
   const togglePlay = () => {
-    console.log(`togglePlay: currentTime=${currentTime}, isPlaying=${isPlaying}`);
-
-    // Chỉ thay đổi trạng thái phát/dừng mà không làm thay đổi thời gian hiện tại
     setIsPlaying(!isPlaying);
   };
 
   // Xử lý event listeners cho thanh tiến trình
   useEffect(() => {
-    // Thêm event listeners khi đang kéo thanh tiến trình
     if (isDraggingProgress) {
       document.addEventListener('mousemove', handleProgressMouseMove);
       document.addEventListener('mouseup', handleProgressMouseUp);
 
-      // Cleanup khi isDraggingProgress thay đổi
       return () => {
         document.removeEventListener('mousemove', handleProgressMouseMove);
         document.removeEventListener('mouseup', handleProgressMouseUp);
@@ -74,12 +69,10 @@ const MusicPlayer = () => {
 
   // Xử lý event listeners cho thanh âm lượng
   useEffect(() => {
-    // Thêm event listeners khi đang kéo thanh âm lượng
     if (isDraggingVolume) {
       document.addEventListener('mousemove', handleVolumeMouseMove);
       document.addEventListener('mouseup', handleVolumeMouseUp);
 
-      // Cleanup khi isDraggingVolume thay đổi
       return () => {
         document.removeEventListener('mousemove', handleVolumeMouseMove);
         document.removeEventListener('mouseup', handleVolumeMouseUp);
@@ -91,104 +84,73 @@ const MusicPlayer = () => {
     setShowPlaylistPopup(!showPlaylistPopup);
   };
 
-  // Xử lý khi click vào thanh progress
+  // Xử lý thanh tiến trình
   const handleProgressClick = (e) => {
     if (!progressRef.current || !duration) return;
 
     const rect = progressRef.current.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
-    const width = rect.width;
-    const percentage = Math.max(0, Math.min(1, offsetX / width));
-    const newTime = percentage * duration;
-
-    seekTo(newTime);
+    const percentage = Math.max(0, Math.min(1, offsetX / rect.width));
+    seekTo(percentage * duration);
   };
 
-  // Xử lý khi bắt đầu kéo thanh progress
   const handleProgressMouseDown = (e) => {
     if (!progressRef.current || !duration) return;
-
-    // Đánh dấu đang kéo
     setIsDraggingProgress(true);
-
-    // Ngăn chặn hành vi mặc định (chọn text)
     e.preventDefault();
   };
 
-  // Xử lý khi kéo thanh progress
   const handleProgressMouseMove = (e) => {
     if (!isDraggingProgress || !progressRef.current || !duration) return;
 
     const rect = progressRef.current.getBoundingClientRect();
     const offsetX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
     const percentage = offsetX / rect.width;
-    const newTime = percentage * duration;
-
-    // Chỉ cập nhật thời gian hiển thị, không seek ngay
-    setCurrentTime(newTime);
+    setCurrentTime(percentage * duration);
   };
 
-  // Xử lý khi kết thúc kéo thanh progress
   const handleProgressMouseUp = (e) => {
     if (!isDraggingProgress || !progressRef.current || !duration) return;
 
     const rect = progressRef.current.getBoundingClientRect();
     const offsetX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
     const percentage = offsetX / rect.width;
-    const newTime = percentage * duration;
-
-    // Seek đến thời điểm mới
-    seekTo(newTime);
-
-    // Đánh dấu kết thúc kéo
+    seekTo(percentage * duration);
     setIsDraggingProgress(false);
   };
 
-  // Xử lý khi click vào thanh volume
+  // Xử lý thanh âm lượng
   const handleVolumeClick = (e) => {
     if (!volumeRef.current) return;
 
     const rect = volumeRef.current.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
-    const width = rect.width;
-    const percentage = offsetX / width;
-
-    setVolume(Math.max(0, Math.min(1, percentage)));
+    const percentage = Math.max(0, Math.min(1, offsetX / rect.width));
+    setVolume(percentage);
   };
 
-  // Xử lý khi bắt đầu kéo thanh volume
   const handleVolumeMouseDown = (e) => {
     if (!volumeRef.current) return;
-
-    // Đánh dấu đang kéo
     setIsDraggingVolume(true);
-
-    // Ngăn chặn hành vi mặc định (chọn text)
     e.preventDefault();
   };
 
-  // Xử lý khi kéo thanh volume
   const handleVolumeMouseMove = (e) => {
     if (!isDraggingVolume || !volumeRef.current) return;
 
     const rect = volumeRef.current.getBoundingClientRect();
     const offsetX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
     const percentage = offsetX / rect.width;
-
     setVolume(Math.max(0, Math.min(1, percentage)));
   };
 
-  // Xử lý khi kết thúc kéo thanh volume
   const handleVolumeMouseUp = (e) => {
     if (!isDraggingVolume || !volumeRef.current) return;
 
     const rect = volumeRef.current.getBoundingClientRect();
     const offsetX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
     const percentage = offsetX / rect.width;
-
     setVolume(Math.max(0, Math.min(1, percentage)));
-
-    // Đánh dấu kết thúc kéo
     setIsDraggingVolume(false);
   };
 
@@ -201,24 +163,37 @@ const MusicPlayer = () => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // Tính toán phần trăm tiến độ
+  // Tính toán phần trăm tiến độ và âm lượng
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
-
-  // Tính toán phần trăm âm lượng
   const volumePercentage = volume * 100;
 
   return (
     <>
-      {/* Thêm AudioPlayer component */}
+      {/* AudioPlayer component */}
       <AudioPlayer
         songId={currentSong?.id}
         isPlaying={isPlaying}
         currentTime={currentTime}
         volume={volume}
+        repeatMode={repeatMode}
         onEnded={() => {
+          setIsPlaying(false);
+
           if (repeatMode === 'one') {
             // Nếu lặp lại một bài, reset thời gian và tiếp tục phát
             seekTo(0);
+
+            // Sử dụng setTimeout để đảm bảo seekTo đã hoàn thành
+            setTimeout(() => {
+              setIsPlaying(true);
+
+              // Thêm một lần nữa để đảm bảo
+              setTimeout(() => {
+                if (!isPlaying) {
+                  setIsPlaying(true);
+                }
+              }, 200);
+            }, 300);
           } else {
             // Nếu không, chuyển bài tiếp theo
             playNext();
@@ -247,16 +222,21 @@ const MusicPlayer = () => {
           <div className="control-buttons">
             <button
               className={`control-btn ${isShuffled ? 'active' : ''}`}
-              onClick={toggleShuffle}
+              onClick={(e) => {
+                // Thêm hiệu ứng ripple khi click
+                const button = e.currentTarget;
+                const ripple = document.createElement('span');
+                ripple.classList.add('control-btn-ripple');
+                button.appendChild(ripple);
+
+                setTimeout(() => button.removeChild(ripple), 600);
+                toggleShuffle();
+              }}
               title={isShuffled ? "Tắt phát ngẫu nhiên" : "Bật phát ngẫu nhiên"}
             >
               <div className="shuffle-button-container">
                 <FaRandom />
-                {isShuffled && (
-                  <div className="shuffle-indicator">
-                    Ngẫu nhiên
-                  </div>
-                )}
+                {isShuffled && <div className="shuffle-indicator">Ngẫu nhiên</div>}
               </div>
             </button>
             <button
@@ -279,11 +259,7 @@ const MusicPlayer = () => {
                 ripple.classList.add('play-btn-ripple');
                 button.appendChild(ripple);
 
-                // Xóa ripple sau khi animation kết thúc
-                setTimeout(() => {
-                  button.removeChild(ripple);
-                }, 600);
-
+                setTimeout(() => button.removeChild(ripple), 600);
                 togglePlay();
               }}
               disabled={!currentSong}
@@ -306,7 +282,16 @@ const MusicPlayer = () => {
             </button>
             <button
               className={`control-btn ${repeatMode !== 'none' ? 'active' : ''}`}
-              onClick={toggleRepeat}
+              onClick={(e) => {
+                // Thêm hiệu ứng ripple khi click
+                const button = e.currentTarget;
+                const ripple = document.createElement('span');
+                ripple.classList.add('control-btn-ripple');
+                button.appendChild(ripple);
+
+                setTimeout(() => button.removeChild(ripple), 600);
+                toggleRepeat();
+              }}
               title={
                 repeatMode === 'none' ? "Bật lặp lại tất cả" :
                 repeatMode === 'all' ? "Bật lặp lại một bài" : "Tắt lặp lại"
@@ -332,15 +317,13 @@ const MusicPlayer = () => {
               onClick={handleProgressClick}
               onMouseDown={handleProgressMouseDown}
               onMouseMove={(e) => {
-                if (isDraggingProgress) return; // Không hiển thị tooltip khi đang kéo
+                if (isDraggingProgress) return;
 
                 const rect = e.currentTarget.getBoundingClientRect();
                 const offsetX = e.clientX - rect.left;
-                const width = rect.width;
-                const percentage = Math.max(0, Math.min(1, offsetX / width));
+                const percentage = Math.max(0, Math.min(1, offsetX / rect.width));
                 const hoverTime = percentage * duration;
 
-                // Hiển thị thời gian hover
                 const tooltip = e.currentTarget.querySelector('.progress-tooltip');
                 if (tooltip) {
                   tooltip.style.left = `${offsetX}px`;
@@ -349,9 +332,8 @@ const MusicPlayer = () => {
                 }
               }}
               onMouseLeave={(e) => {
-                if (isDraggingProgress) return; // Không ẩn tooltip khi đang kéo
+                if (isDraggingProgress) return;
 
-                // Ẩn tooltip khi rời chuột
                 const tooltip = e.currentTarget.querySelector('.progress-tooltip');
                 if (tooltip) {
                   tooltip.style.display = 'none';
