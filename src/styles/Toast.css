@@ -1,0 +1,100 @@
+/* CSS cho các thông báo toast */
+
+/* Tùy chỉnh container của toast */
+.Toastify__toast-container {
+  width: auto;
+  min-width: 320px;
+  max-width: 500px;
+}
+
+/* Tùy chỉnh toast */
+.Toastify__toast {
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Tùy chỉnh toast thành công */
+.Toastify__toast--success {
+  background-color: #1db954;
+}
+
+/* Tùy chỉnh toast lỗi */
+.Toastify__toast--error {
+  background-color: #e74c3c;
+}
+
+/* Tùy chỉnh toast cảnh báo */
+.Toastify__toast--warning {
+  background-color: #f39c12;
+}
+
+/* Tùy chỉnh toast thông tin */
+.Toastify__toast--info {
+  background-color: #3498db;
+}
+
+/* Tùy chỉnh nội dung toast */
+.Toastify__toast-body {
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+}
+
+/* Tùy chỉnh nút đóng toast */
+.Toastify__close-button {
+  color: white;
+  opacity: 0.7;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1;
+}
+
+/* Tùy chỉnh thanh tiến trình */
+.Toastify__progress-bar {
+  height: 4px;
+}
+
+/* Tùy chỉnh toast xác nhận */
+.toast-message {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.toast-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.toast-confirm-btn,
+.toast-cancel-btn {
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.toast-confirm-btn {
+  background-color: #1db954;
+  color: white;
+}
+
+.toast-confirm-btn:hover {
+  background-color: #1ed760;
+}
+
+.toast-cancel-btn {
+  background-color: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.toast-cancel-btn:hover {
+  border-color: white;
+}

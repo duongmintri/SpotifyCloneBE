@@ -1,0 +1,97 @@
+.album-card {
+  text-decoration: none;
+  background-color: #181818;
+  border-radius: 6px;
+  padding: 16px;
+  transition: background-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.album-card:hover {
+  background-color: #282828;
+}
+
+.album-image-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 100%; /* Tạo hình vuông */
+  margin-bottom: 16px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.album-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.album-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.play-icon {
+  width: 40px;
+  height: 40px;
+  background-color: #1db954;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  transform: translateY(10px);
+  transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.album-card:hover .album-overlay {
+  opacity: 1;
+}
+
+.album-card:hover .play-icon {
+  transform: translateY(0);
+}
+
+.album-card:hover .album-image {
+  transform: scale(1.05);
+}
+
+.album-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.album-title {
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.album-artist {
+  color: #b3b3b3;
+  font-size: 14px;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

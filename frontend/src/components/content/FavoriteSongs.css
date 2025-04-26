@@ -1,0 +1,26 @@
+.favorite-songs-container {
+  padding: 20px;
+}
+
+.favorite-songs-container h2 {
+  color: #fff;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.loading-message,
+.error-message,
+.empty-message {
+  color: #b3b3b3;
+  text-align: center;
+  padding: 40px 0;
+  font-size: 16px;
+}
+
+.error-message {
+  color: #ff4d4d;
+}
+
+.empty-message p {
+  margin: 10px 0;
+}

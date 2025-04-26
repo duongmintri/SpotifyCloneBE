@@ -1,0 +1,90 @@
+.album-form-container {
+  background-color: #282828;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.album-form-container h2 {
+  color: #fff;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.album-form .form-group {
+  margin-bottom: 16px;
+}
+
+.album-form label {
+  display: block;
+  color: #fff;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.album-form input {
+  width: 100%;
+  padding: 12px;
+  background-color: #3e3e3e;
+  border: 1px solid #3e3e3e;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.album-form input:focus {
+  outline: none;
+  border-color: #1db954;
+}
+
+.album-form .form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+.album-form .cancel-btn,
+.album-form .submit-btn {
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.album-form .cancel-btn {
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid #b3b3b3;
+}
+
+.album-form .submit-btn {
+  background-color: #1db954;
+  color: #fff;
+}
+
+.album-form .cancel-btn:hover {
+  border-color: #fff;
+}
+
+.album-form .submit-btn:hover {
+  background-color: #1ed760;
+  transform: scale(1.05);
+}
+
+.album-form .cancel-btn:disabled,
+.album-form .submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background-color: rgba(255, 0, 0, 0.1);
+  color: #ff4d4d;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}

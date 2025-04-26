@@ -1,0 +1,48 @@
+.favorite-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b3b3b3;
+  padding: 0;
+  z-index: 20;
+  position: relative;
+}
+
+.favorite-btn:hover {
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.favorite-btn.active {
+  color: #1db954;
+}
+
+.favorite-btn.active:hover {
+  color: #1ed760;
+}
+
+.favorite-btn-sm {
+  font-size: 14px;
+}
+
+.favorite-btn-md {
+  font-size: 18px;
+}
+
+.favorite-btn-lg {
+  font-size: 24px;
+}
+
+.favorite-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Hiệu ứng khi click */
+.favorite-btn:active {
+  transform: scale(0.9);
+}

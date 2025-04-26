@@ -1,0 +1,158 @@
+.song-list {
+  width: 100%;
+  color: #fff;
+}
+
+.song-list-header {
+  display: grid;
+  grid-template-columns: 50px 3fr 2fr 100px 50px;
+  padding: 0 16px 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #b3b3b3;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.song-list-body {
+  margin-top: 8px;
+}
+
+.song-item {
+  display: grid;
+  grid-template-columns: 50px 3fr 2fr 100px 50px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.song-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.song-item.active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.song-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.song-number-container {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.song-index {
+  position: absolute;
+  color: #b3b3b3;
+}
+
+.song-play-icon {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  color: #fff;
+  font-size: 14px;
+}
+
+.song-item:hover .song-index {
+  opacity: 0;
+}
+
+.song-item:hover .song-play-icon {
+  opacity: 1;
+}
+
+.song-item.active .song-play-icon {
+  opacity: 1;
+}
+
+.song-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.song-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.song-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.song-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.song-name {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.song-artist {
+  font-size: 14px;
+  color: #b3b3b3;
+}
+
+.song-album {
+  color: #b3b3b3;
+  font-size: 14px;
+}
+
+.song-duration {
+  color: #b3b3b3;
+  font-size: 14px;
+  text-align: right;
+}
+
+.song-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.song-more-icon {
+  cursor: pointer;
+  color: #b3b3b3;
+  opacity: 0;
+  transition: color 0.2s;
+}
+
+.song-item:hover .song-more-icon {
+  opacity: 1;
+}
+
+.song-more-icon:hover {
+  color: #fff;
+}
+
+.song-remove-icon {
+  cursor: pointer;
+  color: #b3b3b3;
+  opacity: 0;
+  transition: color 0.2s;
+}
+
+.song-item:hover .song-remove-icon {
+  opacity: 1;
+}
+
+.song-remove-icon:hover {
+  color: #f15e6c;
+}

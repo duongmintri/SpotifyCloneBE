@@ -54,40 +54,22 @@ export const getSongDownloadUrl = (songId) => {
     return null;
   }
 
-  // Thêm timestamp để tránh cache
-  const timestamp = new Date().getTime();
-  return `${API_URL}/api/songs/${songId}/download/?t=${timestamp}`;
+  return `${API_URL}/api/songs/${songId}/download/`;
 };
 
-// Lấy danh sách playlist
-export const getPlaylists = async () => {
+// Tìm kiếm bài hát
+export const searchSongs = async (query) => {
   try {
-    const response = await fetchWithAuth(`${API_URL}/api/playlists/`);
+    const response = await fetchWithAuth(`${API_URL}/api/songs/search/?q=${encodeURIComponent(query)}`);
 
     if (!response.ok) {
-      throw new Error('Không thể lấy danh sách playlist');
+      throw new Error('Không thể tìm kiếm bài hát');
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Lỗi khi lấy danh sách playlist:', error);
-    throw error;
-  }
-};
-
-// Lấy thông tin chi tiết playlist
-export const getPlaylistDetails = async (playlistId) => {
-  try {
-    const response = await fetchWithAuth(`${API_URL}/api/playlists/${playlistId}/`);
-
-    if (!response.ok) {
-      throw new Error('Không thể lấy thông tin playlist');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Lỗi khi lấy thông tin playlist:', error);
-    throw error;
+    console.error('Lỗi khi tìm kiếm bài hát:', error);
+    return [];
   }
 };
 
@@ -96,6 +78,9 @@ export const createPlaylist = async (playlistData) => {
   try {
     const response = await fetchWithAuth(`${API_URL}/api/playlists/`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(playlistData),
     });
 
@@ -115,6 +100,9 @@ export const addSongToPlaylist = async (playlistId, songId) => {
   try {
     const response = await fetchWithAuth(`${API_URL}/api/playlists/${playlistId}/add-song/`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ song_id: songId }),
     });
 
@@ -134,6 +122,9 @@ export const removeSongFromPlaylist = async (playlistId, songId) => {
   try {
     const response = await fetchWithAuth(`${API_URL}/api/playlists/${playlistId}/remove-song/`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ song_id: songId }),
     });
 
@@ -270,6 +261,90 @@ export const removeSongFromAlbum = async (albumId, songId) => {
   }
 };
 
+// Xóa album
+export const deleteAlbum = async (albumId) => {
+  try {
+    console.log('Gọi deleteAlbum với albumId:', albumId);
+
+    const response = await fetchWithAuth(`${API_URL}/api/albums/${albumId}/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('Response status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      throw new Error('Không thể xóa album');
+    }
+
+    return true; // Trả về true nếu xóa thành công
+  } catch (error) {
+    console.error('Lỗi khi xóa album:', error);
+    throw error;
+  }
+};
+
+// Cập nhật album
+export const updateAlbum = async (albumId, albumData) => {
+  try {
+    console.log('Gọi updateAlbum với albumId:', albumId, 'data:', albumData);
+
+    const response = await fetchWithAuth(`${API_URL}/api/albums/${albumId}/`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(albumData),
+    });
+
+    console.log('Response status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      throw new Error('Không thể cập nhật album');
+    }
+
+    const result = await response.json();
+    console.log('Update album result:', result);
+    return result;
+  } catch (error) {
+    console.error('Lỗi khi cập nhật album:', error);
+    throw error;
+  }
+};
+
+// Xóa album
+export const deleteAlbum = async (albumId) => {
+  try {
+    console.log('Gọi deleteAlbum với albumId:', albumId);
+
+    const response = await fetchWithAuth(`${API_URL}/api/albums/${albumId}/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('Response status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      throw new Error('Không thể xóa album');
+    }
+
+    return true; // Trả về true nếu xóa thành công
+  } catch (error) {
+    console.error('Lỗi khi xóa album:', error);
+    throw error;
+  }
+};
+
 // Lấy danh sách bài hát yêu thích
 export const getFavoriteSongs = async () => {
   try {
@@ -289,23 +364,14 @@ export const getFavoriteSongs = async () => {
 // Thêm/xóa bài hát khỏi danh sách yêu thích
 export const toggleFavoriteSong = async (songId) => {
   try {
-    console.log('Gọi toggleFavoriteSong với songId:', songId, 'type:', typeof songId);
-
-    // Đảm bảo songId là số nguyên
-    const id = Number(songId);
-    if (isNaN(id)) {
-      console.error('songId không phải là số hợp lệ:', songId);
-      throw new Error('ID bài hát không hợp lệ');
-    }
-
-    console.log('Đã chuyển đổi songId thành số:', id);
+    console.log('Gọi toggleFavoriteSong với songId:', songId);
 
     const response = await fetchWithAuth(`${API_URL}/api/favorites/toggle/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ song_id: id }),
+      body: JSON.stringify({ song_id: songId }),
     });
 
     console.log('Response status:', response.status);

@@ -28,7 +28,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow: hidden;
+  overflow: auto;
   background-color: var(--spotify-black);
 }
 
@@ -76,7 +76,7 @@ body {
 
 .spotify-navbar .btn-login:hover, .btn-signup:hover {
   transform: scale(1.05);
-  background-color: rgba(255, 255, 255, 0.1); 
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .logo-container {
@@ -121,7 +121,7 @@ body {
 .main-container {
   flex: 1;
   display: flex;
-  overflow: hidden;
+  overflow: auto;
   background: linear-gradient(to bottom, #3a3a3a, black);
 }
 
@@ -146,6 +146,12 @@ body {
   width: var(--right-sidebar-width);
   background-color: #1F1F1F;
   padding: 1.5rem 1rem;
+  position: fixed;
+  top: var(--navbar-height);
+  right: 0;
+  bottom: var(--player-height);
+  overflow-y: auto;
+  z-index: 10;
 }
 
 
@@ -205,7 +211,7 @@ body {
   color: var(--spotify-light-gray);
   cursor: pointer;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: auto;
   text-overflow: ellipsis;
   transition: color 0.2s ease;
 }
@@ -217,10 +223,11 @@ body {
 /* Main content styles */
 .main-content {
   flex: 1;
-  overflow-y: auto;
+  overflow-y: auto; height: 100%;
   padding: 1.5rem 2rem;
   z-index: 1;
   background-image: linear-gradient(rgba(0, 0, 0, 0.6) 0%, var(--spotify-black) 100%);
+  margin-right: var(--right-sidebar-width); /* Thêm margin bên phải để không bị che phủ bởi RightSidebar */
 }
 
 .section-title {
@@ -310,7 +317,7 @@ body {
   font-weight: 700;
   font-size: 1rem;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: auto;
   text-overflow: ellipsis;
   margin-bottom: 0.5rem;
 }
@@ -319,7 +326,7 @@ body {
   color: var(--spotify-light-gray);
   font-size: 0.875rem;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: auto;
   text-overflow: ellipsis;
 }
 
@@ -358,7 +365,7 @@ body {
   font-size: 0.75rem;
   color: var(--spotify-light-gray);
   white-space: nowrap;
-  overflow: hidden;
+  overflow: auto;
   text-overflow: ellipsis;
 }
 
@@ -592,7 +599,7 @@ body {
     align-items: flex-start;
     padding-top: 10px;
   }
-  
+
   .modal-container {
     max-height: 85vh;
     margin-top: 10px;
@@ -1106,14 +1113,14 @@ body {
 .track-info {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .track-title {
   font-size: 0.9rem;
   font-weight: 500;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: auto;
   text-overflow: ellipsis;
 }
 
@@ -1121,7 +1128,7 @@ body {
   font-size: 0.8rem;
   color: var(--spotify-light-gray);
   white-space: nowrap;
-  overflow: hidden;
+  overflow: auto;
   text-overflow: ellipsis;
 }
 
@@ -1205,7 +1212,7 @@ body {
   font-weight: 500;
   color: var(--spotify-white);
   white-space: nowrap;
-  overflow: hidden;
+  overflow: auto;
   text-overflow: ellipsis;
   flex: 1;
 }
@@ -1242,7 +1249,7 @@ body {
   flex-direction: column;
   animation: popupFadeIn 0.2s ease forwards;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  overflow: hidden;
+  overflow: auto;
   overflow-x: hidden; /* Prevent horizontal overflow */
 }
 
@@ -1407,14 +1414,14 @@ body {
 .playlist-popup-container .track-info {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: auto;
 }
 
 .playlist-popup-container .track-title {
   font-size: 0.8rem;
   font-weight: 500;
   white-space: nowrap;
-  overflow: hidden;
+  overflow: auto;
   text-overflow: ellipsis;
 }
 
@@ -1422,7 +1429,7 @@ body {
   font-size: 0.7rem;
   color: var(--spotify-light-gray);
   white-space: nowrap;
-  overflow: hidden;
+  overflow: auto;
   text-overflow: ellipsis;
 }
 

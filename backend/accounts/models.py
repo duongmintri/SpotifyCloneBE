@@ -30,6 +30,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
+    # Thêm quan hệ many-to-many với Song cho bài hát yêu thích
+    favorite_songs = models.ManyToManyField('music.Song', related_name='favorited_by', blank=True)
     objects = UserManager()
 
     USERNAME_FIELD = 'username'

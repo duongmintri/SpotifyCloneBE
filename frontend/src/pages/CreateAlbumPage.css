@@ -1,0 +1,7 @@
+.create-album-page {
+  padding: 30px;
+  min-height: calc(100vh - 90px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}

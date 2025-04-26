@@ -1,5 +1,6 @@
 import React from "react";
-import { FaHome, FaPlus, FaHeart } from "react-icons/fa";
+import { FaHome, FaPlus, FaHeart, FaCompactDisc } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const playlists = [
   { name: "Urban Nights", image: "./src/assets/images/cover-images/5.jpg" },
@@ -19,13 +20,42 @@ const LeftSidebar = () => {
        <div className="library-section">
         <ul className="nav-menu">
           <li className="active">
-            <FaHome />
-            <span>Thư viện của bạn</span>
+            <Link to="/home">
+              <FaHome />
+              <span>Trang chủ</span>
+            </Link>
           </li>
         </ul>
       </div>
 
       <ul className="nav-menu">
+        <li>
+          <Link to="/albums">
+            <FaCompactDisc
+              style={{
+                backgroundColor: "#b3b3b3",
+                color: "black",
+                padding: "5px",
+                borderRadius: "2px",
+                fontSize: "1.2rem",
+              }}
+            />
+            <span>Albums</span>
+          </Link>
+        </li>
+        <li>
+          <Link to="/favorites">
+            <FaHeart
+              style={{
+                background: "linear-gradient(135deg, #450af5, #c4efd9)",
+                padding: "5px",
+                borderRadius: "2px",
+                fontSize: "1.2rem",
+              }}
+            />
+            <span>Bài hát yêu thích</span>
+          </Link>
+        </li>
         <li>
           <FaPlus
             style={{
@@ -36,18 +66,7 @@ const LeftSidebar = () => {
               fontSize: "1.2rem",
             }}
           />
-          <span>Tạo playlist của riêng bạn</span>
-        </li>
-        <li>
-          <FaHeart
-            style={{
-              background: "linear-gradient(135deg, #450af5, #c4efd9)",
-              padding: "5px",
-              borderRadius: "2px",
-              fontSize: "1.2rem",
-            }}
-          />
-          <span>Các bài hát bạn yêu thích</span>
+          <span>Tạo playlist mới</span>
         </li>
       </ul>
 

@@ -157,6 +157,50 @@ export const getAccessToken = () => {
   return localStorage.getItem('access_token');
 };
 
+// Lấy refresh token từ localStorage
+export const getRefreshToken = () => {
+  return localStorage.getItem('refresh_token');
+};
+
+// Refresh token khi access token hết hạn
+export const refreshToken = async () => {
+  try {
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) {
+      throw new Error('Không có refresh token');
+    }
+
+    const csrfToken = getCsrfToken();
+    const response = await fetch(`${API_URL}/api/accounts/token/refresh/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken,
+      },
+      body: JSON.stringify({ refresh: refreshToken }),
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new Error('Không thể refresh token');
+    }
+
+    const data = await response.json();
+
+    // Lưu access token mới vào localStorage
+    localStorage.setItem('access_token', data.access);
+
+    return data.access;
+  } catch (error) {
+    console.error('Lỗi refresh token:', error);
+    // Nếu không thể refresh token, xóa thông tin đăng nhập
+    clearAuthData();
+    // Chuyển hướng về trang đăng nhập
+    window.location.href = '/login';
+    throw error;
+  }
+};
+
 // Lấy thông tin người dùng từ localStorage
 export const getUser = () => {
   const userStr = localStorage.getItem('user');
@@ -173,4 +217,52 @@ export const clearAuthData = () => {
 // Kiểm tra người dùng đã đăng nhập chưa
 export const isAuthenticated = () => {
   return !!getAccessToken();
+};
+
+// Hàm fetch với xác thực và tự động refresh token
+export const fetchWithAuth = async (url, options = {}) => {
+  // Lấy token hiện tại
+  let token = getAccessToken();
+
+  // Thêm headers nếu chưa có
+  if (!options.headers) {
+    options.headers = {};
+  }
+
+  // Thêm Content-Type nếu chưa có và có body
+  if (options.body && !options.headers['Content-Type']) {
+    options.headers['Content-Type'] = 'application/json';
+  }
+
+  // Thêm credentials nếu chưa có
+  if (!options.credentials) {
+    options.credentials = 'include';
+  }
+
+  // Thêm token vào headers
+  if (token) {
+    options.headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // Thực hiện fetch
+  let response = await fetch(url, options);
+
+  // Nếu token hết hạn (401 Unauthorized)
+  if (response.status === 401) {
+    try {
+      // Thử refresh token
+      token = await refreshToken();
+
+      // Cập nhật token trong headers
+      options.headers['Authorization'] = `Bearer ${token}`;
+
+      // Thực hiện fetch lại
+      response = await fetch(url, options);
+    } catch (error) {
+      console.error('Không thể refresh token:', error);
+      throw error;
+    }
+  }
+
+  return response;
 };
