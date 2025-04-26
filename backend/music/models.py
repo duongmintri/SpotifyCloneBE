@@ -17,9 +17,11 @@ class Artist(models.Model):
 class Album(models.Model):
     title = models.CharField(max_length=100)
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE, related_name='albums')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='albums', null=True)
     cover_image = models.CharField(max_length=255, blank=True, null=True)
     release_date = models.DateField()
     created_at = models.DateTimeField(auto_now_add=True)
+    is_public = models.BooleanField(default=True)
 
     class Meta:
         db_table = 'albums'
@@ -30,7 +32,7 @@ class Album(models.Model):
 class Song(models.Model):
     title = models.CharField(max_length=100)
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE, related_name='songs')
-    album = models.ForeignKey(Album, on_delete=models.CASCADE, related_name='songs', blank=True, null=True)
+    album = models.ForeignKey(Album, on_delete=models.SET_NULL, related_name='songs', blank=True, null=True)
     duration = models.IntegerField()
     file_path = models.FileField(upload_to='songs/')
     is_premium = models.BooleanField(default=False)

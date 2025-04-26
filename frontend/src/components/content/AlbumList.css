@@ -1,0 +1,132 @@
+.album-list-container {
+  padding: 1.5rem 2rem;
+  min-height: 100%;
+  padding-bottom: 100px; /* Thêm padding-bottom để đảm bảo có thể cuộn xuống dưới */
+}
+
+.album-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.album-header h2 {
+  color: #fff;
+  font-size: 24px;
+  margin: 0;
+}
+
+.create-album-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #1db954;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.create-album-button:hover {
+  background-color: #1ed760;
+  transform: scale(1.02);
+}
+
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Chính xác 3 album mỗi hàng */
+  gap: 24px;
+  margin-bottom: 2rem;
+  padding: 0 0.5rem;
+}
+
+.loading-message,
+.error-message,
+.empty-message {
+  color: #b3b3b3;
+  text-align: center;
+  padding: 40px 0;
+  font-size: 16px;
+}
+
+.error-message {
+  color: #ff4d4d;
+}
+
+@media (max-width: 1200px) {
+  .album-grid {
+    grid-template-columns: repeat(3, 1fr); /* Vẫn giữ 3 album mỗi hàng */
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .album-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 album mỗi hàng trên tablet */
+    gap: 16px;
+  }
+}
+
+/* Đã xóa CSS của pagination-info */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+  gap: 10px;
+}
+
+.pagination-button,
+.pagination-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-button:not(:disabled):hover,
+.pagination-page:hover {
+  background-color: #444;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-page.active {
+  background-color: #1db954;
+}
+
+@media (max-width: 480px) {
+  .album-grid {
+    grid-template-columns: repeat(1, 1fr); /* 1 album mỗi hàng trên mobile */
+    gap: 12px;
+  }
+
+  .pagination-button,
+  .pagination-page {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+}

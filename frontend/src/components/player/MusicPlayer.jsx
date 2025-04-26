@@ -16,7 +16,7 @@ import {
 
 import PlaylistPopup from "../popups/PlaylistPopup";
 import usePlayerStore from "../../store/playerStore";
-import { getAccessToken } from "../../services/api";
+import { fetchWithAuth } from "../../services/api";
 import AudioPlayer from "./AudioPlayer";
 import ImageLoader from "./ImageLoader";
 import "./MusicPlayer.css";
@@ -382,26 +382,15 @@ const MusicPlayer = () => {
                 onClick={() => {
                   if (!currentSong) return;
 
-                  // Không cần sử dụng getSongDownloadUrl vì chúng ta đã tạo URL trực tiếp
-
-                  // Tạo một fetch request để lấy file audio với header Authorization
-                  const token = getAccessToken();
-                  console.log("Token được sử dụng cho download:", token);
-
                   // Thêm timestamp để tránh cache
                   const timestamp = new Date().getTime();
                   const url = `http://localhost:8000/api/songs/${currentSong.id}/download/?t=${timestamp}`;
-                  console.log("Download URL:", url);
 
-                  // Sử dụng async/await để code dễ đọc hơn
+                  // Sử dụng fetchWithAuth để tự động xử lý refresh token
                   (async () => {
                     try {
-                      const response = await fetch(url, {
+                      const response = await fetchWithAuth(url, {
                         method: 'GET',
-                        headers: {
-                          'Authorization': `Bearer ${token}`,
-                        },
-                        credentials: 'include',
                       });
 
                       console.log("Download response status:", response.status);

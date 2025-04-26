@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import MusicCard from "./MusicCard";
 import { getSongs, getPlaylists } from "../../services/musicApi";
 import usePlayerStore from "../../store/playerStore";
+import TestFavoriteButton from "./TestFavoriteButton";
 
 const MainContent = () => {
   const [songs, setSongs] = useState([]);

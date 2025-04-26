@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { getAccessToken } from '../../services/api';
+import { fetchWithAuth } from '../../services/api';
 
 /**
  * AudioPlayer Component
@@ -112,17 +112,12 @@ const AudioPlayer = ({ songId, isPlaying, currentTime, volume, repeatMode, onEnd
     // Tạo URL với timestamp để tránh cache
     const timestamp = new Date().getTime();
     const streamUrl = `http://localhost:8000/api/songs/${songId}/stream/?t=${timestamp}`;
-    const token = getAccessToken();
 
-    // Tải file audio mới
+    // Tải file audio mới với xác thực và tự động refresh token
     (async () => {
       try {
-        const response = await fetch(streamUrl, {
+        const response = await fetchWithAuth(streamUrl, {
           method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-          credentials: 'include',
         });
 
         if (!response.ok) {
