@@ -375,7 +375,9 @@ body {
   height: var(--player-height);
   background-color: #181818;
   border-top: 1px solid #282828;
-  padding: 0 1rem;
+  padding: 0;
+  display: flex; /* Đảm bảo player-container chiếm toàn bộ chiều rộng */
+  justify-content: center;
 }
 
 .player-container {
@@ -383,6 +385,10 @@ body {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
   align-items: center;
+}
+
+.music-player .song-info{
+  flex-direction: row;
 }
 
 .song-info {
