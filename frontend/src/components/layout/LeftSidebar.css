@@ -2,6 +2,7 @@
   padding: 20px 0;
   overflow-y: auto;
   height: 100%;
+  background-color: #1F1F1F; /* Đồng bộ màu nền với App.css */
 }
 
 .library-section {
@@ -27,8 +28,9 @@
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: inherit;
+  color: #b3b3b3;
   width: 100%;
+  gap: 15px; /* Thêm khoảng cách giữa icon và chữ */
 }
 
 .nav-menu li:hover {
@@ -39,9 +41,15 @@
   color: #fff;
 }
 
+.left-sidebar .nav-menu li a:visited {
+  color: #b3b3b3 !important;
+  text-decoration: none !important;
+}
+
+
 .nav-menu li svg {
-  margin-right: 15px;
-  font-size: 1.2rem;
+  margin-right: 0; /* Loại bỏ margin-right vì đã dùng gap */
+  font-size: 0.5rem; /* Tăng kích thước icon cho đồng bộ */
 }
 
 .playlists-section {
@@ -56,18 +64,24 @@
   margin-bottom: 15px;
 }
 
+/* Playlist card container */
 .playlist-card-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Giảm khoảng cách giữa các card */
 }
 
+/* Playlist card */
 .playlist-card {
+  display: flex;
+  align-items: center;
+  background-color: #282828; /* Màu nền tối hơn cho nổi bật */
+  border-radius: 6px;
+  padding: 8px; /* Giảm padding để tiết kiệm không gian */
   cursor: pointer;
-  transition: background-color 0.3s;
-  border-radius: 4px;
-  overflow: hidden;
-  padding: 10px;
+  transition: background-color 0.3s ease;
+  width: 100%; /* Sử dụng toàn bộ chiều rộng sidebar */
+  transform: none; /* Loại bỏ transform gây lệch */
 }
 
 .playlist-card:hover {
@@ -76,17 +90,15 @@
 
 .playlist-card-img-container {
   position: relative;
-  width: 100%;
-  padding-bottom: 100%; /* Tạo hình vuông */
-  margin-bottom: 10px;
+  width: 40px; /* Giảm kích thước ảnh để cân đối */
+  height: 40px;
+  margin-right: 12px; /* Khoảng cách hợp lý giữa ảnh và tiêu đề */
   border-radius: 4px;
   overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .playlist-card-img {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -95,18 +107,19 @@
 .playlist-card-title {
   color: #fff;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  flex: 1; /* Đảm bảo tiêu đề chiếm hết không gian còn lại */
 }
 
 .play-icon {
   position: absolute;
   bottom: 5px;
   right: 5px;
-  width: 30px;
-  height: 30px;
+  width: 24px; /* Giảm kích thước icon play */
+  height: 24px;
   background-color: #1db954;
   border-radius: 50%;
   display: flex;
@@ -121,3 +134,4 @@
   opacity: 1;
   transform: translateY(0);
 }
+

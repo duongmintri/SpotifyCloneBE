@@ -1,6 +1,6 @@
 import React from 'react';
-import { FaUserPlus } from 'react-icons/fa'; // Icon "Thêm bạn bè"
-import useModalStore from '../../store/modalStore.jsx'; // Điều chỉnh đường dẫn nếu cần
+import { FaUserPlus } from 'react-icons/fa'; 
+import useModalStore from '../../store/modalStore.jsx'; 
 
 const RightSidebar = () => {
   const { openAddFriendModal } = useModalStore();
