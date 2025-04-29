@@ -23,12 +23,31 @@ body {
   color: var(--spotify-white);
 }
 
+/* Đặt màu mặc định cho tất cả các liên kết */
+a {
+  color: var(--spotify-white); /* Màu trắng mặc định */
+  text-decoration: none; /* Loại bỏ gạch chân */
+  transition: color 0.2s ease; /* Hiệu ứng chuyển đổi màu */
+}
+
+a:hover {
+  color: var(--spotify-green); /* Màu xanh lá khi hover */
+}
+
+a:visited {
+  color: var(--spotify-light-gray); /* Màu xám nhạt khi đã truy cập */
+}
+
+a:active {
+  color: var(--spotify-green); /* Màu xanh lá khi nhấn */
+}
+
 /* App Layout */
 .app {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow: auto;
+  overflow: hidden;
   background-color: var(--spotify-black);
 }
 
@@ -121,14 +140,15 @@ body {
 .main-container {
   flex: 1;
   display: flex;
-  overflow: auto;
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(to bottom, #3a3a3a, black);
 }
 
 /* Sidebar styles */
 .sidebar {
   flex-shrink: 0;
-  background-color: black;
+  background-color: #1F1F1F;
   overflow-y: auto;
   height: 100%;
   border-radius: 5px;
@@ -137,23 +157,15 @@ body {
 
 .left-sidebar {
   width: var(--sidebar-width);
-  background-color: #1F1F1F;
-  padding: 0.5rem 0;
+  padding: 0;
   overflow-x: hidden;
 }
 
+
 .right-sidebar {
   width: var(--right-sidebar-width);
-  background-color: #1F1F1F;
   padding: 1.5rem 1rem;
-  position: fixed;
-  top: var(--navbar-height);
-  right: 0;
-  bottom: var(--player-height);
-  overflow-y: auto;
-  z-index: 10;
 }
-
 
 
 /* Navigation menu */
@@ -166,6 +178,7 @@ body {
 .nav-menu li {
   padding: 0.5rem 1.5rem;
   margin-bottom: 0.25rem;
+  align-items: center; 
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -183,8 +196,14 @@ body {
 }
 
 .nav-menu li svg {
-  margin-right: 1rem;
-  font-size: 1.5rem;
+  margin-right: 1rem; /* Khoảng cách giữa icon và chữ */
+  font-size: 1.5rem; /* Kích thước icon */
+  vertical-align: middle;
+}
+
+.nav-menu li span {
+  font-size: large;
+  line-height: 1; /* Đảm bảo chữ không bị lệch */
 }
 
 /* Playlist section */
@@ -223,11 +242,11 @@ body {
 /* Main content styles */
 .main-content {
   flex: 1;
-  overflow-y: auto; height: 100%;
+  overflow-y: auto;
+  height: 100%;
   padding: 1.5rem 2rem;
   z-index: 1;
   background-image: linear-gradient(rgba(0, 0, 0, 0.6) 0%, var(--spotify-black) 100%);
-  margin-right: var(--right-sidebar-width); /* Thêm margin bên phải để không bị che phủ bởi RightSidebar */
 }
 
 .section-title {
@@ -375,7 +394,9 @@ body {
   height: var(--player-height);
   background-color: #181818;
   border-top: 1px solid #282828;
-  padding: 0 1rem;
+  padding: 0;
+  display: flex; /* Đảm bảo player-container chiếm toàn bộ chiều rộng */
+  justify-content: center;
 }
 
 .player-container {
@@ -383,6 +404,10 @@ body {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
   align-items: center;
+}
+
+.music-player .song-info{
+  flex-direction: row;
 }
 
 .song-info {

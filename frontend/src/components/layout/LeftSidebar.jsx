@@ -5,13 +5,6 @@ import { Link } from "react-router-dom";
 const playlists = [
   { name: "Urban Nights", image: "./src/assets/images/cover-images/5.jpg" },
   { name: "Coastal Dreaming", image: "./src/assets/images/cover-images/5.jpg" },
-  { name: "Eastern Dreams", image: "./src/assets/images/cover-images/5.jpg" },
-  { name: "Test Album", image: "./src/assets/images/cover-images/5.jpg" },
-  { name: "House Party Mix", image: "./src/assets/images/cover-images/5.jpg" },
-  { name: "Piano Classics", image: "./src/assets/images/cover-images/5.jpg" },
-  { name: "Rock Anthems", image: "./src/assets/images/cover-images/5.jpg" },
-  { name: "Lo-Fi Beats", image: "./src/assets/images/cover-images/5.jpg" },
-  { name: "Summer Hits", image: "./src/assets/images/cover-images/5.jpg" },
 ];
 
 const LeftSidebar = () => {
@@ -19,16 +12,16 @@ const LeftSidebar = () => {
     <div className="left-sidebar">
        <div className="library-section">
         <ul className="nav-menu">
-          <li className="active">
+        </ul>
+      </div>
+
+      <ul className="nav-menu">
+        <li>
             <Link to="/home">
               <FaHome />
               <span>Trang chủ</span>
             </Link>
           </li>
-        </ul>
-      </div>
-
-      <ul className="nav-menu">
         <li>
           <Link to="/albums">
             <FaCompactDisc

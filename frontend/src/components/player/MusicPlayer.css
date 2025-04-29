@@ -278,8 +278,9 @@
   opacity: 1;
 }
 
+/* Volume slider */
 .music-player .volume-slider {
-  width: 80px;
+  width: 90px; /* Tăng nhẹ chiều rộng để cân đối */
   height: 4px;
   background: #5a5a5a;
   border-radius: 2px;
@@ -349,12 +350,14 @@
 }
 
 /* Progress bar */
+/* Progress container */
 .music-player .progress-container {
   display: flex;
   align-items: center;
   width: 100%;
+  max-width: 500px; /* Giới hạn chiều rộng thanh tiến trình */
   gap: 8px;
-  margin-top: 8px;
+  margin-bottom: 8px;
 }
 
 .music-player .progress-time {
@@ -541,9 +544,9 @@
 
 /* Player container */
 .music-player .player-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr; /* Chia đều không gian: song-info, player-controls, volume-container */
   align-items: center;
-  justify-content: space-between;
   padding: 16px 24px;
   background-color: #181818;
   border-top: 1px solid #282828;
@@ -555,25 +558,29 @@
   height: var(--player-height);
 }
 
+/* Song info */
 .music-player .song-info {
   display: flex;
   align-items: center;
-  min-width: 180px;
-  max-width: 30%;
+  width: 100%; /* Sử dụng toàn bộ chiều rộng cột */
+  padding-right: 12px; /* Thêm khoảng cách bên phải */
 }
 
+/* Song image */
 .music-player .song-img {
-  width: 56px;
-  height: 56px;
+  width: 48px; /* Giảm kích thước ảnh để cân đối hơn */
+  height: 48px;
   object-fit: cover;
-  margin-right: 12px;
+  margin-right: 10px;
   border-radius: 4px;
 }
 
+/* Song details */
 .music-player .song-details {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  flex: 1; /* Sử dụng không gian còn lại */
 }
 
 .music-player .song-title {
@@ -598,21 +605,26 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 40%;
-  width: 100%;
+  justify-content: center;
+  width: 100%; /* Sử dụng toàn bộ chiều rộng cột */
+  padding: 0 12px; /* Thêm padding để căn giữa */
 }
 
+/* Control buttons */
 .music-player .control-buttons {
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 8px; /* Giảm khoảng cách giữa các nút */
   margin-bottom: 8px;
 }
 
+/* Volume container */
 .music-player .volume-container {
   display: flex;
   align-items: center;
-  gap: 16px;
-  min-width: 180px;
-  max-width: 30%;
   justify-content: flex-end;
+  gap: 12px;
+  width: 100%; /* Sử dụng toàn bộ chiều rộng cột */
+  padding-left: 12px; /* Thêm khoảng cách bên trái */
 }

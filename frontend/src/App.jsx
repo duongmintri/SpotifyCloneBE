@@ -36,7 +36,6 @@ const AppLayout = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Kiểm tra xem người dùng đã đăng nhập chưa
     if (!isAuthenticated()) {
       navigate("/login");
     }
@@ -51,7 +50,9 @@ const AppLayout = () => {
         <div className="sidebar left-sidebar">
           <LeftSidebar />
         </div>
-        <Outlet /> {/* Nơi các component con sẽ được render */}
+        <div className="main-content">
+          <Outlet />
+        </div>
         <div className="sidebar right-sidebar">
           <RightSidebar />
         </div>
