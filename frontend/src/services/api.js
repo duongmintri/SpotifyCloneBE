@@ -154,7 +154,8 @@ export const saveAuthData = (data) => {
 
 // Lấy token từ localStorage
 export const getAccessToken = () => {
-  return localStorage.getItem('access_token');
+  const token = localStorage.getItem('access_token');
+  return token;
 };
 
 // Lấy refresh token từ localStorage
@@ -216,53 +217,57 @@ export const clearAuthData = () => {
 
 // Kiểm tra người dùng đã đăng nhập chưa
 export const isAuthenticated = () => {
-  return !!getAccessToken();
+  const token = getAccessToken();
+  console.log("Kiểm tra xác thực, token:", token ? "Có token" : "Không có token");
+  return !!token;
 };
 
 // Hàm fetch với xác thực và tự động refresh token
 export const fetchWithAuth = async (url, options = {}) => {
   // Lấy token hiện tại
   let token = getAccessToken();
-
+  
   // Thêm headers nếu chưa có
   if (!options.headers) {
     options.headers = {};
   }
-
+  
   // Thêm Content-Type nếu chưa có và có body
   if (options.body && !options.headers['Content-Type']) {
     options.headers['Content-Type'] = 'application/json';
   }
-
+  
   // Thêm credentials nếu chưa có
   if (!options.credentials) {
     options.credentials = 'include';
   }
-
+  
   // Thêm token vào headers
   if (token) {
     options.headers['Authorization'] = `Bearer ${token}`;
   }
-
+  
   // Thực hiện fetch
   let response = await fetch(url, options);
-
+  
   // Nếu token hết hạn (401 Unauthorized)
   if (response.status === 401) {
     try {
+      console.log("Token hết hạn, đang refresh token...");
       // Thử refresh token
       token = await refreshToken();
-
+      
       // Cập nhật token trong headers
       options.headers['Authorization'] = `Bearer ${token}`;
-
+      
       // Thực hiện fetch lại
+      console.log("Thực hiện fetch lại với token mới");
       response = await fetch(url, options);
     } catch (error) {
       console.error('Không thể refresh token:', error);
       throw error;
     }
   }
-
+  
   return response;
 };

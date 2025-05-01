@@ -1,7 +1,7 @@
 # music/urls.py
 from django.urls import path
 from .views import (
-    SongListView, SongDetailView, SongStreamView, SongDownloadView,
+    SongListView, SongDetailView, SongDownloadView,
     PlaylistListView, PlaylistDetailView, PlaylistAddSongView, PlaylistRemoveSongView,
     AlbumListView, AlbumDetailView, AlbumAddSongView, AlbumRemoveSongView,
     FavoriteSongListView, FavoriteSongToggleView, CheckFavoriteSongView
@@ -12,7 +12,7 @@ urlpatterns = [
     # Song endpoints
     path('songs/', SongListView.as_view(), name='song-list'),
     path('songs/<int:pk>/', SongDetailView.as_view(), name='song-detail'),
-    path('songs/<int:pk>/stream/', SongStreamView.as_view(), name='song-stream'),
+    path('songs/<int:song_id>/stream/', serve_song_file, name='song-stream'),
     path('songs/<int:pk>/download/', SongDownloadView.as_view(), name='song-download'),
 
     # Playlist endpoints

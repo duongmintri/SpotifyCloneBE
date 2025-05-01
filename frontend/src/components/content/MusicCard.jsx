@@ -16,7 +16,7 @@ const MusicCard = ({ song, isPlaying = false }) => {
   console.log("MusicCard nhận được song:", song);
 
   // Lấy các thuộc tính cần thiết một cách an toàn
-  const id = song.id || Math.random().toString();
+  const id = song.id ? Number(song.id) : Math.random().toString();
   console.log("MusicCard - song ID:", id, "type:", typeof id);
   const title = song.title || "Bài hát không tên";
 
@@ -36,6 +36,7 @@ const MusicCard = ({ song, isPlaying = false }) => {
 
   const handlePlay = () => {
     console.log("Xử lý phát nhạc cho bài hát:", song);
+    console.log("Bài hát ID:", id, "type:", typeof id);
 
     // Nếu bài hát này đang phát, tạm dừng
     if (isPlaying) {
@@ -46,13 +47,13 @@ const MusicCard = ({ song, isPlaying = false }) => {
 
     // Nếu bài hát này chưa có trong queue, thêm vào
     if (!queue.some(item => item.id === id)) {
-      console.log("Thêm bài hát vào queue và phát");
+      console.log("Thêm bài hát vào queue và phát, ID:", id);
       setQueue([...queue, song], queue.length);
       setCurrentSong(song);
       setIsPlaying(true);
     } else {
       // Nếu đã có trong queue, phát bài hát đó
-      console.log("Bài hát đã có trong queue, phát trực tiếp");
+      console.log("Bài hát đã có trong queue, phát trực tiếp, ID:", id);
       setCurrentSong(song);
       setIsPlaying(true);
     }

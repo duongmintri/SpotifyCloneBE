@@ -36,15 +36,33 @@ export const getSongDetails = async (songId) => {
 };
 
 // Lấy URL stream bài hát
-export const getSongStreamUrl = (songId) => {
+export const getSongStreamUrl = async (songId) => {
   if (!songId) {
     console.error("songId không hợp lệ:", songId);
     return null;
   }
 
-  // Thêm timestamp để tránh cache
-  const timestamp = new Date().getTime();
-  return `${API_URL}/api/songs/${songId}/stream/?t=${timestamp}`;
+  try {
+    // Thêm timestamp để tránh cache
+    const timestamp = new Date().getTime();
+    console.log(`Đang gọi API để lấy URL stream cho bài hát ID: ${songId}`);
+    const response = await fetchWithAuth(`${API_URL}/api/songs/${songId}/stream/?t=${timestamp}`);
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.log("Không tìm thấy file audio");
+        return null;
+      }
+      throw new Error('Không thể lấy URL stream của bài hát');
+    }
+
+    const data = await response.json();
+    console.log("Nhận được URL audio từ API:", data.url);
+    return data.url;
+  } catch (error) {
+    console.error('Lỗi khi lấy URL stream của bài hát:', error);
+    return null;
+  }
 };
 
 // Lấy URL download bài hát
