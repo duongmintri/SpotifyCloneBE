@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { FaTimes, FaExpand, FaCompress, FaPlay, FaPause } from 'react-icons/fa';
+import { FaTimes, FaExpand, FaCompress, FaPlay, FaPause, FaDownload } from 'react-icons/fa';
 import useCanvasStore from '../../store/canvasStore';
 import usePlayerStore from '../../store/playerStore';
+import { fetchWithAuth } from '../../services/api';
 import './Canvas.css';
 
 const Canvas = () => {
@@ -17,17 +18,18 @@ const Canvas = () => {
     hideCanvas
   } = useCanvasStore();
 
-  // Lấy state từ playerStore
+  // Lấy state và actions từ playerStore
   const {
     isPlaying,
-    currentSong
+    currentSong,
+    setIsPlaying
   } = usePlayerStore();
 
   // Đồng bộ trạng thái phát với player (chỉ play/pause)
   useEffect(() => {
     if (!videoRef.current) return;
 
-    // Cập nhật trạng thái phát local
+    // Cập nhật trạng thái phát local để đồng bộ với player
     setLocalIsPlaying(isPlaying);
 
     if (isPlaying) {
@@ -44,17 +46,14 @@ const Canvas = () => {
 
   // Xử lý khi người dùng tự điều khiển video
   const handleVideoPlayPause = () => {
-    setLocalIsPlaying(!localIsPlaying);
+    // Đảo ngược trạng thái phát
+    const newPlayingState = !isPlaying;
 
-    if (videoRef.current) {
-      if (!localIsPlaying) {
-        videoRef.current.play().catch(err => {
-          console.error('Không thể phát video:', err);
-        });
-      } else {
-        videoRef.current.pause();
-      }
-    }
+    // Cập nhật trạng thái phát của player (sẽ tự động đồng bộ với video qua useEffect)
+    setIsPlaying(newPlayingState);
+
+    // Không cần điều khiển video trực tiếp ở đây vì useEffect sẽ xử lý
+    // khi trạng thái isPlaying thay đổi
   };
 
   // Xử lý khi URL video thay đổi
@@ -98,6 +97,69 @@ const Canvas = () => {
         document.msExitFullscreen();
       }
     }
+  };
+
+  // Xử lý tải xuống video
+  const handleDownloadVideo = () => {
+    if (!currentSong || !currentVideoUrl) return;
+
+    // Thêm timestamp để tránh cache
+    const timestamp = new Date().getTime();
+    const url = `http://localhost:8000/api/songs/${currentSong.id}/video/?t=${timestamp}`;
+
+    // Sử dụng fetchWithAuth để tự động xử lý refresh token
+    (async () => {
+      try {
+        const response = await fetchWithAuth(url, {
+          method: 'GET',
+        });
+
+        console.log("Download video response status:", response.status);
+        console.log("Download video response headers:", [...response.headers.entries()]);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Download video response error text:", errorText);
+          throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
+        }
+
+        // Kiểm tra nếu response là JSON (trường hợp S3)
+        const contentType = response.headers.get('content-type');
+
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          if (data.url) {
+            // Nếu là URL từ S3, mở cửa sổ mới để tải xuống
+            const a = document.createElement('a');
+            a.href = data.url;
+            a.download = `${currentSong.title || 'video'}.mp4`;
+            a.target = '_blank';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          } else {
+            throw new Error('Không tìm thấy URL trong response');
+          }
+        } else {
+          // Nếu là blob từ backend, tạo objectURL
+          const blob = await response.blob();
+          const objectURL = URL.createObjectURL(blob);
+
+          // Tạo một thẻ a tạm thời để tải xuống
+          const a = document.createElement('a');
+          a.href = objectURL;
+          a.download = `${currentSong.title || 'video'}.mp4`;
+          document.body.appendChild(a);
+          a.click();
+
+          // Dọn dẹp
+          URL.revokeObjectURL(objectURL);
+          document.body.removeChild(a);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải xuống file video:", error);
+      }
+    })();
   };
 
   // Theo dõi trạng thái fullscreen
@@ -146,6 +208,14 @@ const Canvas = () => {
             title={isFullscreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
           >
             {isFullscreen ? <FaCompress /> : <FaExpand />}
+          </button>
+          <button
+            className="canvas-control-btn"
+            onClick={handleDownloadVideo}
+            title="Tải xuống video"
+            disabled={!currentVideoUrl}
+          >
+            <FaDownload />
           </button>
           <button
             className="canvas-control-btn"
