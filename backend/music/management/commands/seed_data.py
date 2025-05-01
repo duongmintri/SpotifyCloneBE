@@ -62,7 +62,7 @@ class Command(BaseCommand):
         # Create songs
         songs = [
             {'title': 'Song One', 'artist': artist_objects[0], 'album': album_objects[0], 'duration': 180, 'filename': 'sample.mp3', 'is_premium': False, 'cover_image': 'http://example.com/song1.jpg'},
-            {'title': 'Song Two', 'artist': artist_objects[1], 'album': album_objects[1], 'duration': 200, 'filename': 'sample.mp3', 'is_premium': True, 'cover_image': 'http://example.com/song2.jpg'},
+            {'title': 'Song Two', 'artist': artist_objects[1], 'album': album_objects[1], 'duration': 200, 'filename': 'sample.mp3', 'is_premium': False, 'cover_image': 'http://example.com/song2.jpg'},
             {'title': 'Song Three', 'artist': artist_objects[0], 'album': album_objects[0], 'duration': 220, 'filename': 'sample.mp3', 'is_premium': False, 'cover_image': 'http://example.com/song3.jpg'},
         ]
         song_objects = []

@@ -1,0 +1,101 @@
+.playlist-list-container {
+  padding: 20px;
+  width: 100%;
+}
+
+.playlist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.playlist-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.create-playlist-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #1db954;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.create-playlist-button:hover {
+  background-color: #1ed760;
+  transform: scale(1.05);
+}
+
+.playlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.playlist-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  width: 100%;
+}
+
+/* Thêm style cho bảng danh sách bài hát */
+.playlist-songs-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.playlist-songs-table th {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #b3b3b3;
+  font-weight: normal;
+}
+
+.playlist-songs-table td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.playlist-songs-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.loading-message,
+.error-message,
+.empty-message {
+  text-align: center;
+  padding: 40px 0;
+  color: #b3b3b3;
+  font-size: 16px;
+}
+
+.error-message {
+  color: #e82c2c;
+}
+
+@media (max-width: 768px) {
+  .playlist-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+  }
+  
+  .playlist-songs-table .album-column {
+    display: none;
+  }
+}

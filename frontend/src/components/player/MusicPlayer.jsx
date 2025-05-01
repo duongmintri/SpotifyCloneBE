@@ -12,9 +12,12 @@ import {
   FaList,
   FaDownload,
   FaHeart,
+  FaRegHeart,
+  FaPlus,
 } from "react-icons/fa";
 
 import PlaylistPopup from "../popups/PlaylistPopup";
+import AddToPlaylistModal from "../modals/AddToPlaylistModal";
 import usePlayerStore from "../../store/playerStore";
 import useCanvasStore from "../../store/canvasStore";
 import { fetchWithAuth } from "../../services/api";
@@ -23,11 +26,13 @@ import { getSongStreamUrl } from "../../services/musicApi";
 import AudioPlayer from "./AudioPlayer";
 import ImageLoader from "./ImageLoader";
 import "./MusicPlayer.css";
+import FavoriteButton from "../common/FavoriteButton";
 
 const MusicPlayer = () => {
   const [showPlaylistPopup, setShowPlaylistPopup] = useState(false);
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
   const [isDraggingVolume, setIsDraggingVolume] = useState(false);
+  const [showAddToPlaylistModal, setShowAddToPlaylistModal] = useState(false);
   const progressRef = useRef(null);
   const volumeRef = useRef(null);
   const [audioUrl, setAudioUrl] = useState(null);
@@ -110,6 +115,10 @@ const MusicPlayer = () => {
 
   const togglePlaylistPopup = () => {
     setShowPlaylistPopup(!showPlaylistPopup);
+  };
+
+  const toggleAddToPlaylistModal = () => {
+    setShowAddToPlaylistModal(!showAddToPlaylistModal);
   };
 
   // Xử lý thanh tiến trình
@@ -430,12 +439,33 @@ const MusicPlayer = () => {
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
         >
           {/* Nút yêu thích */}
+          {currentSong && (
+            <div className="control-btn">
+              <FavoriteButton 
+                songId={currentSong.id} 
+                size="md"
+                className="player-favorite-btn"
+              />
+            </div>
+          )}
+          {!currentSong && (
+            <button
+              className="control-btn"
+              title="Yêu thích"
+              disabled={true}
+            >
+              <FaRegHeart />
+            </button>
+          )}
+
+          {/* Nút thêm vào playlist */}
           <button
             className="control-btn"
-            title="Yêu thích"
+            onClick={toggleAddToPlaylistModal}
+            title="Thêm vào playlist"
             disabled={!currentSong}
           >
-            <FaHeart />
+            <FaPlus />
           </button>
 
           {/* Nút download */}
@@ -601,6 +631,13 @@ const MusicPlayer = () => {
             usePlayerStore.getState().setIsPlaying(true);
           }
         }}
+      />
+
+      {/* Modal thêm vào playlist */}
+      <AddToPlaylistModal
+        isOpen={showAddToPlaylistModal}
+        onClose={toggleAddToPlaylistModal}
+        songId={currentSong?.id}
       />
     </>
   );
