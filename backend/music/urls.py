@@ -6,7 +6,7 @@ from .views import (
     AlbumListView, AlbumDetailView, AlbumAddSongView, AlbumRemoveSongView,
     FavoriteSongListView, FavoriteSongToggleView, CheckFavoriteSongView
 )
-from .media_views import serve_s3_file, serve_song_file
+from .media_views import serve_s3_file, serve_song_file, serve_song_video
 
 urlpatterns = [
     # Song endpoints
@@ -35,4 +35,5 @@ urlpatterns = [
     # Media endpoints
     path('media/<path:file_path>', serve_s3_file, name='serve-s3-file'),
     path('media/songs/<int:song_id>', serve_song_file, name='serve-song-file'),
+    path('songs/<int:song_id>/video/', serve_song_video, name='song-video'),
 ]

@@ -1,0 +1,67 @@
+.right-sidebar-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.friends-section {
+  margin-top: 16px;
+}
+
+.friends-header {
+  margin-bottom: 16px;
+}
+
+.friends-title-container {
+  display: flex;
+  align-items: center;
+}
+
+.friends-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.friend-row {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.friend-row:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.friend-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 12px;
+  object-fit: cover;
+}
+
+.friend-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.friend-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.friend-song {
+  font-size: 12px;
+  color: #b3b3b3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

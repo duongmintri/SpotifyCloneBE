@@ -151,6 +151,12 @@ class AdminSongListView(APIView):
         if not mp3_file:
             return Response({"error": "Không có file MP3 được upload"}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Xử lý file ảnh cover nếu có
+        cover_file = request.FILES.get('cover_image')
+
+        # Xử lý file video nếu có
+        video_file = request.FILES.get('video')
+
         try:
             # Tạo thư mục tạm nếu chưa tồn tại
             temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp')
@@ -174,7 +180,8 @@ class AdminSongListView(APIView):
                 'album': request.data.get('album') if request.data.get('album') else None,
                 'duration': duration,
                 'is_premium': request.data.get('is_premium', 'false').lower() == 'true',
-                'cover_image': request.data.get('cover_image', '')
+                'cover_image': request.data.get('cover_image', ''),
+                'video': None
             }
 
             # Debug: In ra dữ liệu trước khi tạo serializer
@@ -196,11 +203,40 @@ class AdminSongListView(APIView):
 
                 # Tạo một tên file ngẫu nhiên để tránh xung đột
                 random_suffix = str(uuid.uuid4())[:8]
+
+                # Xử lý file MP3
                 file_name = f"{os.path.splitext(mp3_file.name)[0]}_{random_suffix}{os.path.splitext(mp3_file.name)[1]}"
                 s3_key = f"media/songs/{file_name}"
 
+                # Xử lý file ảnh cover nếu có
+                cover_s3_key = None
+                cover_s3_url = None
+                if 'cover_image' in request.FILES:
+                    cover_file = request.FILES['cover_image']
+                    cover_name = f"{os.path.splitext(cover_file.name)[0]}_{random_suffix}{os.path.splitext(cover_file.name)[1]}"
+                    cover_s3_key = f"media/images/{cover_name}"
+
+                    # Lưu file tạm thời
+                    cover_temp_path = os.path.join(temp_dir, cover_file.name)
+                    with open(cover_temp_path, 'wb+') as destination:
+                        for chunk in cover_file.chunks():
+                            destination.write(chunk)
+
+                # Xử lý file video nếu có
+                video_s3_key = None
+                if 'video' in request.FILES:
+                    video_file = request.FILES['video']
+                    video_name = f"{os.path.splitext(video_file.name)[0]}_{random_suffix}{os.path.splitext(video_file.name)[1]}"
+                    video_s3_key = f"media/videos/{video_name}"
+
+                    # Lưu file tạm thời
+                    video_temp_path = os.path.join(temp_dir, video_file.name)
+                    with open(video_temp_path, 'wb+') as destination:
+                        for chunk in video_file.chunks():
+                            destination.write(chunk)
+
                 try:
-                    # Upload file lên S3
+                    # Upload file MP3 lên S3
                     print(f"Uploading file to S3: {s3_key}")
                     s3_client.upload_file(
                         temp_file_path,
@@ -217,6 +253,38 @@ class AdminSongListView(APIView):
                     if os.path.exists(temp_file_path):
                         os.remove(temp_file_path)
 
+                    # Upload file ảnh cover lên S3 nếu có
+                    if 'cover_image' in request.FILES and cover_s3_key:
+                        print(f"Uploading cover image to S3: {cover_s3_key}")
+                        s3_client.upload_file(
+                            cover_temp_path,
+                            settings.AWS_STORAGE_BUCKET_NAME,
+                            cover_s3_key
+                        )
+                        print(f"Cover image uploaded successfully to S3: {cover_s3_key}")
+
+                        # Cập nhật URL ảnh cover
+                        cover_s3_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{cover_s3_key}"
+                        data['cover_image'] = cover_s3_url
+
+                        # Xóa file tạm
+                        if os.path.exists(cover_temp_path):
+                            os.remove(cover_temp_path)
+
+                    # Upload file video lên S3 nếu có
+                    if 'video' in request.FILES and video_s3_key:
+                        print(f"Uploading video to S3: {video_s3_key}")
+                        s3_client.upload_file(
+                            video_temp_path,
+                            settings.AWS_STORAGE_BUCKET_NAME,
+                            video_s3_key
+                        )
+                        print(f"Video uploaded successfully to S3: {video_s3_key}")
+
+                        # Xóa file tạm
+                        if os.path.exists(video_temp_path):
+                            os.remove(video_temp_path)
+
                     # Tạo bài hát trực tiếp trong database
                     from django.core.files.base import ContentFile
                     from django.db import connection
@@ -227,8 +295,8 @@ class AdminSongListView(APIView):
                             cursor.execute(
                                 """
                                 INSERT INTO songs
-                                (title, artist_id, album_id, duration, file_path, is_premium, cover_image, created_at)
-                                VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
+                                (title, artist_id, album_id, duration, file_path, is_premium, cover_image, video, created_at)
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
                                 RETURNING id
                                 """,
                                 [
@@ -239,6 +307,7 @@ class AdminSongListView(APIView):
                                     s3_key,
                                     data['is_premium'],
                                     data['cover_image'] or '',
+                                    video_s3_key,
                                 ]
                             )
                             song_id = cursor.fetchone()[0]
@@ -311,6 +380,13 @@ class AdminSongDetailView(APIView):
 
         # Kiểm tra xem có file mới được upload không
         mp3_file = request.FILES.get('file')
+
+        # Xử lý file ảnh cover nếu có
+        cover_file = request.FILES.get('cover_image')
+
+        # Xử lý file video nếu có
+        video_file = request.FILES.get('video')
+
         if mp3_file:
             try:
                 # Tạo thư mục tạm nếu chưa tồn tại
@@ -335,7 +411,8 @@ class AdminSongDetailView(APIView):
                     'album': request.data.get('album') if request.data.get('album') else song.album_id,
                     'duration': duration,
                     'is_premium': request.data.get('is_premium', 'false').lower() == 'true',
-                    'cover_image': request.data.get('cover_image', song.cover_image or '')
+                    'cover_image': request.data.get('cover_image', song.cover_image or ''),
+                    'video': song.video
                 }
 
                 # Nếu sử dụng S3, upload file trực tiếp lên S3 bằng boto3
@@ -354,11 +431,37 @@ class AdminSongDetailView(APIView):
 
                     # Tạo một tên file ngẫu nhiên để tránh xung đột
                     random_suffix = str(uuid.uuid4())[:8]
+
+                    # Xử lý file MP3
                     file_name = f"{os.path.splitext(mp3_file.name)[0]}_{random_suffix}{os.path.splitext(mp3_file.name)[1]}"
                     s3_key = f"media/songs/{file_name}"
 
+                    # Xử lý file ảnh cover nếu có
+                    cover_s3_key = None
+                    if cover_file:
+                        cover_name = f"{os.path.splitext(cover_file.name)[0]}_{random_suffix}{os.path.splitext(cover_file.name)[1]}"
+                        cover_s3_key = f"media/images/{cover_name}"
+
+                        # Lưu file tạm thời
+                        cover_temp_path = os.path.join(temp_dir, cover_file.name)
+                        with open(cover_temp_path, 'wb+') as destination:
+                            for chunk in cover_file.chunks():
+                                destination.write(chunk)
+
+                    # Xử lý file video nếu có
+                    video_s3_key = None
+                    if video_file:
+                        video_name = f"{os.path.splitext(video_file.name)[0]}_{random_suffix}{os.path.splitext(video_file.name)[1]}"
+                        video_s3_key = f"media/videos/{video_name}"
+
+                        # Lưu file tạm thời
+                        video_temp_path = os.path.join(temp_dir, video_file.name)
+                        with open(video_temp_path, 'wb+') as destination:
+                            for chunk in video_file.chunks():
+                                destination.write(chunk)
+
                     try:
-                        # Upload file lên S3
+                        # Upload file MP3 lên S3
                         print(f"Uploading file to S3: {s3_key}")
                         s3_client.upload_file(
                             temp_file_path,
@@ -374,6 +477,38 @@ class AdminSongDetailView(APIView):
                         # Xóa file tạm
                         if os.path.exists(temp_file_path):
                             os.remove(temp_file_path)
+
+                        # Upload file ảnh cover lên S3 nếu có
+                        if cover_file and cover_s3_key:
+                            print(f"Uploading cover image to S3: {cover_s3_key}")
+                            s3_client.upload_file(
+                                cover_temp_path,
+                                settings.AWS_STORAGE_BUCKET_NAME,
+                                cover_s3_key
+                            )
+                            print(f"Cover image uploaded successfully to S3: {cover_s3_key}")
+
+                            # Cập nhật URL ảnh cover
+                            cover_s3_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{cover_s3_key}"
+                            data['cover_image'] = cover_s3_url
+
+                            # Xóa file tạm
+                            if os.path.exists(cover_temp_path):
+                                os.remove(cover_temp_path)
+
+                        # Upload file video lên S3 nếu có
+                        if video_file and video_s3_key:
+                            print(f"Uploading video to S3: {video_s3_key}")
+                            s3_client.upload_file(
+                                video_temp_path,
+                                settings.AWS_STORAGE_BUCKET_NAME,
+                                video_s3_key
+                            )
+                            print(f"Video uploaded successfully to S3: {video_s3_key}")
+
+                            # Xóa file tạm
+                            if os.path.exists(video_temp_path):
+                                os.remove(video_temp_path)
 
                         # Xóa file cũ trên S3 nếu có
                         if song.file_path:
@@ -397,7 +532,7 @@ class AdminSongDetailView(APIView):
                                     """
                                     UPDATE songs
                                     SET title = %s, artist_id = %s, album_id = %s, duration = %s,
-                                        file_path = %s, is_premium = %s, cover_image = %s
+                                        file_path = %s, is_premium = %s, cover_image = %s, video = %s
                                     WHERE id = %s
                                     """,
                                     [
@@ -408,6 +543,7 @@ class AdminSongDetailView(APIView):
                                         s3_key,
                                         data['is_premium'],
                                         data['cover_image'] or '',
+                                        video_s3_key,
                                         song.id
                                     ]
                                 )
@@ -475,6 +611,124 @@ class AdminSongDetailView(APIView):
                 'is_premium': request.data.get('is_premium', 'false').lower() == 'true',
                 'cover_image': request.data.get('cover_image', song.cover_image or '')
             }
+
+            # Xử lý file ảnh cover nếu có
+            if cover_file:
+                # Tạo thư mục tạm nếu chưa tồn tại
+                temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp')
+                if not os.path.exists(temp_dir):
+                    os.makedirs(temp_dir)
+
+                # Lưu file tạm thời
+                cover_temp_path = os.path.join(temp_dir, cover_file.name)
+                with open(cover_temp_path, 'wb+') as destination:
+                    for chunk in cover_file.chunks():
+                        destination.write(chunk)
+
+                # Nếu sử dụng S3, upload file trực tiếp lên S3
+                if settings.USE_S3:
+                    import boto3
+                    from botocore.exceptions import ClientError
+                    import uuid
+
+                    # Tạo kết nối với S3
+                    s3_client = boto3.client(
+                        's3',
+                        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                        region_name=settings.AWS_S3_REGION_NAME
+                    )
+
+                    # Tạo một tên file ngẫu nhiên để tránh xung đột
+                    random_suffix = str(uuid.uuid4())[:8]
+                    cover_name = f"{os.path.splitext(cover_file.name)[0]}_{random_suffix}{os.path.splitext(cover_file.name)[1]}"
+                    cover_s3_key = f"media/images/{cover_name}"
+
+                    try:
+                        # Upload file ảnh cover lên S3
+                        print(f"Uploading cover image to S3: {cover_s3_key}")
+                        s3_client.upload_file(
+                            cover_temp_path,
+                            settings.AWS_STORAGE_BUCKET_NAME,
+                            cover_s3_key
+                        )
+                        print(f"Cover image uploaded successfully to S3: {cover_s3_key}")
+
+                        # Cập nhật URL ảnh cover
+                        cover_s3_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{cover_s3_key}"
+                        data['cover_image'] = cover_s3_url
+
+                        # Xóa file tạm
+                        if os.path.exists(cover_temp_path):
+                            os.remove(cover_temp_path)
+                    except ClientError as e:
+                        print(f"Error uploading cover image to S3: {e}")
+                        # Xóa file tạm
+                        if os.path.exists(cover_temp_path):
+                            os.remove(cover_temp_path)
+                        return Response({"error": f"Error uploading cover image to S3: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                else:
+                    # Nếu không sử dụng S3, sử dụng file gốc
+                    data['cover_image'] = cover_file
+
+            # Xử lý file video nếu có
+            if video_file:
+                # Tạo thư mục tạm nếu chưa tồn tại
+                temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp')
+                if not os.path.exists(temp_dir):
+                    os.makedirs(temp_dir)
+
+                # Lưu file tạm thời
+                video_temp_path = os.path.join(temp_dir, video_file.name)
+                with open(video_temp_path, 'wb+') as destination:
+                    for chunk in video_file.chunks():
+                        destination.write(chunk)
+
+                # Nếu sử dụng S3, upload file trực tiếp lên S3
+                if settings.USE_S3:
+                    import boto3
+                    from botocore.exceptions import ClientError
+                    import uuid
+
+                    # Tạo kết nối với S3 (nếu chưa tạo)
+                    if 's3_client' not in locals():
+                        s3_client = boto3.client(
+                            's3',
+                            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                            region_name=settings.AWS_S3_REGION_NAME
+                        )
+
+                    # Tạo một tên file ngẫu nhiên để tránh xung đột
+                    random_suffix = str(uuid.uuid4())[:8]
+                    video_name = f"{os.path.splitext(video_file.name)[0]}_{random_suffix}{os.path.splitext(video_file.name)[1]}"
+                    video_s3_key = f"media/videos/{video_name}"
+
+                    try:
+                        # Upload file video lên S3
+                        print(f"Uploading video to S3: {video_s3_key}")
+                        s3_client.upload_file(
+                            video_temp_path,
+                            settings.AWS_STORAGE_BUCKET_NAME,
+                            video_s3_key
+                        )
+                        print(f"Video uploaded successfully to S3: {video_s3_key}")
+
+                        # Cập nhật trường video
+                        data['video'] = video_s3_key
+
+                        # Xóa file tạm
+                        if os.path.exists(video_temp_path):
+                            os.remove(video_temp_path)
+                    except ClientError as e:
+                        print(f"Error uploading video to S3: {e}")
+                        # Xóa file tạm
+                        if os.path.exists(video_temp_path):
+                            os.remove(video_temp_path)
+                        return Response({"error": f"Error uploading video to S3: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                else:
+                    # Nếu không sử dụng S3, sử dụng file gốc
+                    data['video'] = video_file
 
             # Debug
             print("Partial update data:", data)

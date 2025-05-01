@@ -323,6 +323,10 @@ export const createSong = async (songData) => {
       formData.append('cover_image', songData.cover_image);
     }
 
+    if (songData.video) {
+      formData.append('video', songData.video);
+    }
+
     formData.append('is_premium', songData.is_premium);
 
     const response = await fetchWithAdminAuth(`${API_URL}/api/admin/songs/`, {
@@ -372,6 +376,10 @@ export const updateSong = async (songId, songData) => {
 
     if (songData.cover_image) {
       formData.append('cover_image', songData.cover_image);
+    }
+
+    if (songData.video) {
+      formData.append('video', songData.video);
     }
 
     formData.append('is_premium', songData.is_premium);

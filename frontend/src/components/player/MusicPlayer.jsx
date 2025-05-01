@@ -16,6 +16,7 @@ import {
 
 import PlaylistPopup from "../popups/PlaylistPopup";
 import usePlayerStore from "../../store/playerStore";
+import useCanvasStore from "../../store/canvasStore";
 import { fetchWithAuth } from "../../services/api";
 import AudioPlayer from "./AudioPlayer";
 import ImageLoader from "./ImageLoader";
@@ -27,6 +28,9 @@ const MusicPlayer = () => {
   const [isDraggingVolume, setIsDraggingVolume] = useState(false);
   const progressRef = useRef(null);
   const volumeRef = useRef(null);
+
+  // Lấy state và actions từ canvasStore
+  const { toggleCanvas, isCanvasVisible } = useCanvasStore();
 
   // Lấy state và actions từ playerStore
   const {
@@ -446,11 +450,11 @@ const MusicPlayer = () => {
             </div>
           </div>
 
-          {/* Nút mở video pop-up */}
+          {/* Nút mở canvas video */}
           <button
-            className="control-btn"
-            onClick={() => console.log("Mở video pop-up (chưa có chức năng)")}
-            title="Xem video"
+            className={`control-btn ${isCanvasVisible ? 'active' : ''}`}
+            onClick={toggleCanvas}
+            title={isCanvasVisible ? "Ẩn canvas" : "Hiển thị canvas"}
             disabled={!currentSong}
           >
             <FaVideo />

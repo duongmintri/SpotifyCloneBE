@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaArrowLeft, FaUpload, FaMusic } from "react-icons/fa";
+import { FaArrowLeft, FaUpload, FaMusic, FaImage, FaVideo } from "react-icons/fa";
 import {
   getSongDetails,
   createSong,
@@ -14,20 +14,33 @@ const SongForm = () => {
   const navigate = useNavigate();
   const isEditMode = !!id;
   const fileInputRef = useRef(null);
+  const coverImageInputRef = useRef(null);
+  const videoInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     title: "",
     artist: "",
     album: "",
     is_premium: false,
-    cover_image: "",
+    cover_image: null,
     file: null,
+    video: null,
   });
 
   const [fileInfo, setFileInfo] = useState({
     name: "",
     size: 0,
     duration: 0,
+  });
+
+  const [coverImageInfo, setCoverImageInfo] = useState({
+    name: "",
+    size: 0,
+  });
+
+  const [videoInfo, setVideoInfo] = useState({
+    name: "",
+    size: 0,
   });
 
   const [artists, setArtists] = useState([]);
@@ -56,8 +69,9 @@ const SongForm = () => {
             artist: songData.artist,
             album: songData.album || "",
             is_premium: songData.is_premium,
-            cover_image: songData.cover_image || "",
+            cover_image: null,
             file: null,
+            video: null,
           });
 
           setFileInfo({
@@ -65,6 +79,20 @@ const SongForm = () => {
             size: 0,
             duration: songData.duration,
           });
+
+          if (songData.cover_image) {
+            setCoverImageInfo({
+              name: songData.cover_image.split('/').pop(),
+              size: 0,
+            });
+          }
+
+          if (songData.video) {
+            setVideoInfo({
+              name: songData.video.split('/').pop(),
+              size: 0,
+            });
+          }
         }
 
         setLoading(false);
@@ -117,6 +145,52 @@ const SongForm = () => {
     };
 
     fileReader.readAsArrayBuffer(file);
+  };
+
+  const handleCoverImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Kiểm tra xem file có phải là ảnh không
+    if (!file.type.includes('image/')) {
+      setError("Chỉ chấp nhận file ảnh");
+      return;
+    }
+
+    // Cập nhật formData với file ảnh mới
+    setFormData({
+      ...formData,
+      cover_image: file,
+    });
+
+    // Cập nhật thông tin file ảnh
+    setCoverImageInfo({
+      name: file.name,
+      size: (file.size / (1024 * 1024)).toFixed(2), // Kích thước tính bằng MB
+    });
+  };
+
+  const handleVideoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Kiểm tra xem file có phải là video không
+    if (!file.type.includes('video/')) {
+      setError("Chỉ chấp nhận file video");
+      return;
+    }
+
+    // Cập nhật formData với file video mới
+    setFormData({
+      ...formData,
+      video: file,
+    });
+
+    // Cập nhật thông tin file video
+    setVideoInfo({
+      name: file.name,
+      size: (file.size / (1024 * 1024)).toFixed(2), // Kích thước tính bằng MB
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -267,16 +341,75 @@ const SongForm = () => {
           </div>
 
           <div className="admin-form-group">
-            <label htmlFor="cover_image">Ảnh bìa (URL)</label>
-            <input
-              type="text"
-              id="cover_image"
-              name="cover_image"
-              value={formData.cover_image}
-              onChange={handleChange}
-              className="admin-input-field"
-              placeholder="Nhập URL ảnh bìa"
-            />
+            <label>Ảnh bìa</label>
+            <div className="admin-file-upload">
+              <input
+                type="file"
+                ref={coverImageInputRef}
+                onChange={handleCoverImageChange}
+                accept="image/*"
+                style={{ display: 'none' }}
+              />
+              <button
+                type="button"
+                className="admin-file-upload-btn"
+                onClick={() => coverImageInputRef.current.click()}
+              >
+                <FaImage /> Chọn file ảnh
+              </button>
+              {coverImageInfo.name && (
+                <div className="admin-file-info">
+                  <FaImage className="admin-file-icon" />
+                  <div className="admin-file-details">
+                    <div className="admin-file-name">{coverImageInfo.name}</div>
+                    <div className="admin-file-meta">
+                      {coverImageInfo.size > 0 && <span>{coverImageInfo.size} MB</span>}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {isEditMode && !formData.cover_image && coverImageInfo.name && (
+                <div className="admin-file-note">
+                  * Chỉ cần chọn file mới nếu muốn thay thế ảnh hiện tại
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="admin-form-group admin-form-group-full">
+            <label>Video (tùy chọn)</label>
+            <div className="admin-file-upload">
+              <input
+                type="file"
+                ref={videoInputRef}
+                onChange={handleVideoChange}
+                accept="video/*"
+                style={{ display: 'none' }}
+              />
+              <button
+                type="button"
+                className="admin-file-upload-btn"
+                onClick={() => videoInputRef.current.click()}
+              >
+                <FaVideo /> Chọn file video
+              </button>
+              {videoInfo.name && (
+                <div className="admin-file-info">
+                  <FaVideo className="admin-file-icon" />
+                  <div className="admin-file-details">
+                    <div className="admin-file-name">{videoInfo.name}</div>
+                    <div className="admin-file-meta">
+                      {videoInfo.size > 0 && <span>{videoInfo.size} MB</span>}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {isEditMode && !formData.video && videoInfo.name && (
+                <div className="admin-file-note">
+                  * Chỉ cần chọn file mới nếu muốn thay thế video hiện tại
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="admin-form-group">
