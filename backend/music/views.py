@@ -42,35 +42,78 @@ class SongDetailView(APIView):
             return Response({"detail": "Song not found"}, status=status.HTTP_404_NOT_FOUND)
 
 class SongStreamView(APIView):
-    permission_classes = [IsAuthenticated]
-
+    # Bỏ yêu cầu xác thực mặc định
+    # permission_classes = [IsAuthenticated]
+    
     def get(self, request, pk):
-        song = get_object_or_404(Song, pk=pk)
-        if song.is_premium and not request.user.is_premium:
-            return Response({"detail": "Premium content"}, status=status.HTTP_403_FORBIDDEN)
-
-        from django.conf import settings
-
-        if settings.USE_S3:
-            # Nếu sử dụng S3, trả về URL trực tiếp
-            file_url = song.file_path.url
-            return Response({"url": file_url}, status=status.HTTP_200_OK)
-        else:
-            # Nếu không sử dụng S3, sử dụng phương pháp cũ
-            file_path = song.file_path.path
-            if not os.path.exists(file_path):
-                return Response({"detail": "File not found"}, status=status.HTTP_404_NOT_FOUND)
-
-            try:
+        try:
+            # Lấy bài hát từ database
+            song = get_object_or_404(Song, pk=pk)
+            
+            # Nếu là bài hát premium, kiểm tra người dùng
+            if song.is_premium:
+                if not request.user.is_authenticated:
+                    return Response({"detail": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
+                if not request.user.is_premium:
+                    return Response({"detail": "Premium content"}, status=status.HTTP_403_FORBIDDEN)
+            
+            from django.conf import settings
+            
+            if settings.USE_S3:
+                # Truy vấn trực tiếp database để lấy đường dẫn file
+                from django.db import connection
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT file_path FROM songs WHERE id = %s",
+                        [song.id]
+                    )
+                    result = cursor.fetchone()
+                    
+                    if result and result[0]:
+                        file_path_db = result[0]
+                        # Đảm bảo đường dẫn bắt đầu bằng media/songs
+                        if not file_path_db.startswith('media/songs'):
+                            if not file_path_db.startswith('songs'):
+                                file_path_db = f"media/songs/{file_path_db}"
+                            else:
+                                file_path_db = f"media/{file_path_db}"
+                        
+                        # Tạo URL trực tiếp đến file trên S3
+                        file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{file_path_db}"
+                    else:
+                        # Sử dụng đường dẫn từ model nếu không tìm thấy trong database
+                        file_path_name = song.file_path.name
+                        if not file_path_name.startswith('media/songs'):
+                            if not file_path_name.startswith('songs'):
+                                file_path_name = f"media/songs/{file_path_name}"
+                            else:
+                                file_path_name = f"media/{file_path_name}"
+                        
+                        file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{file_path_name}"
+                
+                # Log thông tin để debug
+                print(f"Song ID: {song.id}")
+                print(f"Song title: {song.title}")
+                print(f"Serving song file from S3: {file_url}")
+                
+                # Trả về URL trong response JSON
+                return Response({"url": file_url}, status=status.HTTP_200_OK)
+            else:
+                # Nếu không sử dụng S3, phục vụ file từ local storage
+                file_path = song.file_path.path
+                if not os.path.exists(file_path):
+                    return Response({"detail": "File not found"}, status=status.HTTP_404_NOT_FOUND)
+                
+                from django.http import FileResponse
                 return FileResponse(
                     open(file_path, 'rb'),
                     content_type='audio/mpeg',
                     as_attachment=False,
                     filename=f"{song.title}.mp3"
                 )
-            except Exception as e:
-                print(f"Streaming error: {e}")
-                return Response({"detail": "Error while streaming file"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            print(f"Error serving song file: {str(e)}")
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class SongDownloadView(APIView):
     permission_classes = [IsAuthenticated]
