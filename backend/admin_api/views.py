@@ -12,6 +12,7 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.conf import settings
 import os
 import mutagen
 from mutagen.mp3 import MP3
@@ -150,13 +151,20 @@ class AdminSongListView(APIView):
         if not mp3_file:
             return Response({"error": "Không có file MP3 được upload"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Lưu file tạm thời để lấy thông tin
-        file_path = default_storage.save(f'temp/{mp3_file.name}', ContentFile(mp3_file.read()))
-        file_full_path = os.path.join(default_storage.location, file_path)
-
         try:
+            # Tạo thư mục tạm nếu chưa tồn tại
+            temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp')
+            if not os.path.exists(temp_dir):
+                os.makedirs(temp_dir)
+
+            # Lưu file tạm thời để lấy thông tin
+            temp_file_path = os.path.join(temp_dir, mp3_file.name)
+            with open(temp_file_path, 'wb+') as destination:
+                for chunk in mp3_file.chunks():
+                    destination.write(chunk)
+
             # Lấy thời lượng từ file MP3
-            audio = MP3(file_full_path)
+            audio = MP3(temp_file_path)
             duration = int(audio.info.length)  # Thời lượng tính bằng giây
 
             # Tạo dữ liệu cho serializer
@@ -172,27 +180,121 @@ class AdminSongListView(APIView):
             # Debug: In ra dữ liệu trước khi tạo serializer
             print("Data for serializer:", data)
 
-            # Xóa file tạm
-            if os.path.exists(file_full_path):
-                os.remove(file_full_path)
+            # Nếu sử dụng S3, upload file trực tiếp lên S3 bằng boto3
+            if settings.USE_S3:
+                import boto3
+                from botocore.exceptions import ClientError
+                import uuid
 
-            # Sử dụng file gốc từ request.FILES
-            data['file_path'] = mp3_file
+                # Tạo kết nối với S3
+                s3_client = boto3.client(
+                    's3',
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                    region_name=settings.AWS_S3_REGION_NAME
+                )
 
-            serializer = AdminSongSerializer(data=data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                # Tạo một tên file ngẫu nhiên để tránh xung đột
+                random_suffix = str(uuid.uuid4())[:8]
+                file_name = f"{os.path.splitext(mp3_file.name)[0]}_{random_suffix}{os.path.splitext(mp3_file.name)[1]}"
+                s3_key = f"media/songs/{file_name}"
 
-            # Nếu serializer không hợp lệ
-            print("Serializer errors:", serializer.errors)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                try:
+                    # Upload file lên S3
+                    print(f"Uploading file to S3: {s3_key}")
+                    s3_client.upload_file(
+                        temp_file_path,
+                        settings.AWS_STORAGE_BUCKET_NAME,
+                        s3_key
+                    )
+                    print(f"File uploaded successfully to S3: {s3_key}")
+
+                    # Tạo URL để truy cập file
+                    s3_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{s3_key}"
+                    print(f"S3 URL: {s3_url}")
+
+                    # Xóa file tạm
+                    if os.path.exists(temp_file_path):
+                        os.remove(temp_file_path)
+
+                    # Tạo bài hát trực tiếp trong database
+                    from django.core.files.base import ContentFile
+                    from django.db import connection
+
+                    # Tạo bài hát trực tiếp bằng SQL
+                    try:
+                        with connection.cursor() as cursor:
+                            cursor.execute(
+                                """
+                                INSERT INTO songs
+                                (title, artist_id, album_id, duration, file_path, is_premium, cover_image, created_at)
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
+                                RETURNING id
+                                """,
+                                [
+                                    data['title'],
+                                    data['artist'],
+                                    data['album'],
+                                    data['duration'],
+                                    s3_key,
+                                    data['is_premium'],
+                                    data['cover_image'] or '',
+                                ]
+                            )
+                            song_id = cursor.fetchone()[0]
+
+                        # Lấy bài hát vừa tạo
+                        song = Song.objects.get(id=song_id)
+                        print(f"Song created successfully. File path: {s3_key}")
+
+                        # Trả về thông tin bài hát
+                        serializer = AdminSongSerializer(song)
+                        return Response(serializer.data, status=status.HTTP_201_CREATED)
+                    except Exception as e:
+                        print(f"Error creating song: {e}")
+                        # Xóa file trên S3
+                        try:
+                            s3_client.delete_object(
+                                Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                                Key=s3_key
+                            )
+                            print(f"Deleted file from S3 due to database error: {s3_key}")
+                        except Exception as e2:
+                            print(f"Error deleting file from S3: {e2}")
+
+                        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+                except ClientError as e:
+                    print(f"Error uploading file to S3: {e}")
+                    # Xóa file tạm
+                    if os.path.exists(temp_file_path):
+                        os.remove(temp_file_path)
+                    return Response({"error": f"Error uploading file to S3: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                # Nếu không sử dụng S3, sử dụng file gốc từ request.FILES
+                # Xóa file tạm
+                if os.path.exists(temp_file_path):
+                    os.remove(temp_file_path)
+
+                data['file_path'] = mp3_file
+
+                serializer = AdminSongSerializer(data=data)
+                if serializer.is_valid():
+                    song = serializer.save()
+                    print(f"Song created successfully. File path: {song.file_path.path}")
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+                # Nếu serializer không hợp lệ
+                print("Serializer errors:", serializer.errors)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             # Xóa file tạm nếu có lỗi
-            if os.path.exists(file_full_path):
-                os.remove(file_full_path)
+            if 'temp_file_path' in locals() and os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
             print("Exception:", str(e))
+            import traceback
+            traceback.print_exc()
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class AdminSongDetailView(APIView):
@@ -210,13 +312,20 @@ class AdminSongDetailView(APIView):
         # Kiểm tra xem có file mới được upload không
         mp3_file = request.FILES.get('file')
         if mp3_file:
-            # Lưu file tạm thời để lấy thông tin
-            file_path = default_storage.save(f'temp/{mp3_file.name}', ContentFile(mp3_file.read()))
-            file_full_path = os.path.join(default_storage.location, file_path)
-
             try:
+                # Tạo thư mục tạm nếu chưa tồn tại
+                temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp')
+                if not os.path.exists(temp_dir):
+                    os.makedirs(temp_dir)
+
+                # Lưu file tạm thời để lấy thông tin
+                temp_file_path = os.path.join(temp_dir, mp3_file.name)
+                with open(temp_file_path, 'wb+') as destination:
+                    for chunk in mp3_file.chunks():
+                        destination.write(chunk)
+
                 # Lấy thời lượng từ file MP3
-                audio = MP3(file_full_path)
+                audio = MP3(temp_file_path)
                 duration = int(audio.info.length)  # Thời lượng tính bằng giây
 
                 # Tạo dữ liệu cho serializer
@@ -225,33 +334,136 @@ class AdminSongDetailView(APIView):
                     'artist': request.data.get('artist', song.artist_id),
                     'album': request.data.get('album') if request.data.get('album') else song.album_id,
                     'duration': duration,
-                    'is_premium': request.data.get('is_premium', song.is_premium),
+                    'is_premium': request.data.get('is_premium', 'false').lower() == 'true',
                     'cover_image': request.data.get('cover_image', song.cover_image or '')
                 }
 
-                # Xóa file cũ nếu có
-                old_file_path = os.path.join(default_storage.location, song.file_path)
-                if os.path.exists(old_file_path):
-                    os.remove(old_file_path)
+                # Nếu sử dụng S3, upload file trực tiếp lên S3 bằng boto3
+                if settings.USE_S3:
+                    import boto3
+                    from botocore.exceptions import ClientError
+                    import uuid
 
-                # Lưu file MP3 mới vào thư mục chính thức
-                final_path = f'songs/{mp3_file.name}'
-                os.rename(file_full_path, os.path.join(default_storage.location, final_path))
-                data['file_path'] = final_path
+                    # Tạo kết nối với S3
+                    s3_client = boto3.client(
+                        's3',
+                        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                        region_name=settings.AWS_S3_REGION_NAME
+                    )
 
-                serializer = AdminSongSerializer(song, data=data)
-                if serializer.is_valid():
-                    serializer.save()
-                    return Response(serializer.data)
+                    # Tạo một tên file ngẫu nhiên để tránh xung đột
+                    random_suffix = str(uuid.uuid4())[:8]
+                    file_name = f"{os.path.splitext(mp3_file.name)[0]}_{random_suffix}{os.path.splitext(mp3_file.name)[1]}"
+                    s3_key = f"media/songs/{file_name}"
 
-                # Nếu serializer không hợp lệ, xóa file đã upload
-                os.remove(os.path.join(default_storage.location, final_path))
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                    try:
+                        # Upload file lên S3
+                        print(f"Uploading file to S3: {s3_key}")
+                        s3_client.upload_file(
+                            temp_file_path,
+                            settings.AWS_STORAGE_BUCKET_NAME,
+                            s3_key
+                        )
+                        print(f"File uploaded successfully to S3: {s3_key}")
+
+                        # Tạo URL để truy cập file
+                        s3_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{s3_key}"
+                        print(f"S3 URL: {s3_url}")
+
+                        # Xóa file tạm
+                        if os.path.exists(temp_file_path):
+                            os.remove(temp_file_path)
+
+                        # Xóa file cũ trên S3 nếu có
+                        if song.file_path:
+                            try:
+                                old_key = song.file_path.name
+                                s3_client.delete_object(
+                                    Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                                    Key=old_key
+                                )
+                                print(f"Deleted old file from S3: {old_key}")
+                            except Exception as e:
+                                print(f"Error deleting old file from S3: {e}")
+
+                        # Cập nhật bài hát trực tiếp trong database
+                        from django.db import connection
+
+                        # Cập nhật bài hát trực tiếp bằng SQL
+                        try:
+                            with connection.cursor() as cursor:
+                                cursor.execute(
+                                    """
+                                    UPDATE songs
+                                    SET title = %s, artist_id = %s, album_id = %s, duration = %s,
+                                        file_path = %s, is_premium = %s, cover_image = %s
+                                    WHERE id = %s
+                                    """,
+                                    [
+                                        data['title'],
+                                        data['artist'],
+                                        data['album'],
+                                        data['duration'],
+                                        s3_key,
+                                        data['is_premium'],
+                                        data['cover_image'] or '',
+                                        song.id
+                                    ]
+                                )
+
+                            # Lấy bài hát vừa cập nhật
+                            updated_song = Song.objects.get(id=song.id)
+                            print(f"Song updated successfully. File path: {s3_key}")
+
+                            # Trả về thông tin bài hát
+                            serializer = AdminSongSerializer(updated_song)
+                            return Response(serializer.data)
+                        except Exception as e:
+                            print(f"Error updating song: {e}")
+                            # Xóa file trên S3
+                            try:
+                                s3_client.delete_object(
+                                    Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                                    Key=s3_key
+                                )
+                                print(f"Deleted file from S3 due to database error: {s3_key}")
+                            except Exception as e2:
+                                print(f"Error deleting file from S3: {e2}")
+
+                            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+                    except ClientError as e:
+                        print(f"Error uploading file to S3: {e}")
+                        # Xóa file tạm
+                        if os.path.exists(temp_file_path):
+                            os.remove(temp_file_path)
+                        return Response({"error": f"Error uploading file to S3: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                else:
+                    # Nếu không sử dụng S3, sử dụng file gốc từ request.FILES
+                    # Xóa file tạm
+                    if os.path.exists(temp_file_path):
+                        os.remove(temp_file_path)
+
+                    data['file_path'] = mp3_file
+
+                    serializer = AdminSongSerializer(song, data=data)
+                    if serializer.is_valid():
+                        updated_song = serializer.save()
+                        print(f"Song updated successfully. File path: {updated_song.file_path.path}")
+                        return Response(serializer.data)
+
+                    # Nếu serializer không hợp lệ
+                    print("Serializer errors:", serializer.errors)
+                    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
             except Exception as e:
                 # Xóa file tạm nếu có lỗi
-                if os.path.exists(file_full_path):
-                    os.remove(file_full_path)
+                if 'temp_file_path' in locals() and os.path.exists(temp_file_path):
+                    os.remove(temp_file_path)
+                print("Exception:", str(e))
+                import traceback
+                traceback.print_exc()
                 return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         else:
             # Không có file mới, chỉ cập nhật thông tin
@@ -280,11 +492,37 @@ class AdminSongDetailView(APIView):
         song = get_object_or_404(Song, pk=pk)
 
         try:
-            # Xóa file nếu tồn tại
-            if song.file_path and hasattr(song.file_path, 'path'):
-                file_path = song.file_path.path
-                if os.path.exists(file_path):
-                    os.remove(file_path)
+            # Xóa file
+            if song.file_path:
+                if settings.USE_S3:
+                    # Nếu sử dụng S3, xóa file trực tiếp bằng boto3
+                    import boto3
+                    from botocore.exceptions import ClientError
+
+                    # Tạo kết nối với S3
+                    s3_client = boto3.client(
+                        's3',
+                        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                        region_name=settings.AWS_S3_REGION_NAME
+                    )
+
+                    try:
+                        # Xóa file trên S3
+                        s3_key = song.file_path.name
+                        s3_client.delete_object(
+                            Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                            Key=s3_key
+                        )
+                        print(f"Deleted file from S3: {s3_key}")
+                    except ClientError as e:
+                        print(f"Error deleting file from S3: {e}")
+                else:
+                    # Nếu không sử dụng S3, xóa file từ local storage
+                    if hasattr(song.file_path, 'path'):
+                        file_path = song.file_path.path
+                        if os.path.exists(file_path):
+                            os.remove(file_path)
         except Exception as e:
             print(f"Lỗi khi xóa file: {e}")
             # Tiếp tục xóa bài hát ngay cả khi không thể xóa file

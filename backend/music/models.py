@@ -34,7 +34,7 @@ class Song(models.Model):
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE, related_name='songs')
     album = models.ForeignKey(Album, on_delete=models.SET_NULL, related_name='songs', blank=True, null=True)
     duration = models.IntegerField()
-    file_path = models.FileField(upload_to='songs/')
+    file_path = models.FileField(upload_to='media/songs/')
     is_premium = models.BooleanField(default=False)
     cover_image = models.CharField(max_length=255, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)

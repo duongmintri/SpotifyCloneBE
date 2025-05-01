@@ -402,21 +402,39 @@ const MusicPlayer = () => {
                         throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
                       }
 
-                      const blob = await response.blob();
+                      // Kiểm tra nếu response là JSON (trường hợp S3)
+                      const contentType = response.headers.get('content-type');
 
-                      // Tạo URL từ blob
-                      const objectURL = URL.createObjectURL(blob);
+                      if (contentType && contentType.includes('application/json')) {
+                        const data = await response.json();
+                        if (data.url && data.filename) {
+                          // Nếu là URL từ S3, mở cửa sổ mới để tải xuống
+                          const a = document.createElement('a');
+                          a.href = data.url;
+                          a.download = data.filename;
+                          a.target = '_blank';
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                        } else {
+                          throw new Error('Không tìm thấy URL trong response');
+                        }
+                      } else {
+                        // Nếu là blob từ backend, tạo objectURL
+                        const blob = await response.blob();
+                        const objectURL = URL.createObjectURL(blob);
 
-                      // Tạo một thẻ a tạm thời để tải xuống
-                      const a = document.createElement('a');
-                      a.href = objectURL;
-                      a.download = `${currentSong.title || 'song'}.mp3`;
-                      document.body.appendChild(a);
-                      a.click();
+                        // Tạo một thẻ a tạm thời để tải xuống
+                        const a = document.createElement('a');
+                        a.href = objectURL;
+                        a.download = `${currentSong.title || 'song'}.mp3`;
+                        document.body.appendChild(a);
+                        a.click();
 
-                      // Dọn dẹp
-                      URL.revokeObjectURL(objectURL);
-                      document.body.removeChild(a);
+                        // Dọn dẹp
+                        URL.revokeObjectURL(objectURL);
+                        document.body.removeChild(a);
+                      }
                     } catch (error) {
                       console.error("Lỗi khi tải xuống file audio:", error);
                     }

@@ -49,20 +49,28 @@ class SongStreamView(APIView):
         if song.is_premium and not request.user.is_premium:
             return Response({"detail": "Premium content"}, status=status.HTTP_403_FORBIDDEN)
 
-        file_path = song.file_path.path
-        if not os.path.exists(file_path):
-            return Response({"detail": "File not found"}, status=status.HTTP_404_NOT_FOUND)
+        from django.conf import settings
 
-        try:
-            return FileResponse(
-                open(file_path, 'rb'),
-                content_type='audio/mpeg',
-                as_attachment=False,
-                filename=f"{song.title}.mp3"
-            )
-        except Exception as e:
-            print(f"Streaming error: {e}")
-            return Response({"detail": "Error while streaming file"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if settings.USE_S3:
+            # Nếu sử dụng S3, trả về URL trực tiếp
+            file_url = song.file_path.url
+            return Response({"url": file_url}, status=status.HTTP_200_OK)
+        else:
+            # Nếu không sử dụng S3, sử dụng phương pháp cũ
+            file_path = song.file_path.path
+            if not os.path.exists(file_path):
+                return Response({"detail": "File not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            try:
+                return FileResponse(
+                    open(file_path, 'rb'),
+                    content_type='audio/mpeg',
+                    as_attachment=False,
+                    filename=f"{song.title}.mp3"
+                )
+            except Exception as e:
+                print(f"Streaming error: {e}")
+                return Response({"detail": "Error while streaming file"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class SongDownloadView(APIView):
     permission_classes = [IsAuthenticated]
@@ -72,20 +80,28 @@ class SongDownloadView(APIView):
         if song.is_premium and not request.user.is_premium:
             return Response({"detail": "Premium content"}, status=status.HTTP_403_FORBIDDEN)
 
-        file_path = song.file_path.path
-        if not os.path.exists(file_path):
-            return Response({"detail": "File not found"}, status=status.HTTP_404_NOT_FOUND)
+        from django.conf import settings
 
-        try:
-            return FileResponse(
-                open(file_path, 'rb'),
-                content_type='application/octet-stream',
-                as_attachment=True,
-                filename=f"{song.title}.mp3"
-            )
-        except Exception as e:
-            print(f"Download error: {e}")
-            return Response({"detail": "Error while downloading file"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        if settings.USE_S3:
+            # Nếu sử dụng S3, trả về URL trực tiếp
+            file_url = song.file_path.url
+            return Response({"url": file_url, "filename": f"{song.title}.mp3"}, status=status.HTTP_200_OK)
+        else:
+            # Nếu không sử dụng S3, sử dụng phương pháp cũ
+            file_path = song.file_path.path
+            if not os.path.exists(file_path):
+                return Response({"detail": "File not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            try:
+                return FileResponse(
+                    open(file_path, 'rb'),
+                    content_type='application/octet-stream',
+                    as_attachment=True,
+                    filename=f"{song.title}.mp3"
+                )
+            except Exception as e:
+                print(f"Download error: {e}")
+                return Response({"detail": "Error while downloading file"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class PlaylistListView(APIView):
