@@ -21,6 +21,8 @@ import AddToPlaylistModal from "../modals/AddToPlaylistModal";
 import usePlayerStore from "../../store/playerStore";
 import useCanvasStore from "../../store/canvasStore";
 import { fetchWithAuth } from "../../services/api";
+// Đảm bảo import getSongStreamUrl
+import { getSongStreamUrl } from "../../services/musicApi";
 import AudioPlayer from "./AudioPlayer";
 import ImageLoader from "./ImageLoader";
 import "./MusicPlayer.css";
@@ -33,6 +35,7 @@ const MusicPlayer = () => {
   const [showAddToPlaylistModal, setShowAddToPlaylistModal] = useState(false);
   const progressRef = useRef(null);
   const volumeRef = useRef(null);
+  const [audioUrl, setAudioUrl] = useState(null);
 
   // Lấy state và actions từ canvasStore
   const { toggleCanvas, isCanvasVisible } = useCanvasStore();
@@ -201,11 +204,54 @@ const MusicPlayer = () => {
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
   const volumePercentage = volume * 100;
 
+  useEffect(() => {
+    const loadAudio = async () => {
+      if (!currentSong) return;
+      
+      try {
+        console.log("Đang tải audio cho bài hát:", currentSong.title);
+        
+        // Lưu vị trí hiện tại nếu có audio element
+        let currentPosition = 0;
+        const audioElement = window._audioElement;
+        if (audioElement) {
+          currentPosition = audioElement.currentTime;
+        }
+        
+        // Lấy URL stream từ API
+        const streamUrl = await getSongStreamUrl(currentSong.id);
+        if (streamUrl) {
+          console.log("Đã nhận URL stream:", streamUrl);
+          
+          // Kiểm tra xem URL có thay đổi không
+          const isSameUrl = audioElement && audioElement.src === streamUrl;
+          
+          // Cập nhật URL cho AudioPlayer
+          setAudioUrl(streamUrl);
+          
+          // Nếu là cùng URL, giữ nguyên vị trí phát
+          if (isSameUrl && audioElement) {
+            setTimeout(() => {
+              audioElement.currentTime = currentPosition;
+            }, 100);
+          }
+        } else {
+          console.error("Không nhận được URL stream");
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy URL stream:", error);
+      }
+    };
+    
+    loadAudio();
+  }, [currentSong]);
+
   return (
     <>
       {/* AudioPlayer component */}
       <AudioPlayer
         songId={currentSong?.id}
+        audioUrl={audioUrl}
         isPlaying={isPlaying}
         currentTime={currentTime}
         volume={volume}

@@ -1,7 +1,7 @@
 # music/urls.py
 from django.urls import path
 from .views import (
-    SongListView, SongDetailView, SongStreamView, SongDownloadView,
+    SongListView, SongDetailView, SongDownloadView,
     PlaylistListView, PlaylistDetailView, PlaylistAddSongView, PlaylistRemoveSongView,
     AlbumListView, AlbumDetailView, AlbumAddSongView, AlbumRemoveSongView,
     FavoriteSongListView, FavoriteSongToggleView, CheckFavoriteSongView

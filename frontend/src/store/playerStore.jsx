@@ -19,11 +19,40 @@ const usePlayerStore = create((set, get) => ({
   // Phát/tạm dừng
   togglePlay: () => {
     const { isPlaying } = get();
-    set({ isPlaying: !isPlaying });
+    const newState = !isPlaying;
+    
+    // Cập nhật trạng thái
+    set({ isPlaying: newState });
+    
+    // Xử lý trực tiếp audio element nếu có
+    if (window._audioElement) {
+      if (newState) {
+        // Phát từ vị trí hiện tại
+        console.log("Phát từ vị trí:", window._audioElement.currentTime);
+        window._audioElement.play().catch(err => {
+          console.error("Lỗi khi phát audio từ store:", err);
+        });
+      } else {
+        window._audioElement.pause();
+      }
+    }
   },
 
   // Cập nhật trạng thái phát
-  setIsPlaying: (isPlaying) => set({ isPlaying }),
+  setIsPlaying: (isPlaying) => {
+    set({ isPlaying });
+    
+    // Xử lý trực tiếp audio element nếu có
+    if (window._audioElement) {
+      if (isPlaying) {
+        window._audioElement.play().catch(err => {
+          console.error("Lỗi khi phát audio từ store:", err);
+        });
+      } else {
+        window._audioElement.pause();
+      }
+    }
+  },
 
   // Cập nhật bài hát hiện tại
   setCurrentSong: (song, resetTime = true) => {
