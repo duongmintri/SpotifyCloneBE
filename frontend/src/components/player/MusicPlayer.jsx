@@ -12,6 +12,7 @@ import {
   FaList,
   FaDownload,
   FaHeart,
+  FaRegHeart,
 } from "react-icons/fa";
 
 import PlaylistPopup from "../popups/PlaylistPopup";
@@ -21,6 +22,7 @@ import { fetchWithAuth } from "../../services/api";
 import AudioPlayer from "./AudioPlayer";
 import ImageLoader from "./ImageLoader";
 import "./MusicPlayer.css";
+import FavoriteButton from "../common/FavoriteButton";
 
 const MusicPlayer = () => {
   const [showPlaylistPopup, setShowPlaylistPopup] = useState(false);
@@ -363,13 +365,24 @@ const MusicPlayer = () => {
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
         >
           {/* Nút yêu thích */}
-          <button
-            className="control-btn"
-            title="Yêu thích"
-            disabled={!currentSong}
-          >
-            <FaHeart />
-          </button>
+          {currentSong && (
+            <div className="control-btn">
+              <FavoriteButton 
+                songId={currentSong.id} 
+                size="md"
+                className="player-favorite-btn"
+              />
+            </div>
+          )}
+          {!currentSong && (
+            <button
+              className="control-btn"
+              title="Yêu thích"
+              disabled={true}
+            >
+              <FaRegHeart />
+            </button>
+          )}
 
           {/* Nút download */}
           <div className="dropdown">
