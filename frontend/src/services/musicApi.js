@@ -59,6 +59,34 @@ export const getSongDownloadUrl = (songId) => {
   return `${API_URL}/api/songs/${songId}/download/?t=${timestamp}`;
 };
 
+// Lấy URL video của bài hát
+export const getSongVideoUrl = async (songId) => {
+  if (!songId) {
+    console.error("songId không hợp lệ:", songId);
+    return null;
+  }
+
+  try {
+    // Thêm timestamp để tránh cache
+    const timestamp = new Date().getTime();
+    const response = await fetchWithAuth(`${API_URL}/api/songs/${songId}/video/?t=${timestamp}`);
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        console.log("Bài hát không có video");
+        return null;
+      }
+      throw new Error('Không thể lấy video của bài hát');
+    }
+
+    const data = await response.json();
+    return data.url;
+  } catch (error) {
+    console.error('Lỗi khi lấy video của bài hát:', error);
+    return null;
+  }
+};
+
 // Lấy danh sách playlist
 export const getPlaylists = async () => {
   try {

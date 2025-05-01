@@ -111,21 +111,16 @@ const AudioPlayer = ({ songId, isPlaying, currentTime, volume, repeatMode, onEnd
 
     // Tạo URL với timestamp để tránh cache
     const timestamp = new Date().getTime();
-    const streamUrl = `http://localhost:8000/api/songs/${songId}/stream/?t=${timestamp}`;
 
-    // Tải file audio mới với xác thực và tự động refresh token
+    // Sử dụng URL trực tiếp đến file trên S3 cho bài hát ID 18
+    const streamUrl = `https://spotifyclonesongs724.s3.ap-southeast-2.amazonaws.com/media/songs/1_f583a903.mp3?t=${timestamp}`;
+    console.log("Đang tải file nhạc trực tiếp từ S3:", streamUrl);
+
+    // Sử dụng URL trực tiếp
     (async () => {
       try {
-        const response = await fetchWithAuth(streamUrl, {
-          method: 'GET',
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const blob = await response.blob();
-        const objectURL = URL.createObjectURL(blob);
+        // Sử dụng URL trực tiếp
+        const objectURL = streamUrl;
 
         if (audioRef.current) {
           // Lưu lại thời gian hiện tại nếu là cùng một bài hát

@@ -3,4 +3,5 @@ venv/
 __pycache__/
 backend/.env
 backend/songs
-/backend/songs
+/backend/media/songs
+
