@@ -1,7 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Outlet } from "react-router-dom";
 import "./styles/App.css";
 import "./styles/AuthStyles.css";
+import "./styles/AdminStyles.css";
 import Navbar from "./components/layout/Navbar";
 import LeftSidebar from "./components/layout/LeftSidebar";
 import RightSidebar from "./components/layout/RightSidebar";
@@ -17,6 +18,21 @@ import CreateAlbumPage from "./pages/CreateAlbumPage";
 import AlbumList from "./components/content/AlbumList";
 import FavoriteSongs from "./components/content/FavoriteSongs";
 import { isAuthenticated } from "./services/api";
+
+// Admin imports
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminLoginPage from "./pages/admin/AdminLoginPage";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import SongList from "./pages/admin/songs/SongList";
+import ArtistList from "./pages/admin/artists/ArtistList";
+import { default as AdminAlbumList } from "./pages/admin/albums/AlbumList";
+import UserList from "./pages/admin/users/UserList";
+import { isAdminAuthenticated } from "./services/adminApi";
+
+// Lazy loaded components
+const SongForm = lazy(() => import('./pages/admin/songs/SongFormLazy'));
+const ArtistForm = lazy(() => import('./pages/admin/artists/ArtistFormLazy'));
+const AlbumForm = lazy(() => import('./pages/admin/albums/AlbumFormLazy'));
 
 // Component để xử lý redirect
 const RedirectToLogin = () => {
@@ -80,6 +96,19 @@ const FavoritesPage = () => {
   return <FavoriteSongs />;
 };
 
+// Component để xử lý redirect cho admin
+const RedirectToAdminLogin = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isAdminAuthenticated()) {
+      navigate("/admin/login");
+    } else {
+      navigate("/admin/dashboard");
+    }
+  }, [navigate]);
+  return null;
+};
+
 const App = () => {
   return (
     <Router>
@@ -103,6 +132,55 @@ const App = () => {
         <Route path="/signup" element={<SignupPage />} />
         {/* Trang test */}
         <Route path="/test" element={<TestPage />} />
+
+        {/* Admin routes */}
+        <Route path="/admin" element={<RedirectToAdminLogin />} />
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<AdminDashboard />} />
+
+          {/* Song routes */}
+          <Route path="songs" element={<SongList />} />
+          <Route path="songs/create" element={
+            <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
+              <SongForm />
+            </Suspense>
+          } />
+          <Route path="songs/edit/:id" element={
+            <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
+              <SongForm />
+            </Suspense>
+          } />
+
+          {/* Artist routes */}
+          <Route path="artists" element={<ArtistList />} />
+          <Route path="artists/create" element={
+            <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
+              <ArtistForm />
+            </Suspense>
+          } />
+          <Route path="artists/edit/:id" element={
+            <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
+              <ArtistForm />
+            </Suspense>
+          } />
+
+          {/* Album routes */}
+          <Route path="albums" element={<AdminAlbumList />} />
+          <Route path="albums/create" element={
+            <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
+              <AlbumForm />
+            </Suspense>
+          } />
+          <Route path="albums/edit/:id" element={
+            <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
+              <AlbumForm />
+            </Suspense>
+          } />
+
+          {/* User routes */}
+          <Route path="users" element={<UserList />} />
+        </Route>
       </Routes>
     </Router>
   );
