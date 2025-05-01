@@ -1,27 +1,29 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FaHome, FaPlus, FaHeart, FaCompactDisc } from "react-icons/fa";
 import { Link } from "react-router-dom";
-
-const playlists = [
-  { name: "Urban Nights", image: "./src/assets/images/cover-images/5.jpg" },
-  { name: "Coastal Dreaming", image: "./src/assets/images/cover-images/5.jpg" },
-];
+import usePlaylistStore from "../../store/playlistStore";
 
 const LeftSidebar = () => {
+  const { playlists, loading, error, fetchPlaylists } = usePlaylistStore();
+
+  useEffect(() => {
+    fetchPlaylists();
+  }, [fetchPlaylists]);
+
   return (
     <div className="left-sidebar">
-       <div className="library-section">
+      <div className="library-section">
         <ul className="nav-menu">
         </ul>
       </div>
 
       <ul className="nav-menu">
         <li>
-            <Link to="/home">
-              <FaHome />
-              <span>Trang chủ</span>
-            </Link>
-          </li>
+          <Link to="/home">
+            <FaHome />
+            <span>Trang chủ</span>
+          </Link>
+        </li>
         <li>
           <Link to="/albums">
             <FaCompactDisc
@@ -60,28 +62,32 @@ const LeftSidebar = () => {
       <div className="playlists-section">
         <h2>Playlists</h2>
         <div className="playlist-card-container">
-          {playlists.map((playlist, index) => (
-            <div className="playlist-card" key={index}>
-              <div className="playlist-card-img-container">
-                <img
-                  src={playlist.image}
-                  alt={playlist.name}
-                  className="playlist-card-img"
-                />
-                <div className="play-icon">
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
+          {loading ? (
+            <div className="loading-playlists">Đang tải...</div>
+          ) : error ? (
+            <div className="error-playlists">{error}</div>
+          ) : playlists.length === 0 ? (
+            <div className="empty-playlists">Chưa có playlist nào</div>
+          ) : (
+            playlists.map((playlist) => (
+              <Link to={`/playlists/${playlist.id}`} key={playlist.id} className="playlist-link">
+                <div className="playlist-card">
+                  <div className="playlist-card-img-container">
+                    <img
+                      src={playlist.cover_image || "/src/assets/images/cover-images/11.jpg"}
+                      alt={playlist.name}
+                      className="playlist-card-img"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/src/assets/images/cover-images/11.jpg";
+                      }}
+                    />
+                  </div>
+                  <div className="playlist-card-title">{playlist.name}</div>
                 </div>
-              </div>
-              <div className="playlist-card-title">{playlist.name}</div>
-            </div>
-          ))}
+              </Link>
+            ))
+          )}
         </div>
       </div>
     </div>
