@@ -5,3 +5,5 @@ backend/.env
 backend/songs
 /backend/media/songs
 
+backend/spotify_clone/.env
+backend/media/media/songs/
