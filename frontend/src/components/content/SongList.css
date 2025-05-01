@@ -1,91 +1,74 @@
 .song-list {
   width: 100%;
-  color: #fff;
+  margin-top: 20px;
 }
 
-.song-list-header {
-  display: grid;
-  grid-template-columns: 50px 3fr 2fr 100px 50px;
-  padding: 0 16px 8px 16px;
+.song-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.song-table th {
+  text-align: left;
+  padding: 8px 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   color: #b3b3b3;
   font-size: 14px;
   font-weight: 500;
 }
 
-.song-list-body {
-  margin-top: 8px;
-}
-
-.song-item {
-  display: grid;
-  grid-template-columns: 50px 3fr 2fr 100px 50px;
-  padding: 8px 16px;
-  border-radius: 4px;
-  align-items: center;
+.song-row {
+  cursor: pointer;
   transition: background-color 0.2s;
 }
 
-.song-item:hover {
+.song-row:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.song-item.active {
+.song-row.active {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
-.song-number {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
+.song-row td {
+  padding: 8px 16px;
+  vertical-align: middle;
 }
 
-.song-number-container {
-  position: relative;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Điều chỉnh chiều rộng cột */
+.song-number-col, .song-number-cell {
+  width: 40px;
+  text-align: center;
 }
 
-.song-index {
-  position: absolute;
-  color: #b3b3b3;
+.song-image-col, .song-image-cell {
+  width: 60px;
 }
 
-.song-play-icon {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  color: #fff;
-  font-size: 14px;
+.song-title-col {
+  text-align: left;
 }
 
-.song-item:hover .song-index {
-  opacity: 0;
+.song-artist-col {
+  text-align: left;
 }
 
-.song-item:hover .song-play-icon {
-  opacity: 1;
+.song-duration-col, .song-duration-cell {
+  width: 80px;
+  text-align: right;
 }
 
-.song-item.active .song-play-icon {
-  opacity: 1;
-}
-
-.song-title {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+.song-actions-col, .song-actions-cell {
+  width: 50px;
+  text-align: right;
 }
 
 .song-image {
   width: 40px;
   height: 40px;
-  border-radius: 4px;
   overflow: hidden;
+  border-radius: 4px;
 }
 
 .song-image img {
@@ -94,65 +77,49 @@
   object-fit: cover;
 }
 
-.song-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.song-name {
+.song-title {
   font-weight: 500;
-  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.song-artist {
-  font-size: 14px;
-  color: #b3b3b3;
-}
-
-.song-album {
-  color: #b3b3b3;
+.song-playing-icon {
+  color: #1db954;
   font-size: 14px;
 }
 
-.song-duration {
+.song-action-btn {
+  background: transparent;
+  border: none;
   color: #b3b3b3;
+  cursor: pointer;
   font-size: 14px;
-  text-align: right;
-}
-
-.song-actions {
+  padding: 4px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 16px;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.2s, color 0.2s;
 }
 
-.song-more-icon {
-  cursor: pointer;
-  color: #b3b3b3;
-  opacity: 0;
-  transition: color 0.2s;
-}
-
-.song-item:hover .song-more-icon {
+.song-action-btn:hover {
   opacity: 1;
-}
-
-.song-more-icon:hover {
   color: #fff;
 }
 
-.song-remove-icon {
-  cursor: pointer;
-  color: #b3b3b3;
-  opacity: 0;
-  transition: color 0.2s;
+.remove-btn:hover {
+  color: #ff4d4d;
 }
 
-.song-item:hover .song-remove-icon {
-  opacity: 1;
+@media (max-width: 768px) {
+  .song-duration-col, .song-duration-cell {
+    display: none;
+  }
 }
 
-.song-remove-icon:hover {
-  color: #f15e6c;
+@media (max-width: 480px) {
+  .song-artist-col, .song-artist-cell {
+    display: none;
+  }
 }

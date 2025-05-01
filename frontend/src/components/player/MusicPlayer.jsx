@@ -13,9 +13,11 @@ import {
   FaDownload,
   FaHeart,
   FaRegHeart,
+  FaPlus,
 } from "react-icons/fa";
 
 import PlaylistPopup from "../popups/PlaylistPopup";
+import AddToPlaylistModal from "../modals/AddToPlaylistModal";
 import usePlayerStore from "../../store/playerStore";
 import useCanvasStore from "../../store/canvasStore";
 import { fetchWithAuth } from "../../services/api";
@@ -28,6 +30,7 @@ const MusicPlayer = () => {
   const [showPlaylistPopup, setShowPlaylistPopup] = useState(false);
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
   const [isDraggingVolume, setIsDraggingVolume] = useState(false);
+  const [showAddToPlaylistModal, setShowAddToPlaylistModal] = useState(false);
   const progressRef = useRef(null);
   const volumeRef = useRef(null);
 
@@ -55,9 +58,30 @@ const MusicPlayer = () => {
     toggleRepeat,
   } = usePlayerStore();
 
-  // Hàm toggle play/pause
+  // Hàm toggle play/pause với xử lý trực tiếp audio element
   const togglePlay = () => {
-    setIsPlaying(!isPlaying);
+    console.log("Toggle play/pause, trạng thái hiện tại:", isPlaying);
+    
+    // Lấy audio element từ window (đã expose ở AudioPlayer)
+    const audioElement = window._audioElement;
+    
+    if (isPlaying) {
+      // Nếu đang phát, dừng lại
+      setIsPlaying(false);
+      if (audioElement) {
+        console.log("Dừng audio element trực tiếp");
+        audioElement.pause();
+      }
+    } else {
+      // Nếu đang dừng, phát tiếp từ vị trí hiện tại
+      setIsPlaying(true);
+      if (audioElement) {
+        console.log("Phát audio element trực tiếp từ vị trí:", audioElement.currentTime);
+        audioElement.play().catch(err => {
+          console.error("Lỗi khi phát audio trực tiếp:", err);
+        });
+      }
+    }
   };
 
   // Xử lý event listeners cho thanh tiến trình
@@ -88,6 +112,10 @@ const MusicPlayer = () => {
 
   const togglePlaylistPopup = () => {
     setShowPlaylistPopup(!showPlaylistPopup);
+  };
+
+  const toggleAddToPlaylistModal = () => {
+    setShowAddToPlaylistModal(!showAddToPlaylistModal);
   };
 
   // Xử lý thanh tiến trình
@@ -384,6 +412,16 @@ const MusicPlayer = () => {
             </button>
           )}
 
+          {/* Nút thêm vào playlist */}
+          <button
+            className="control-btn"
+            onClick={toggleAddToPlaylistModal}
+            title="Thêm vào playlist"
+            disabled={!currentSong}
+          >
+            <FaPlus />
+          </button>
+
           {/* Nút download */}
           <div className="dropdown">
             <button
@@ -547,6 +585,13 @@ const MusicPlayer = () => {
             usePlayerStore.getState().setIsPlaying(true);
           }
         }}
+      />
+
+      {/* Modal thêm vào playlist */}
+      <AddToPlaylistModal
+        isOpen={showAddToPlaylistModal}
+        onClose={toggleAddToPlaylistModal}
+        songId={currentSong?.id}
       />
     </>
   );

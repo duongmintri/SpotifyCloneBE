@@ -1,5 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { fetchWithAuth } from '../../services/api';
+import { getSongStreamUrl } from "../../services/musicApi";
+
+// Thêm import API_URL
+const API_URL = 'http://localhost:8000';
 
 /**
  * AudioPlayer Component
@@ -7,6 +11,7 @@ import { fetchWithAuth } from '../../services/api';
  * Xử lý việc phát nhạc từ API với xác thực token
  *
  * @param {number|string} songId - ID của bài hát cần phát
+ * @param {string} audioUrl - URL của file audio (nếu đã có)
  * @param {boolean} isPlaying - Trạng thái phát/dừng
  * @param {number} currentTime - Thời gian hiện tại (từ store)
  * @param {number} volume - Âm lượng (từ store)
@@ -15,10 +20,22 @@ import { fetchWithAuth } from '../../services/api';
  * @param {function} onTimeUpdate - Callback khi thời gian phát thay đổi
  * @param {function} onLoadedMetadata - Callback khi metadata được tải
  */
-const AudioPlayer = ({ songId, isPlaying, currentTime, volume, repeatMode, onEnded, onTimeUpdate, onLoadedMetadata }) => {
+const AudioPlayer = ({ songId, audioUrl, isPlaying, currentTime, volume, repeatMode, onEnded, onTimeUpdate, onLoadedMetadata }) => {
   const audioRef = useRef(null);
   const isSeekingRef = useRef(false);
   const prevSongIdRef = useRef(null);
+
+  // Expose audio element to window for debugging
+  useEffect(() => {
+    if (audioRef.current) {
+      window._audioElement = audioRef.current;
+      console.log("Audio element exposed as window._audioElement for debugging");
+    }
+    
+    return () => {
+      delete window._audioElement;
+    };
+  }, []);
 
   // Xử lý các sự kiện audio (timeupdate, loadedmetadata, ended)
   useEffect(() => {
@@ -46,8 +63,11 @@ const AudioPlayer = ({ songId, isPlaying, currentTime, volume, repeatMode, onEnd
     const audio = audioRef.current;
     if (!audio) return;
 
+    console.log("Trạng thái isPlaying thay đổi:", isPlaying);
+
     if (isPlaying) {
       try {
+        console.log("Đang cố gắng phát nhạc...");
         const playPromise = audio.play();
         if (playPromise !== undefined) {
           playPromise.catch(error => {
@@ -62,7 +82,9 @@ const AudioPlayer = ({ songId, isPlaying, currentTime, volume, repeatMode, onEnd
       }
     } else {
       try {
+        console.log("Đang cố gắng dừng nhạc...");
         audio.pause();
+        console.log("Đã dừng nhạc, trạng thái hiện tại:", audio.paused);
         if (onTimeUpdate) {
           onTimeUpdate(audio.currentTime);
         }
@@ -72,124 +94,60 @@ const AudioPlayer = ({ songId, isPlaying, currentTime, volume, repeatMode, onEnd
     }
   }, [isPlaying, onTimeUpdate]);
 
-  // Xử lý khi songId thay đổi - tải file audio mới
+  // Xử lý khi songId thay đổi
   useEffect(() => {
     if (!songId) return;
-
-    // Kiểm tra xem có phải là cùng một bài hát không
-    const isSameSong = prevSongIdRef.current === songId;
-    prevSongIdRef.current = songId;
-
-    // Kiểm tra xem src có hợp lệ không
-    const hasValidSource = audioRef.current &&
-                          audioRef.current.src &&
-                          audioRef.current.src !== '' &&
-                          audioRef.current.src !== 'about:blank' &&
-                          !audioRef.current.error;
-
-    if (isSameSong && hasValidSource) {
-      // Cập nhật thời gian hiện tại
-      if (onTimeUpdate) {
-        onTimeUpdate(audioRef.current.currentTime);
-      }
-
-      // Nếu đang yêu cầu phát, phát từ vị trí hiện tại
-      if (isPlaying && audioRef.current.readyState >= 2) {
+    
+    // Kiểm tra xem songId có thay đổi không
+    if (prevSongIdRef.current !== songId) {
+      console.log("Song ID thay đổi từ", prevSongIdRef.current, "thành", songId);
+      prevSongIdRef.current = songId;
+      
+      // Tạo hàm lấy URL audio
+      const fetchAudioUrl = async () => {
         try {
-          const playPromise = audioRef.current.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(() => {});
+          console.log(`Đang lấy URL stream cho bài hát ID: ${songId}`);
+          const url = await getSongStreamUrl(songId);
+          
+          if (!url) {
+            console.error('Không thể lấy URL stream');
+            return;
           }
-          return;
-        } catch (error) {
-          console.error("Lỗi khi phát nhạc:", error);
-        }
-      } else if (!isPlaying) {
-        return;
-      }
-    }
-
-    // Tạo URL với timestamp để tránh cache
-    const timestamp = new Date().getTime();
-
-    // Sử dụng URL trực tiếp đến file trên S3 cho bài hát ID 18
-    const streamUrl = `https://spotifyclonesongs724.s3.ap-southeast-2.amazonaws.com/media/songs/1_f583a903.mp3?t=${timestamp}`;
-    console.log("Đang tải file nhạc trực tiếp từ S3:", streamUrl);
-
-    // Sử dụng URL trực tiếp
-    (async () => {
-      try {
-        // Sử dụng URL trực tiếp
-        const objectURL = streamUrl;
-
-        if (audioRef.current) {
-          // Lưu lại thời gian hiện tại nếu là cùng một bài hát
-          const currentTime = isSameSong ? audioRef.current.currentTime : 0;
-          const oldSrc = audioRef.current.src;
-
-          // Đặt src mới và tải
-          audioRef.current.src = objectURL;
-
-          // Xử lý khi audio đã sẵn sàng
-          const handleCanPlay = () => {
-            // Khôi phục thời gian nếu là cùng một bài hát
-            if (isSameSong && currentTime > 0) {
-              audioRef.current.currentTime = currentTime;
-              if (onTimeUpdate) {
-                onTimeUpdate(currentTime);
-              }
-            } else if (onTimeUpdate) {
-              onTimeUpdate(0);
+          
+          console.log("Nhận được URL audio:", url);
+          
+          // Cập nhật src cho audio element
+          if (audioRef.current) {
+            // Lưu vị trí hiện tại nếu là cùng bài hát
+            const isSameSong = audioRef.current.src === url;
+            const currentPosition = isSameSong ? audioRef.current.currentTime : 0;
+            
+            audioRef.current.src = url;
+            audioRef.current.load();
+            
+            // Nếu là cùng bài hát, giữ nguyên vị trí
+            if (isSameSong) {
+              audioRef.current.currentTime = currentPosition;
             }
-
-            // Phát nếu đang yêu cầu phát
+            
+            // Nếu đang yêu cầu phát, phát khi đã tải xong
             if (isPlaying) {
-              try {
-                audioRef.current.play().catch(() => {});
-              } catch (error) {
-                console.error("Lỗi khi phát nhạc:", error);
-              }
+              audioRef.current.oncanplay = () => {
+                audioRef.current.play().catch(err => {
+                  console.error('Không thể phát audio:', err);
+                });
+              };
             }
-
-            audioRef.current.removeEventListener('canplay', handleCanPlay);
-          };
-
-          // Xử lý khi có lỗi
-          const handleError = () => {
-            audioRef.current.removeEventListener('error', handleError);
-          };
-
-          audioRef.current.addEventListener('canplay', handleCanPlay);
-          audioRef.current.addEventListener('error', handleError);
-          audioRef.current.load();
-
-          // Revoke URL cũ
-          if (oldSrc && oldSrc.startsWith('blob:')) {
-            URL.revokeObjectURL(oldSrc);
           }
+        } catch (error) {
+          console.error("Lỗi khi tải URL audio:", error);
         }
-      } catch (error) {
-        console.error("Lỗi khi tải file audio:", error);
-      }
-    })();
-
-    // Cleanup function
-    return () => {
-      if (audioRef.current && !isSameSong) {
-        audioRef.current.pause();
-
-        // Tạo audio element mới để tránh vấn đề với event listener
-        const newAudio = document.createElement('audio');
-        newAudio.preload = "auto";
-
-        if (audioRef.current.parentNode) {
-          audioRef.current.parentNode.replaceChild(newAudio, audioRef.current);
-        }
-
-        audioRef.current = newAudio;
-      }
-    };
-  }, [songId, isPlaying, onTimeUpdate]);
+      };
+      
+      // Gọi hàm lấy URL audio
+      fetchAudioUrl();
+    }
+  }, [songId, isPlaying]);
 
   // Xử lý khi currentTime thay đổi từ bên ngoài (seek)
   useEffect(() => {
@@ -198,6 +156,8 @@ const AudioPlayer = ({ songId, isPlaying, currentTime, volume, repeatMode, onEnd
     // Nếu thời gian từ store khác với thời gian hiện tại của audio > 0.5s
     const diff = Math.abs(audioRef.current.currentTime - currentTime);
     if (diff > 0.5) {
+      console.log("Seek từ", audioRef.current.currentTime, "đến", currentTime);
+      
       // Đánh dấu đang seek để tránh vòng lặp vô hạn
       isSeekingRef.current = true;
 
@@ -229,6 +189,67 @@ const AudioPlayer = ({ songId, isPlaying, currentTime, volume, repeatMode, onEnd
     audioRef.current.loop = repeatMode === 'one';
   }, [repeatMode]);
 
+  // Thêm sự kiện lắng nghe trạng thái audio
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    
+    const handlePlay = () => {
+      console.log("Audio đang phát");
+      if (!isPlaying) {
+        // Nếu trạng thái store không đồng bộ với audio
+        console.log("Đồng bộ trạng thái phát với audio");
+        onTimeUpdate?.(audio.currentTime);
+      }
+    };
+    
+    const handlePause = () => {
+      console.log("Audio đã dừng");
+      if (isPlaying) {
+        // Nếu trạng thái store không đồng bộ với audio
+        console.log("Đồng bộ trạng thái dừng với audio");
+        onTimeUpdate?.(audio.currentTime);
+      }
+    };
+    
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    
+    return () => {
+      audio.removeEventListener('play', handlePlay);
+      audio.removeEventListener('pause', handlePause);
+    };
+  }, [isPlaying, onTimeUpdate]);
+
+  // Thêm kiểm tra định kỳ trạng thái audio
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    
+    // Kiểm tra mỗi 1 giây
+    const intervalId = setInterval(() => {
+      // Nếu trạng thái audio và store không khớp nhau
+      if (audio.paused === isPlaying) {
+        console.log("Phát hiện trạng thái không đồng bộ:");
+        console.log("- Audio paused:", audio.paused);
+        console.log("- Store isPlaying:", isPlaying);
+        
+        // Đồng bộ audio với store
+        if (isPlaying && audio.paused) {
+          console.log("Phát lại audio để đồng bộ");
+          audio.play().catch(err => {
+            console.error("Lỗi khi đồng bộ phát:", err);
+          });
+        } else if (!isPlaying && !audio.paused) {
+          console.log("Dừng audio để đồng bộ");
+          audio.pause();
+        }
+      }
+    }, 1000);
+    
+    return () => clearInterval(intervalId);
+  }, [isPlaying]);
+
   return (
     <audio
       ref={audioRef}
@@ -236,6 +257,12 @@ const AudioPlayer = ({ songId, isPlaying, currentTime, volume, repeatMode, onEnd
       style={{ display: 'none' }}
       crossOrigin="anonymous"
       playsInline
+      onPlay={() => {
+        console.log("Audio element đang phát, currentTime:", audioRef.current?.currentTime);
+      }}
+      onPause={() => {
+        console.log("Audio element đã dừng, currentTime:", audioRef.current?.currentTime);
+      }}
     />
   );
 };

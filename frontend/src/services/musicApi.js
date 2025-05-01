@@ -37,6 +37,7 @@ export const getSongDetails = async (songId) => {
 
 // Lấy URL stream bài hát
 export const getSongStreamUrl = (songId) => {
+  
   if (!songId) {
     console.error("songId không hợp lệ:", songId);
     return null;
@@ -87,7 +88,7 @@ export const getSongVideoUrl = async (songId) => {
   }
 };
 
-// Lấy danh sách playlist
+// Lấy danh sách playlist của người dùng
 export const getPlaylists = async () => {
   try {
     const response = await fetchWithAuth(`${API_URL}/api/playlists/`);
@@ -124,6 +125,9 @@ export const createPlaylist = async (playlistData) => {
   try {
     const response = await fetchWithAuth(`${API_URL}/api/playlists/`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify(playlistData),
     });
 
@@ -141,12 +145,19 @@ export const createPlaylist = async (playlistData) => {
 // Thêm bài hát vào playlist
 export const addSongToPlaylist = async (playlistId, songId) => {
   try {
+    console.log(`Thêm bài hát ${songId} vào playlist ${playlistId}`);
+    
     const response = await fetchWithAuth(`${API_URL}/api/playlists/${playlistId}/add-song/`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ song_id: songId }),
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
       throw new Error('Không thể thêm bài hát vào playlist');
     }
 

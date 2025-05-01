@@ -50,16 +50,10 @@ const LeftSidebar = () => {
           </Link>
         </li>
         <li>
-          <FaPlus
-            style={{
-              backgroundColor: "#b3b3b3",
-              color: "black",
-              padding: "5px",
-              borderRadius: "2px",
-              fontSize: "1.2rem",
-            }}
-          />
-          <span>Tạo playlist mới</span>
+          <Link to="/playlists/create" className="nav-link">
+            <FaPlus />
+            <span>Tạo Playlist</span>
+          </Link>
         </li>
       </ul>
 
