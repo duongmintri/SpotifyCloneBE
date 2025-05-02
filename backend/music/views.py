@@ -44,21 +44,21 @@ class SongDetailView(APIView):
 class SongStreamView(APIView):
     # Bỏ yêu cầu xác thực mặc định
     # permission_classes = [IsAuthenticated]
-    
+
     def get(self, request, pk):
         try:
             # Lấy bài hát từ database
             song = get_object_or_404(Song, pk=pk)
-            
+
             # Nếu là bài hát premium, kiểm tra người dùng
             if song.is_premium:
                 if not request.user.is_authenticated:
                     return Response({"detail": "Authentication required"}, status=status.HTTP_401_UNAUTHORIZED)
                 if not request.user.is_premium:
                     return Response({"detail": "Premium content"}, status=status.HTTP_403_FORBIDDEN)
-            
+
             from django.conf import settings
-            
+
             if settings.USE_S3:
                 # Truy vấn trực tiếp database để lấy đường dẫn file
                 from django.db import connection
@@ -68,7 +68,7 @@ class SongStreamView(APIView):
                         [song.id]
                     )
                     result = cursor.fetchone()
-                    
+
                     if result and result[0]:
                         file_path_db = result[0]
                         # Đảm bảo đường dẫn bắt đầu bằng media/songs
@@ -77,7 +77,7 @@ class SongStreamView(APIView):
                                 file_path_db = f"media/songs/{file_path_db}"
                             else:
                                 file_path_db = f"media/{file_path_db}"
-                        
+
                         # Tạo URL trực tiếp đến file trên S3
                         file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{file_path_db}"
                     else:
@@ -88,14 +88,14 @@ class SongStreamView(APIView):
                                 file_path_name = f"media/songs/{file_path_name}"
                             else:
                                 file_path_name = f"media/{file_path_name}"
-                        
+
                         file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{file_path_name}"
-                
+
                 # Log thông tin để debug
                 print(f"Song ID: {song.id}")
                 print(f"Song title: {song.title}")
                 print(f"Serving song file from S3: {file_url}")
-                
+
                 # Trả về URL trong response JSON
                 return Response({"url": file_url}, status=status.HTTP_200_OK)
             else:
@@ -103,7 +103,7 @@ class SongStreamView(APIView):
                 file_path = song.file_path.path
                 if not os.path.exists(file_path):
                     return Response({"detail": "File not found"}, status=status.HTTP_404_NOT_FOUND)
-                
+
                 from django.http import FileResponse
                 return FileResponse(
                     open(file_path, 'rb'),
@@ -403,6 +403,89 @@ class AlbumRemoveSongView(APIView):
                 return Response({"detail": "Song not found in this album"}, status=status.HTTP_404_NOT_FOUND)
         except Album.DoesNotExist:
             return Response({"detail": "Album not found"}, status=status.HTTP_404_NOT_FOUND)
+
+# Search Views
+class SearchView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        query = request.query_params.get('q', '')
+        if not query:
+            return Response({"detail": "Vui lòng nhập từ khóa để tìm kiếm"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Tìm kiếm bài hát
+        songs = Song.objects.filter(
+            Q(title__icontains=query) |
+            Q(artist__name__icontains=query)
+        )[:10]  # Giới hạn 10 kết quả
+
+        # Tìm kiếm album
+        albums = Album.objects.filter(
+            Q(title__icontains=query) |
+            Q(artist__name__icontains=query)
+        ).filter(Q(is_public=True) | Q(user=request.user))[:10]  # Giới hạn 10 kết quả
+
+        # Tìm kiếm nghệ sĩ
+        artists = Artist.objects.filter(
+            name__icontains=query
+        )[:10]  # Giới hạn 10 kết quả
+
+        # Trả về kết quả
+        return Response({
+            "songs": SongSerializer(songs, many=True).data,
+            "albums": AlbumSerializer(albums, many=True, context={'request': request}).data,
+            "artists": ArtistSerializer(artists, many=True).data
+        })
+
+# Song Search View
+class SongSearchView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        query = request.query_params.get('q', '')
+        if not query:
+            return Response({"detail": "Vui lòng nhập từ khóa để tìm kiếm"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Tìm kiếm bài hát
+        songs = Song.objects.filter(
+            Q(title__icontains=query) |
+            Q(artist__name__icontains=query)
+        )[:20]  # Giới hạn 20 kết quả
+
+        return Response(SongSerializer(songs, many=True).data)
+
+# Album Search View
+class AlbumSearchView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        query = request.query_params.get('q', '')
+        if not query:
+            return Response({"detail": "Vui lòng nhập từ khóa để tìm kiếm"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Tìm kiếm album
+        albums = Album.objects.filter(
+            Q(title__icontains=query) |
+            Q(artist__name__icontains=query)
+        ).filter(Q(is_public=True) | Q(user=request.user))[:20]  # Giới hạn 20 kết quả
+
+        return Response(AlbumSerializer(albums, many=True, context={'request': request}).data)
+
+# Artist Search View
+class ArtistSearchView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        query = request.query_params.get('q', '')
+        if not query:
+            return Response({"detail": "Vui lòng nhập từ khóa để tìm kiếm"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Tìm kiếm nghệ sĩ
+        artists = Artist.objects.filter(
+            name__icontains=query
+        )[:20]  # Giới hạn 20 kết quả
+
+        return Response(ArtistSerializer(artists, many=True).data)
 
 # Favorite Songs Views
 class FavoriteSongListView(APIView):
