@@ -1,10 +1,9 @@
 import React from 'react';
-import { FaPlay, FaPause, FaEllipsisH, FaTrash } from 'react-icons/fa';
+import { FaPlay, FaPause, FaTrash } from 'react-icons/fa';
 import usePlayerStore from '../../store/playerStore';
-import FavoriteButton from '../common/FavoriteButton';
 import './SongList.css';
 
-const SongList = ({ songs, onSongRemoved, onRemoveSong, showAlbum = true }) => {
+const SongList = ({ songs, onSongRemoved }) => {
   const {
     currentSong,
     isPlaying,
@@ -13,8 +12,8 @@ const SongList = ({ songs, onSongRemoved, onRemoveSong, showAlbum = true }) => {
     setQueue
   } = usePlayerStore();
 
-  // Xử lý khi click vào nút phát
-  const handlePlay = (song) => {
+  // Xử lý khi click vào bài hát
+  const handlePlaySong = (song, index) => {
     // Nếu bài hát này đang phát, tạm dừng
     if (currentSong?.id === song.id && isPlaying) {
       setIsPlaying(false);
@@ -41,91 +40,81 @@ const SongList = ({ songs, onSongRemoved, onRemoveSong, showAlbum = true }) => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  // Xử lý khi bài hát bị xóa khỏi danh sách yêu thích
-  const handleFavoriteToggle = (songId, isFavorite) => {
-    if (!isFavorite && onSongRemoved) {
+  // Xử lý khi xóa bài hát khỏi playlist
+  const handleRemoveSong = (e, songId) => {
+    e.stopPropagation(); // Ngăn sự kiện click lan ra ngoài
+    if (onSongRemoved) {
       onSongRemoved(songId);
     }
   };
 
   return (
     <div className="song-list">
-      <div className="song-list-header">
-        <div className="song-number">#</div>
-        <div className="song-title">Tiêu đề</div>
-        {showAlbum && <div className="song-album">Album</div>}
-        <div className="song-duration">Thời lượng</div>
-        <div className="song-actions"></div>
-      </div>
+      <table className="song-table">
+        <thead>
+          <tr>
+            <th className="song-number-col">#</th>
+            <th className="song-image-col"></th>
+            <th className="song-title-col">Tiêu đề</th>
+            <th className="song-artist-col">Nghệ sĩ</th>
+            <th className="song-duration-col">Thời lượng</th>
+            <th className="song-actions-col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {songs.map((song, index) => {
+            const isCurrentSong = currentSong && currentSong.id === song.id;
+            const formattedDuration = formatDuration(song.duration);
+            const artistName = song.artist?.name || song.artist || 'Unknown Artist';
 
-      <div className="song-list-body">
-        {songs.map((song, index) => (
-          <div
-            key={song.id}
-            className={`song-item ${currentSong?.id === song.id ? 'active' : ''}`}
-          >
-            <div className="song-number">
-              {currentSong?.id === song.id && isPlaying ? (
-                <FaPause
-                  className="song-play-icon"
-                  onClick={() => handlePlay(song)}
-                />
-              ) : (
-                <div className="song-number-container">
-                  <span className="song-index">{index + 1}</span>
-                  <FaPlay
-                    className="song-play-icon"
-                    onClick={() => handlePlay(song)}
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="song-title">
-              <div className="song-image">
-                <img
-                  src={song.cover_image || "/src/assets/images/cover-images/3.jpg"}
-                  alt={song.title}
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = "/src/assets/images/cover-images/3.jpg";
-                  }}
-                />
-              </div>
-              <div className="song-info">
-                <div className="song-name">{song.title}</div>
-                <div className="song-artist">{song.artist?.name || 'Unknown Artist'}</div>
-              </div>
-            </div>
-
-            {showAlbum && (
-              <div className="song-album">
-                {song.album?.title || 'Single'}
-              </div>
-            )}
-
-            <div className="song-duration">
-              {formatDuration(song.duration)}
-            </div>
-
-            <div className="song-actions">
-              <FavoriteButton
-                songId={song.id}
-                size="sm"
-                onToggle={(isFavorite) => handleFavoriteToggle(song.id, isFavorite)}
-              />
-              {onRemoveSong && (
-                <FaTrash
-                  className="song-remove-icon"
-                  onClick={() => onRemoveSong(song.id)}
-                  title="Xóa khỏi album"
-                />
-              )}
-              <FaEllipsisH className="song-more-icon" />
-            </div>
-          </div>
-        ))}
-      </div>
+            return (
+              <tr 
+                key={song.id} 
+                className={`song-row ${isCurrentSong ? 'active' : ''}`}
+                onClick={() => handlePlaySong(song, index)}
+              >
+                <td className="song-number-cell">
+                  {isCurrentSong && isPlaying ? (
+                    <FaPause className="song-playing-icon" />
+                  ) : (
+                    <span>{index + 1}</span>
+                  )}
+                </td>
+                <td className="song-image-cell">
+                  <div className="song-image">
+                    <img 
+                      src={song.cover_image || "/src/assets/images/cover-images/3.jpg"} 
+                      alt={song.title}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/src/assets/images/cover-images/3.jpg";
+                      }}
+                    />
+                  </div>
+                </td>
+                <td className="song-title-cell">
+                  <div className="song-title">{song.title}</div>
+                </td>
+                <td className="song-artist-cell">{artistName}</td>
+                <td className="song-duration-cell">{formattedDuration}</td>
+                <td className="song-actions-cell">
+                  <button 
+                    className="song-action-btn remove-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveSong(e, song.id);
+                    }}
+                    title="Xóa khỏi playlist"
+                    disabled={!onSongRemoved}
+                  >
+                    <FaTrash />
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 };

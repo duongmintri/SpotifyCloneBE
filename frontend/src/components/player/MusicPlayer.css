@@ -628,3 +628,12 @@
   width: 100%; /* Sử dụng toàn bộ chiều rộng cột */
   padding-left: 12px; /* Thêm khoảng cách bên trái */
 }
+
+/* Thêm vào cuối file */
+.control-btn .fa-plus {
+  font-size: 14px;
+}
+
+.control-btn:hover .fa-plus {
+  color: #1db954;
+}

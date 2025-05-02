@@ -60,10 +60,10 @@ const AlbumList = () => {
   return (
     <div className="album-list-container">
       <div className="album-header">
-        <h2>Albums</h2>
-        <Link to="/albums/create" className="create-album-button">
+        <h2>Albums được đề xuất cho bạn</h2>
+        {/* <Link to="/albums/create" className="create-album-button">
           <FaPlus /> Tạo Album
-        </Link>
+        </Link> */}
       </div>
       <div className="album-grid">
         {albums.map(album => (

@@ -1,0 +1,122 @@
+.create-playlist-form {
+  background-color: #282828;
+  border-radius: 8px;
+  padding: 24px;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  color: #fff;
+}
+
+.create-playlist-form .form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.create-playlist-form h2 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.create-playlist-form .close-button {
+  background: transparent;
+  border: none;
+  color: #b3b3b3;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.create-playlist-form .close-button:hover {
+  color: #fff;
+}
+
+.create-playlist-form .error-message {
+  background-color: rgba(232, 44, 44, 0.2);
+  color: #e82c2c;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.create-playlist-form .form-group {
+  margin-bottom: 16px;
+}
+
+.create-playlist-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.create-playlist-form input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  background-color: #3e3e3e;
+  border: 1px solid #3e3e3e;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.create-playlist-form input[type="text"]:focus {
+  border-color: #1db954;
+  outline: none;
+}
+
+.create-playlist-form .checkbox-group {
+  display: flex;
+  align-items: center;
+}
+
+.create-playlist-form .checkbox-group input {
+  margin-right: 8px;
+}
+
+.create-playlist-form .checkbox-group label {
+  margin-bottom: 0;
+}
+
+.create-playlist-form .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.create-playlist-form button {
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.create-playlist-form .cancel-button {
+  background-color: transparent;
+  border: 1px solid #b3b3b3;
+  color: #fff;
+}
+
+.create-playlist-form .cancel-button:hover {
+  border-color: #fff;
+}
+
+.create-playlist-form .submit-button {
+  background-color: #1db954;
+  border: none;
+  color: #fff;
+}
+
+.create-playlist-form .submit-button:hover {
+  background-color: #1ed760;
+  transform: scale(1.05);
+}
+
+.create-playlist-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

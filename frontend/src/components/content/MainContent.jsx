@@ -3,6 +3,7 @@ import MusicCard from "./MusicCard";
 import { getSongs, getPlaylists } from "../../services/musicApi";
 import usePlayerStore from "../../store/playerStore";
 import TestFavoriteButton from "./TestFavoriteButton";
+import PlaylistList from './PlaylistList';
 
 const MainContent = () => {
   const [songs, setSongs] = useState([]);
@@ -304,6 +305,7 @@ const MainContent = () => {
           </div>
         </>
       )}
+      <PlaylistList />
     </div>
   );
 };
