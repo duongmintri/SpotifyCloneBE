@@ -43,8 +43,11 @@ const SongList = ({ songs, onSongRemoved }) => {
   // Xử lý khi xóa bài hát khỏi playlist
   const handleRemoveSong = (e, songId) => {
     e.stopPropagation(); // Ngăn sự kiện click lan ra ngoài
+    console.log("Removing song with ID:", songId);
     if (onSongRemoved) {
       onSongRemoved(songId);
+    } else {
+      console.warn("onSongRemoved function not provided");
     }
   };
 
@@ -100,10 +103,7 @@ const SongList = ({ songs, onSongRemoved }) => {
                 <td className="song-actions-cell">
                   <button 
                     className="song-action-btn remove-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveSong(e, song.id);
-                    }}
+                    onClick={(e) => handleRemoveSong(e, song.id)}
                     title="Xóa khỏi playlist"
                     disabled={!onSongRemoved}
                   >

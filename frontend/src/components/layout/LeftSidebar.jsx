@@ -7,8 +7,14 @@ const LeftSidebar = () => {
   const { playlists, loading, error, fetchPlaylists } = usePlaylistStore();
 
   useEffect(() => {
+    console.log("LeftSidebar: Fetching playlists");
     fetchPlaylists();
   }, [fetchPlaylists]);
+
+  // Log khi playlists thay đổi
+  useEffect(() => {
+    console.log("LeftSidebar: Playlists updated", playlists);
+  }, [playlists]);
 
   return (
     <div className="left-sidebar">
@@ -61,6 +67,13 @@ const LeftSidebar = () => {
 
       <div className="playlists-section">
         <h2>Playlists</h2>
+        {/* <button 
+          onClick={() => fetchPlaylists()} 
+          className="refresh-button"
+          style={{ background: 'none', border: 'none', color: '#b3b3b3', cursor: 'pointer', fontSize: '12px' }}
+        >
+          Làm mới
+        </button> */}
         <div className="playlist-card-container">
           {loading ? (
             <div className="loading-playlists">Đang tải...</div>
