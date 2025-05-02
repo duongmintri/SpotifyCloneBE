@@ -20,6 +20,7 @@ import FavoriteSongs from "./components/content/FavoriteSongs";
 import { isAuthenticated } from "./services/api";
 import CreatePlaylistPage from './pages/CreatePlaylistPage';
 import PlaylistDetailPage from './pages/PlaylistDetailPage';
+import PlaylistList from './components/content/PlaylistList';
 import useChatStore from './store/chatStore';
 
 // Admin imports
@@ -146,6 +147,7 @@ const App = () => {
           <Route path="albums/:id" element={<AlbumDetailPage />} />
           {/* <Route path="albums/:id/edit" element={<EditAlbumPage />} /> */}
           <Route path="favorites" element={<FavoritesPage />} />
+          <Route path="playlists" element={<PlaylistList />} />
           <Route path="playlists/create" element={<CreatePlaylistPage />} />
           <Route path="playlists/:id" element={<PlaylistDetailPage />} />
         </Route>

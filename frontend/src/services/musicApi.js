@@ -140,6 +140,8 @@ export const getPlaylistDetails = async (playlistId) => {
 // Tạo playlist mới
 export const createPlaylist = async (playlistData) => {
   try {
+    console.log('Gọi createPlaylist với data:', playlistData);
+
     const response = await fetchWithAuth(`${API_URL}/api/playlists/`, {
       method: 'POST',
       headers: {
@@ -148,11 +150,19 @@ export const createPlaylist = async (playlistData) => {
       body: JSON.stringify(playlistData),
     });
 
+    console.log('Response status:', response.status);
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
       throw new Error('Không thể tạo playlist');
     }
 
-    return await response.json();
+    const result = await response.json();
+    console.log('Create playlist result:', result);
+    
+    // Đảm bảo trả về dữ liệu đầy đủ
+    return result;
   } catch (error) {
     console.error('Lỗi khi tạo playlist:', error);
     throw error;
@@ -200,6 +210,33 @@ export const removeSongFromPlaylist = async (playlistId, songId) => {
     return await response.json();
   } catch (error) {
     console.error('Lỗi khi xóa bài hát khỏi playlist:', error);
+    throw error;
+  }
+};
+
+// Xóa playlist
+export const deletePlaylist = async (playlistId) => {
+  try {
+    console.log('Gọi deletePlaylist với playlistId:', playlistId);
+    
+    const response = await fetchWithAuth(`${API_URL}/api/playlists/${playlistId}/`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    console.log('Response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      throw new Error('Không thể xóa playlist');
+    }
+    
+    return true; // Trả về true nếu xóa thành công
+  } catch (error) {
+    console.error('Lỗi khi xóa playlist:', error);
     throw error;
   }
 };

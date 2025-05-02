@@ -1,0 +1,174 @@
+/* Profile dropdown styles */
+.profile-container {
+  position: relative;
+}
+
+.profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 20px;
+  transition: background-color 0.2s;
+}
+
+.profile-trigger:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 240px;
+  background-color: #282828;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: #333;
+  border-bottom: 1px solid #444;
+}
+
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #535353;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b3b3b3;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-info h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+}
+
+.profile-info p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #b3b3b3;
+}
+
+.profile-menu-items {
+  padding: 8px 0;
+}
+
+.profile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background-color 0.2s;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.profile-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.profile-menu-item svg {
+  color: #b3b3b3;
+  font-size: 16px;
+}
+
+.profile-divider {
+  height: 1px;
+  background-color: #444;
+  margin: 8px 0;
+}
+
+.logout-item {
+  color: #f15e6c;
+}
+
+.logout-item svg {
+  color: #f15e6c;
+}
+
+/* Premium badge styles */
+.premium-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: rgba(255, 215, 0, 0.2);
+  padding: 5px 10px;
+  border-radius: 15px;
+  color: #FFD700;
+  font-weight: bold;
+}
+
+.premium-tag {
+  display: inline-block;
+  background-color: #FFD700;
+  color: black;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+/* Nút nâng cấp Premium */
+.upgrade-premium-btn {
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  border: 1px solid #FFD700;
+  color: #FFD700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upgrade-premium-btn:hover {
+  background-color: rgba(255, 215, 0, 0.2);
+  transform: scale(1.05);
+}
+
+/* Thêm hiệu ứng cho icon crown trong profile-trigger */
+.profile-trigger FaCrown {
+  transition: transform 0.3s ease;
+}
+
+.profile-trigger:hover FaCrown {
+  transform: rotate(15deg);
+}

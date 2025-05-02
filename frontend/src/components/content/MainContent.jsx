@@ -239,7 +239,7 @@ const MainContent = () => {
             })}
           </div>
 
-          <h2 className="sub-section-title">Popular Playlists</h2>
+          {/* <h2 className="sub-section-title">Popular Playlists</h2>
           <div className="card-row">
             {popularPlaylists.map((playlist) => {
               // Kiểm tra xem playlist có đúng định dạng không
@@ -302,10 +302,10 @@ const MainContent = () => {
                 />
               );
             })}
-          </div>
+          </div> */}
         </>
       )}
-      <PlaylistList />
+      {/* <PlaylistList /> */}
     </div>
   );
 };
