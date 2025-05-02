@@ -217,11 +217,21 @@ export const createAlbum = async (albumData) => {
   try {
     const response = await fetchWithAdminAuth(`${API_URL}/api/admin/albums/`, {
       method: 'POST',
-      body: JSON.stringify(albumData),
+      body: albumData, // Đã là FormData, không cần JSON.stringify
+      headers: {
+        // Không đặt Content-Type khi sử dụng FormData
+      },
     });
 
     if (!response.ok) {
-      throw new Error('Không thể tạo album');
+      try {
+        const errorData = await response.json();
+        console.log('Error data:', errorData);
+        throw new Error(errorData.error || JSON.stringify(errorData) || 'Không thể tạo album');
+      } catch (jsonError) {
+        console.log('Error parsing JSON:', jsonError);
+        throw new Error(`Không thể tạo album: ${response.status} ${response.statusText}`);
+      }
     }
 
     return await response.json();
@@ -236,11 +246,21 @@ export const updateAlbum = async (albumId, albumData) => {
   try {
     const response = await fetchWithAdminAuth(`${API_URL}/api/admin/albums/${albumId}/`, {
       method: 'PUT',
-      body: JSON.stringify(albumData),
+      body: albumData, // Đã là FormData, không cần JSON.stringify
+      headers: {
+        // Không đặt Content-Type khi sử dụng FormData
+      },
     });
 
     if (!response.ok) {
-      throw new Error('Không thể cập nhật album');
+      try {
+        const errorData = await response.json();
+        console.log('Error data:', errorData);
+        throw new Error(errorData.error || JSON.stringify(errorData) || 'Không thể cập nhật album');
+      } catch (jsonError) {
+        console.log('Error parsing JSON:', jsonError);
+        throw new Error(`Không thể cập nhật album: ${response.status} ${response.statusText}`);
+      }
     }
 
     return await response.json();
