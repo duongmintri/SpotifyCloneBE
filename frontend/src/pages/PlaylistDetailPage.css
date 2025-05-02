@@ -74,14 +74,12 @@
   background-color: #1db954;
   color: #fff;
   border: none;
-  border-radius: 20px;
-  padding: 10px 24px;
+  border-radius: 30px;
+  padding: 12px 24px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  margin-top: 16px;
   transition: all 0.2s;
-  width: fit-content;
 }
 
 .play-all-button:hover {
@@ -92,6 +90,37 @@
 .play-all-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.playlist-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.delete-playlist-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: transparent;
+  color: #fff;
+  border: 1px solid #f15e6c;
+  border-radius: 30px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-playlist-button:hover {
+  background-color: rgba(241, 94, 108, 0.1);
+  color: #f15e6c;
+}
+
+.delete-playlist-button svg {
+  font-size: 16px;
 }
 
 .loading-message,

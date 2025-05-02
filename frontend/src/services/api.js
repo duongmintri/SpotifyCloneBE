@@ -204,8 +204,16 @@ export const refreshToken = async () => {
 
 // Lấy thông tin người dùng từ localStorage
 export const getUser = () => {
-  const userStr = localStorage.getItem('user');
-  return userStr ? JSON.parse(userStr) : null;
+  try {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return null;
+    return JSON.parse(userStr);
+  } catch (error) {
+    console.error('Lỗi khi đọc thông tin người dùng từ localStorage:', error);
+    // Nếu có lỗi, xóa dữ liệu không hợp lệ
+    localStorage.removeItem('user');
+    return null;
+  }
 };
 
 // Xóa thông tin đăng nhập khỏi localStorage
@@ -270,4 +278,51 @@ export const fetchWithAuth = async (url, options = {}) => {
   }
   
   return response;
+};
+
+// Cập nhật thông tin người dùng
+export const updateUserProfile = async (userData) => {
+  try {
+    console.log('Gửi request cập nhật thông tin người dùng:', userData);
+    
+    const response = await fetchWithAuth(`${API_URL}/api/accounts/profile/`, {
+      method: 'PATCH', // Thử dùng PATCH thay vì PUT
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Không thể cập nhật thông tin người dùng');
+    }
+
+    const updatedUser = await response.json();
+    console.log('Nhận response cập nhật thông tin:', updatedUser);
+    
+    // Cập nhật thông tin người dùng trong localStorage
+    try {
+      // Lấy user hiện tại từ localStorage
+      const currentUser = getUser();
+      if (currentUser) {
+        // Cập nhật thông tin user
+        const updatedUserData = {
+          ...currentUser,
+          ...updatedUser
+        };
+        
+        // Lưu lại vào localStorage
+        localStorage.setItem('user', JSON.stringify(updatedUserData));
+      }
+    } catch (storageError) {
+      console.error('Lỗi khi cập nhật localStorage:', storageError);
+      // Tiếp tục xử lý mà không dừng lại vì lỗi localStorage
+    }
+    
+    return updatedUser;
+  } catch (error) {
+    console.error('Lỗi khi cập nhật thông tin người dùng:', error);
+    throw error;
+  }
 };

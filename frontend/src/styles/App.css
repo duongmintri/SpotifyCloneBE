@@ -588,7 +588,7 @@ a:active {
   background-clip: content-box;
 }
 
-/* Sửa đổi CSS cho modal-overlay để đảm bảo modal nằm trong vùng nhìn thấy */
+/* Sửa đổi CSS cho modal-overlay để đảm bảo modal nằm trên cùng */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -597,12 +597,10 @@ a:active {
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.7);
   display: flex;
-  align-items: flex-start; /* Thay đổi từ center thành flex-start */
+  align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: 2000; /* Tăng z-index lên cao hơn */
   backdrop-filter: blur(5px);
-  padding: 30px 0; /* Thêm padding để tránh modal sát với cạnh trên */
-  overflow-y: auto; /* Cho phép scroll nếu modal quá cao */
 }
 
 .modal-container {
@@ -610,12 +608,11 @@ a:active {
   border-radius: 8px;
   width: 100%;
   max-width: 450px;
-  max-height: 90vh; /* Giới hạn chiều cao của modal */
-  overflow-y: auto; /* Cho phép cuộn nội dung trong modal */
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   animation: modalFadeIn 0.3s ease forwards;
-  margin: 30px auto; /* Thêm margin trên và dưới */
-  z-index: 1001;
+  z-index: 2001; /* Đảm bảo modal container có z-index cao hơn overlay */
 }
 
 /* Đảm bảo modal luôn nằm trong vùng nhìn thấy được trên thiết bị mobile */

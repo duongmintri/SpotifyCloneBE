@@ -1,10 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getPlaylistDetails } from '../services/musicApi';
+import { getPlaylistDetails, deletePlaylist } from '../services/musicApi';
 import SongList from '../components/content/SongList';
-import { FaArrowLeft, FaPlay, FaPause } from 'react-icons/fa';
+import { FaArrowLeft, FaPlay, FaPause, FaTrash } from 'react-icons/fa';
 import usePlayerStore from '../store/playerStore';
+import usePlaylistStore from '../store/playlistStore';
 import './PlaylistDetailPage.css';
+
+// Thêm hàm xử lý xóa playlist
+const handleDeletePlaylist = async (playlistId, navigate, removePlaylist) => {
+  if (window.confirm('Bạn có chắc chắn muốn xóa playlist này không?')) {
+    try {
+      await deletePlaylist(playlistId);
+      // Cập nhật store để xóa playlist khỏi danh sách
+      removePlaylist(parseInt(playlistId));
+      console.log("Đã xóa playlist ID:", playlistId, "khỏi store");
+      navigate('/home'); // Chuyển hướng về trang chính
+    } catch (error) {
+      console.error('Lỗi khi xóa playlist:', error);
+      alert('Không thể xóa playlist. Vui lòng thử lại sau.');
+    }
+  }
+};
 
 const PlaylistDetailPage = () => {
   const { id } = useParams();
@@ -14,6 +31,7 @@ const PlaylistDetailPage = () => {
   const [error, setError] = useState(null);
   
   const { setQueue, setCurrentSong, setIsPlaying, isPlaying, currentSong } = usePlayerStore();
+  const { removePlaylist } = usePlaylistStore();
 
   // Lấy thông tin chi tiết playlist
   useEffect(() => {
@@ -107,16 +125,25 @@ const PlaylistDetailPage = () => {
             <p className="playlist-creator">Tạo bởi: {createdBy}</p>
             <p className="playlist-stats">{songCount} bài hát</p>
             
-            <button 
-              className="play-all-button"
-              onClick={handlePlayAll}
-              disabled={songs.length === 0}
-            >
-              {isPlaying && currentSong && songs.some(song => song.id === currentSong.id) 
-                ? <><FaPause /> Tạm dừng</> 
-                : <><FaPlay /> Phát tất cả</>
-              }
-            </button>
+            <div className="playlist-actions">
+              <button 
+                className="play-all-button"
+                onClick={handlePlayAll}
+                disabled={songs.length === 0}
+              >
+                {isPlaying && currentSong && songs.some(song => song.id === currentSong.id) 
+                  ? <><FaPause /> Tạm dừng</> 
+                  : <><FaPlay /> Phát tất cả</>
+                }
+              </button>
+              
+              <button 
+                className="delete-playlist-button"
+                onClick={() => handleDeletePlaylist(id, navigate, removePlaylist)}
+              >
+                <FaTrash /> Xóa playlist
+              </button>
+            </div>
           </div>
         </div>
       </div>
