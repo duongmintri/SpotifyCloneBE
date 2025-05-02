@@ -1,12 +1,52 @@
-import React, { useState } from 'react';
-import { FaSearch, FaTimes } from 'react-icons/fa'; // FaTimes thay cho IoMdClose để đồng bộ icon
+import React, { useState, useEffect } from 'react';
+import { FaSearch, FaTimes, FaUserPlus, FaCheck } from 'react-icons/fa';
+import useFriendStore from '../../store/friendStore';
+import './AddFriendModal.css';
 
 const AddFriendModal = ({ isOpen, onClose }) => {
-  const [friendName, setFriendName] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState(''); // 'success' hoặc 'error'
+
+  const {
+    searchResults,
+    isSearching,
+    searchError,
+    searchForUsers,
+    sendRequest,
+    resetSearch
+  } = useFriendStore();
+
+  // Reset trạng thái khi đóng modal
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchTerm('');
+      setMessage('');
+      setMessageType('');
+      resetSearch();
+    }
+  }, [isOpen, resetSearch]);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log('Tìm kiếm:', friendName); // Thay bằng logic tìm kiếm thực tế sau
+    setMessage('');
+
+    if (searchTerm.trim().length < 3) {
+      setMessage('Vui lòng nhập ít nhất 3 ký tự để tìm kiếm');
+      setMessageType('error');
+      return;
+    }
+
+    searchForUsers(searchTerm);
+  };
+
+  const handleSendRequest = async (userId) => {
+    setMessage('');
+
+    const result = await sendRequest(userId);
+
+    setMessage(result.message);
+    setMessageType(result.success ? 'success' : 'error');
   };
 
   if (!isOpen) return null;
@@ -22,26 +62,76 @@ const AddFriendModal = ({ isOpen, onClose }) => {
         </div>
         <div className="modal-content">
           <form onSubmit={handleSearch} className="add-friend-form">
-            <div className="form-group" style={{ position: 'relative' }}>
-              <FaSearch style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#b3b3b3' }} />
+            <div className="form-group search-input-container">
+              <FaSearch className="search-icon" />
               <input
                 type="text"
-                placeholder="Nhập tên bạn bè"
-                value={friendName}
-                onChange={(e) => setFriendName(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '10px 10px 10px 35px',
-                  borderRadius: '23px',
-                  border: '1px solid #ccc',
-                  fontSize: '0.875rem',
-                }}
+                placeholder="Nhập tên người dùng hoặc tên đầy đủ"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+                disabled={isSearching}
               />
             </div>
-            <button type="submit" className="addFriendModal submit-btn" style={{ marginTop: '10px' }}>
-              Tìm kiếm
+            <button
+              type="submit"
+              className="search-button"
+              disabled={isSearching || searchTerm.trim().length < 3}
+            >
+              {isSearching ? 'Đang tìm kiếm...' : 'Tìm kiếm'}
             </button>
           </form>
+
+          {message && (
+            <div className={`message ${messageType}`}>
+              {message}
+            </div>
+          )}
+
+          {searchError && (
+            <div className="search-error">
+              {searchError}
+            </div>
+          )}
+
+          <div className="search-results">
+            {searchResults.length > 0 ? (
+              searchResults.map(user => (
+                <div key={user.id} className="user-result">
+                  <div className="user-info">
+                    <div className="user-avatar">
+                      <img
+                        src={user.profile_image || './src/assets/images/default-avatar.jpg'}
+                        alt={user.username}
+                      />
+                    </div>
+                    <div className="user-details">
+                      <div className="user-name">{user.username}</div>
+                      {user.full_name && <div className="user-fullname">{user.full_name}</div>}
+                    </div>
+                  </div>
+                  <div className="user-actions">
+                    {user.is_friend ? (
+                      <span className="already-friend">Đã là bạn bè</span>
+                    ) : user.has_pending_request ? (
+                      <span className="pending-request">
+                        <FaCheck /> Đã gửi lời mời
+                      </span>
+                    ) : (
+                      <button
+                        className="add-friend-btn"
+                        onClick={() => handleSendRequest(user.id)}
+                      >
+                        <FaUserPlus /> Kết bạn
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+            ) : searchTerm.length >= 3 && !isSearching && !searchError ? (
+              <div className="no-results">Không tìm thấy người dùng nào</div>
+            ) : null}
+          </div>
         </div>
       </div>
     </div>

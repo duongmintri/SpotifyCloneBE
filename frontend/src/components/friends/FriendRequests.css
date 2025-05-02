@@ -1,0 +1,15 @@
+.friend-requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.friend-requests-loading,
+.friend-requests-error,
+.friend-requests-empty {
+  padding: 16px 0;
+  text-align: center;
+  color: #b3b3b3;
+  font-size: 14px;
+}

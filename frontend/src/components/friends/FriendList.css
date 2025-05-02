@@ -1,0 +1,16 @@
+.friends-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.friends-loading,
+.friends-error,
+.friends-empty {
+  padding: 16px 0;
+  text-align: center;
+  color: #b3b3b3;
+  font-size: 14px;
+}

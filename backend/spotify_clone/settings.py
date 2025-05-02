@@ -133,6 +133,14 @@ REST_FRAMEWORK = {
 }
 
 WSGI_APPLICATION = 'spotify_clone.wsgi.application'
+ASGI_APPLICATION = 'spotify_clone.asgi.application'
+
+# Channels configuration
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 
 # Database
