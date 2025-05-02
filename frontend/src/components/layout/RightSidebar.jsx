@@ -1,10 +1,14 @@
-import React, { useEffect } from 'react';
-import { FaUserPlus, FaChevronUp, FaChevronDown, FaVideo } from 'react-icons/fa';
+import React, { useEffect, useState } from 'react';
+import { FaUserPlus, FaChevronUp, FaChevronDown, FaBell, FaVideo } from 'react-icons/fa';
 import useModalStore from '../../store/modalStore.jsx';
 import useCanvasStore from '../../store/canvasStore.jsx';
 import usePlayerStore from '../../store/playerStore';
+import useFriendStore from '../../store/friendStore';
+import useChatStore from '../../store/chatStore';
 import { getSongVideoUrl } from '../../services/musicApi';
 import Canvas from '../canvas/Canvas';
+import FriendList from '../friends/FriendList';
+import FriendRequests from '../friends/FriendRequests';
 import './RightSidebar.css';
 
 const RightSidebar = () => {
@@ -16,6 +20,15 @@ const RightSidebar = () => {
     setVideoUrl,
     toggleFriends
   } = useCanvasStore();
+
+  const {
+    friendRequests,
+    fetchFriendRequests
+  } = useFriendStore();
+
+  const { unreadCount } = useChatStore();
+
+  const [showRequests, setShowRequests] = useState(false);
 
   // Lấy URL video khi bài hát thay đổi
   useEffect(() => {
@@ -37,32 +50,58 @@ const RightSidebar = () => {
     fetchVideoUrl();
   }, [currentSong, setVideoUrl]);
 
-  const friends = [
-    { name: 'As a Programmer', song: 'Starlight - Another Artist', artist: 'Another Artist', img: './src/assets/images/luu.jpg' },
-    { name: 'Tania Star', song: 'Purple Sunset - Jazz Combo', artist: 'Jazz Combo', img: './src/assets/images/luu.jpg' },
-    { name: 'David Myers', song: 'Inner Light - Shocking Lemon', artist: 'Shocking Lemon', img: './src/assets/images/luu.jpg' },
-  ];
+  // Lấy danh sách lời mời kết bạn khi component được mount
+  useEffect(() => {
+    fetchFriendRequests();
+
+    // Thiết lập interval để kiểm tra lời mời kết bạn mới mỗi 30 giây
+    const interval = setInterval(() => {
+      fetchFriendRequests();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [fetchFriendRequests]);
 
   return (
     <div className="right-sidebar-content">
       {/* Canvas component */}
       {isCanvasVisible && <Canvas />}
 
+      {/* Friend requests section */}
+      {friendRequests.length > 0 && (
+        <div className="friend-requests-section">
+          <div className="friend-requests-header">
+            <div className="friend-requests-title-container">
+              <h2 className="friend-requests-title">
+                Lời mời kết bạn ({friendRequests.length})
+              </h2>
+              <button
+                onClick={() => setShowRequests(!showRequests)}
+                className="toggle-requests-btn"
+                title={showRequests ? "Thu gọn" : "Mở rộng"}
+              >
+                {showRequests ? <FaChevronUp /> : <FaChevronDown />}
+              </button>
+            </div>
+          </div>
+
+          {showRequests && <FriendRequests />}
+        </div>
+      )}
+
       {/* Friends section */}
       <div className="friends-section">
-        <div className="friends-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div className="friends-title-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <h2 className="playlists-section h2">Bạn bè</h2>
+        <div className="friends-header">
+          <div className="friends-title-container">
+            <h2 className="friends-title">
+              Bạn bè
+              {unreadCount > 0 && (
+                <span className="unread-badge friends-badge">{unreadCount}</span>
+              )}
+            </h2>
             <button
               onClick={toggleFriends}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#b3b3b3',
-                display: 'flex',
-                alignItems: 'center',
-              }}
+              className="toggle-friends-btn"
               title={isFriendsCollapsed ? "Mở rộng" : "Thu gọn"}
             >
               {isFriendsCollapsed ? <FaChevronDown /> : <FaChevronUp />}
@@ -71,13 +110,7 @@ const RightSidebar = () => {
           <div className="friends-actions">
             <button
               onClick={openAddFriendModal}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#fff',
-                fontSize: '1.2rem',
-              }}
+              className="add-friend-btn"
               title="Thêm bạn bè"
             >
               <FaUserPlus />
@@ -85,19 +118,7 @@ const RightSidebar = () => {
           </div>
         </div>
 
-        {!isFriendsCollapsed && (
-          <div className="friends-list">
-            {friends.map((friend, index) => (
-              <div key={index} className="friend-row">
-                <img src={friend.img} alt={friend.name} className="friend-avatar" />
-                <div className="friend-info">
-                  <div className="friend-name">{friend.name}</div>
-                  <div className="friend-song">{friend.song}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {!isFriendsCollapsed && <FriendList />}
       </div>
     </div>
   );

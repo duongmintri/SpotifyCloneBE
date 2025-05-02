@@ -32,6 +32,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     # Thêm quan hệ many-to-many với Song cho bài hát yêu thích
     favorite_songs = models.ManyToManyField('music.Song', related_name='favorited_by', blank=True)
+    # Thêm quan hệ many-to-many với User cho bạn bè
+    friends = models.ManyToManyField('self', blank=True, symmetrical=True)
     objects = UserManager()
 
     USERNAME_FIELD = 'username'
@@ -42,3 +44,50 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+
+class FriendRequest(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected')
+    ]
+
+    from_user = models.ForeignKey(User, related_name='sent_friend_requests', on_delete=models.CASCADE)
+    to_user = models.ForeignKey(User, related_name='received_friend_requests', on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'friend_requests'
+        unique_together = ('from_user', 'to_user')
+
+    def __str__(self):
+        return f"{self.from_user.username} -> {self.to_user.username} ({self.status})"
+
+class FriendActivity(models.Model):
+    user = models.ForeignKey(User, related_name='activities', on_delete=models.CASCADE)
+    song = models.ForeignKey('music.Song', related_name='activities', on_delete=models.CASCADE)
+    action = models.CharField(max_length=50)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'friend_activities'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} {self.action}"
+
+class ChatMessage(models.Model):
+    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
+    content = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'chat_messages'
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"{self.sender.username} -> {self.receiver.username}: {self.content[:20]}..."
