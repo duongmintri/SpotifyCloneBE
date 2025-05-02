@@ -16,17 +16,16 @@ import {
   FaPlus,
 } from "react-icons/fa";
 
-import PlaylistPopup from "../popups/PlaylistPopup";
 import AddToPlaylistModal from "../modals/AddToPlaylistModal";
 import usePlayerStore from "../../store/playerStore";
 import useCanvasStore from "../../store/canvasStore";
 import { fetchWithAuth } from "../../services/api";
-// Đảm bảo import getSongStreamUrl
 import { getSongStreamUrl } from "../../services/musicApi";
 import AudioPlayer from "./AudioPlayer";
 import ImageLoader from "./ImageLoader";
 import "./MusicPlayer.css";
 import FavoriteButton from "../common/FavoriteButton";
+import CurrentPlaylistPopup from '../popups/CurrentPlaylistPopup';
 
 const MusicPlayer = () => {
   const [showPlaylistPopup, setShowPlaylistPopup] = useState(false);
@@ -59,6 +58,8 @@ const MusicPlayer = () => {
     playPrevious,
     toggleShuffle,
     toggleRepeat,
+    reorderQueue,
+    setCurrentSong,
   } = usePlayerStore();
 
   // Hàm toggle play/pause với xử lý trực tiếp audio element
@@ -245,6 +246,16 @@ const MusicPlayer = () => {
     
     loadAudio();
   }, [currentSong]);
+
+  const handleReorderPlaylist = (newPlaylist, oldIndex, newIndex) => {
+    // Cập nhật queue trong store
+    reorderQueue(oldIndex, newIndex);
+  };
+
+  const handlePlaySong = (song, index) => {
+    setCurrentSong(song);
+    setIsPlaying(true);
+  };
 
   return (
     <>
@@ -618,26 +629,21 @@ const MusicPlayer = () => {
         </div>
       </div>
 
-      {/* Playlist Popup */}
-      <PlaylistPopup
-        isOpen={showPlaylistPopup}
-        onClose={togglePlaylistPopup}
-        playlist={queue}
-        currentSong={currentSong}
-        onPlaySong={(song) => {
-          const index = queue.findIndex(item => item.id === song.id);
-          if (index !== -1) {
-            usePlayerStore.getState().setCurrentSong(song);
-            usePlayerStore.getState().setIsPlaying(true);
-          }
-        }}
-      />
-
       {/* Modal thêm vào playlist */}
       <AddToPlaylistModal
         isOpen={showAddToPlaylistModal}
         onClose={toggleAddToPlaylistModal}
         songId={currentSong?.id}
+      />
+
+      <CurrentPlaylistPopup 
+        isOpen={showPlaylistPopup}
+        onClose={() => setShowPlaylistPopup(false)}
+        playlist={queue}
+        currentSong={currentSong}
+        isPlaying={isPlaying}
+        onPlaySong={handlePlaySong}
+        onReorderPlaylist={handleReorderPlaylist}
       />
     </>
   );

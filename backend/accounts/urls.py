@@ -3,19 +3,26 @@ from .views import (
     RegisterView, CustomTokenObtainPairView, UserProfileView,
     UserSearchView, FriendRequestView, FriendRequestListView,
     FriendRequestResponseView, FriendListView, FriendRemoveView,
-    ChatMessageListView, ChatMessageCreateView, ChatUnreadCountView
+    ChatMessageListView, ChatMessageCreateView, ChatUnreadCountView,
+    premium_status, toggle_premium
 )
+from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
-    # Đăng ký và đăng nhập
+    # Authentication
     path('register/', RegisterView.as_view(), name='register'),
     path('login/', CustomTokenObtainPairView.as_view(), name='login'),
-    path('profile/', UserProfileView.as_view(), name='profile'),
-
-    # Tìm kiếm người dùng
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('profile/', UserProfileView.as_view(), name='user_profile'),
+    
+    # Premium features
+    path('premium-status/', premium_status, name='premium_status'),
+    path('toggle-premium/', toggle_premium, name='toggle_premium'),
+    
+    # User search
     path('search/', UserSearchView.as_view(), name='user-search'),
-
-    # Quản lý bạn bè
+    
+    # Friend management
     path('friends/', FriendListView.as_view(), name='friend-list'),
     path('friends/remove/', FriendRemoveView.as_view(), name='friend-remove'),
 

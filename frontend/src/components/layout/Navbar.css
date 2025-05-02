@@ -120,3 +120,55 @@
 .logout-item svg {
   color: #f15e6c;
 }
+
+/* Premium badge styles */
+.premium-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: rgba(255, 215, 0, 0.2);
+  padding: 5px 10px;
+  border-radius: 15px;
+  color: #FFD700;
+  font-weight: bold;
+}
+
+.premium-tag {
+  display: inline-block;
+  background-color: #FFD700;
+  color: black;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+/* Nút nâng cấp Premium */
+.upgrade-premium-btn {
+  display: flex;
+  align-items: center;
+  background-color: transparent;
+  border: 1px solid #FFD700;
+  color: #FFD700;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upgrade-premium-btn:hover {
+  background-color: rgba(255, 215, 0, 0.2);
+  transform: scale(1.05);
+}
+
+/* Thêm hiệu ứng cho icon crown trong profile-trigger */
+.profile-trigger FaCrown {
+  transition: transform 0.3s ease;
+}
+
+.profile-trigger:hover FaCrown {
+  transform: rotate(15deg);
+}

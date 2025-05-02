@@ -50,6 +50,7 @@
   transform: translateY(0);
 }
 
+/* Tùy chỉnh cho card-title và card-artist */
 .card-title {
   color: white;
   font-size: 16px;
@@ -58,15 +59,20 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
 }
 
 .card-artist {
   color: #b3b3b3;
   font-size: 14px;
+  font-weight: 400;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
 }
 
 .favorite-button-container {

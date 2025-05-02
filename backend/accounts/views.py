@@ -13,6 +13,8 @@ from .serializers import (
     UserSearchSerializer, FriendRequestSerializer, FriendActivitySerializer,
     ChatMessageSerializer
 )
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 @method_decorator(csrf_exempt, name='dispatch')
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -41,6 +43,20 @@ class UserProfileView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
+        
+    def put(self, request):
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    def patch(self, request):
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UserSearchView(APIView):
@@ -297,3 +313,32 @@ class ChatUnreadCountView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def premium_status(request):
+    """
+    Endpoint để kiểm tra trạng thái premium của người dùng
+    """
+    user = request.user
+    return Response({
+        'is_premium': user.is_premium,
+        'username': user.username,
+        'email': user.email
+    })
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def toggle_premium(request):
+    """
+    Endpoint để chuyển đổi trạng thái premium của người dùng
+    """
+    user = request.user
+    user.is_premium = not user.is_premium
+    user.save()
+    
+    return Response({
+        'is_premium': user.is_premium,
+        'username': user.username,
+        'email': user.email
+    })

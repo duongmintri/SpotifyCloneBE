@@ -1,11 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getPlaylistDetails, deletePlaylist } from '../services/musicApi';
+import { getPlaylistDetails, deletePlaylist, removeSongFromPlaylist } from '../services/musicApi';
 import SongList from '../components/content/SongList';
 import { FaArrowLeft, FaPlay, FaPause, FaTrash } from 'react-icons/fa';
 import usePlayerStore from '../store/playerStore';
 import usePlaylistStore from '../store/playlistStore';
 import './PlaylistDetailPage.css';
+
+// Thêm các hàm thông báo
+const showSuccessToast = (message) => {
+  alert(message); // Tạm thời dùng alert, sau này có thể thay bằng toast đẹp hơn
+};
+
+const showErrorToast = (message) => {
+  alert(message); // Tạm thời dùng alert, sau này có thể thay bằng toast đẹp hơn
+};
 
 // Thêm hàm xử lý xóa playlist
 const handleDeletePlaylist = async (playlistId, navigate, removePlaylist) => {
@@ -32,6 +41,22 @@ const PlaylistDetailPage = () => {
   
   const { setQueue, setCurrentSong, setIsPlaying, isPlaying, currentSong } = usePlayerStore();
   const { removePlaylist } = usePlaylistStore();
+
+  // Thêm hàm xử lý xóa bài hát khỏi playlist
+  const handleRemoveSong = async (songId) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa bài hát này khỏi playlist?')) {
+      try {
+        await removeSongFromPlaylist(id, songId);
+        // Cập nhật lại danh sách bài hát
+        const updatedPlaylist = await getPlaylistDetails(id);
+        setPlaylist(updatedPlaylist);
+        showSuccessToast('Đã xóa bài hát khỏi playlist thành công!');
+      } catch (error) {
+        console.error('Lỗi khi xóa bài hát khỏi playlist:', error);
+        showErrorToast('Không thể xóa bài hát khỏi playlist. Vui lòng thử lại sau.');
+      }
+    }
+  };
 
   // Lấy thông tin chi tiết playlist
   useEffect(() => {
@@ -64,10 +89,46 @@ const PlaylistDetailPage = () => {
       return;
     }
 
-    // Nếu không, bắt đầu phát từ đầu
-    setQueue(playlist.songs, 0);
-    setCurrentSong(playlist.songs[0]);
-    setIsPlaying(true);
+    try {
+      console.log("Playlist songs:", JSON.stringify(playlist.songs, null, 2));
+      
+      // Đảm bảo songs là mảng các đối tượng bài hát hợp lệ
+      const validSongs = playlist.songs.map(song => {
+        // Kiểm tra và đảm bảo song là đối tượng hợp lệ
+        if (typeof song !== 'object' || song === null) {
+          console.error('Invalid song object:', song);
+          return null;
+        }
+        
+        // Kiểm tra từng trường dữ liệu
+        const processedSong = {
+          id: song.id,
+          title: song.title || "Unknown Title",
+          artist: typeof song.artist === 'object' ? song.artist.name : song.artist || "Unknown Artist",
+          album: song.album ? (typeof song.album === 'object' ? song.album.title : song.album) : "Unknown Album",
+          cover_image: song.cover_image || "/src/assets/images/cover-images/11.jpg",
+          audio_file: song.file_path || ""
+        };
+        
+        console.log("Processed song:", processedSong);
+        return processedSong;
+      }).filter(song => song !== null);
+
+      console.log("Valid songs for queue:", validSongs);
+
+      // Nếu không, bắt đầu phát từ đầu
+      const firstSong = validSongs[0];
+      setQueue(validSongs, 0);
+      setCurrentSong(firstSong);
+      
+      // Đảm bảo đã set current song trước khi phát
+      setTimeout(() => {
+        setIsPlaying(true);
+      }, 100);
+    } catch (error) {
+      console.error('Error in handlePlayAll:', error);
+      setError('Không thể phát playlist. Vui lòng thử lại sau.');
+    }
   };
 
   // Hiển thị loading
@@ -150,7 +211,10 @@ const PlaylistDetailPage = () => {
 
       <div className="playlist-content">
         {songs.length > 0 ? (
-          <SongList songs={songs} />
+          <SongList 
+            songs={songs} 
+            onSongRemoved={handleRemoveSong} 
+          />
         ) : (
           <div className="empty-message">
             Playlist này chưa có bài hát nào. Hãy thêm bài hát vào playlist!

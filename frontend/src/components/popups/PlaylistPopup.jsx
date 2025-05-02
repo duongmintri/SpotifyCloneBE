@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { FaTimes, FaPlay, FaEllipsisH, FaPause } from 'react-icons/fa';
 import {
   DndContext,
@@ -19,6 +19,7 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
 import usePlayerStore from '../../store/playerStore';
 import ImageLoader from '../player/ImageLoader';
+import './PlaylistPopup.css';
 
 // SortableTrack component for individual draggable tracks
 const SortableTrack = ({ track, index, isCurrentSong, isPlaying, onPlaySong }) => {
@@ -59,6 +60,7 @@ const SortableTrack = ({ track, index, isCurrentSong, isPlaying, onPlaySong }) =
     transition,
     opacity: isDragging ? 0.5 : 1,
     cursor: 'grab',
+    zIndex: isDragging ? 1000 : 1,
   };
 
   // Format thời gian từ giây sang mm:ss
@@ -111,7 +113,11 @@ const PlaylistPopup = ({ isOpen, onClose, playlist = [], currentSong = null, onP
 
   // Sensors for drag-and-drop (mouse and keyboard support)
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5, // Khoảng cách tối thiểu để bắt đầu kéo
+      }
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })

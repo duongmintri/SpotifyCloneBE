@@ -106,7 +106,7 @@ export const loginUser = async (credentials) => {
 // Lấy thông tin người dùng
 export const getUserProfile = async (token) => {
   try {
-    console.log('Gửi request lấy thông tin người dùng đến:', `${API_URL}/accounts/profile/`);
+    console.log('Gửi request lấy thông tin người dùng đến:', `${API_URL}/api/accounts/profile/`);
 
     // Lấy CSRF token từ cookie (nếu có)
     const csrfToken = getCsrfToken();
@@ -127,6 +127,7 @@ export const getUserProfile = async (token) => {
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
       const data = await response.json();
+      console.log('Thông tin người dùng từ API:', data);
 
       if (!response.ok) {
         throw new Error(data.detail || 'Không thể lấy thông tin người dùng');
@@ -209,14 +210,43 @@ export const refreshToken = async () => {
 
 // Lấy thông tin người dùng từ localStorage
 export const getUser = () => {
+  const userStr = localStorage.getItem('user');
+  if (!userStr) return null;
+  
   try {
-    const userStr = localStorage.getItem('user');
-    if (!userStr) return null;
-    return JSON.parse(userStr);
+    // Thử parse JSON
+    const user = JSON.parse(userStr);
+    return user;
   } catch (error) {
-    console.error('Lỗi khi đọc thông tin người dùng từ localStorage:', error);
-    // Nếu có lỗi, xóa dữ liệu không hợp lệ
-    localStorage.removeItem('user');
+    console.error('Lỗi khi parse thông tin user:', error);
+    return null;
+  }
+};
+
+// Thêm hàm mới để cập nhật thông tin người dùng
+export const updateUserInfo = async () => {
+  try {
+    // Gọi API để lấy thông tin người dùng mới nhất
+    const response = await fetchWithAuth(`${API_URL}/api/accounts/profile/`);
+    
+    if (response.ok) {
+      // Kiểm tra content-type trước khi parse JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const userData = await response.json();
+        // Cập nhật thông tin user trong localStorage
+        localStorage.setItem('user', JSON.stringify(userData));
+        return userData;
+      } else {
+        console.error('Response không phải JSON:', await response.text());
+        return null;
+      }
+    } else {
+      console.error('Không thể cập nhật thông tin người dùng, status:', response.status);
+      return null;
+    }
+  } catch (error) {
+    console.error('Lỗi khi cập nhật thông tin người dùng:', error);
     return null;
   }
 };
@@ -292,7 +322,7 @@ export const updateUserProfile = async (userData) => {
     console.log('Gửi request cập nhật thông tin người dùng:', userData);
     
     const response = await fetchWithAuth(`${API_URL}/api/accounts/profile/`, {
-      method: 'PATCH', // Thử dùng PATCH thay vì PUT
+      method: 'PUT', // Thay đổi từ PATCH sang PUT
       headers: {
         'Content-Type': 'application/json',
       },
@@ -330,5 +360,38 @@ export const updateUserProfile = async (userData) => {
   } catch (error) {
     console.error('Lỗi khi cập nhật thông tin người dùng:', error);
     throw error;
+  }
+};
+
+// Hàm để kiểm tra trạng thái premium của người dùng
+export const checkPremiumStatus = async () => {
+  try {
+    console.log('Đang kiểm tra trạng thái premium...');
+    // Đảm bảo URL đúng với endpoint backend
+    const response = await fetchWithAuth(`${API_URL}/api/accounts/premium-status/`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response from premium status:', errorText);
+      throw new Error('Không thể kiểm tra trạng thái premium');
+    }
+    
+    const data = await response.json();
+    console.log('Kết quả kiểm tra premium:', data);
+    
+    // Cập nhật thông tin user trong localStorage
+    const currentUser = getUser();
+    if (currentUser) {
+      const updatedUser = {
+        ...currentUser,
+        is_premium: data.is_premium
+      };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
+    
+    return data.is_premium;
+  } catch (error) {
+    console.error('Lỗi khi kiểm tra trạng thái premium:', error);
+    return false;
   }
 };
