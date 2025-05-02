@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaTimes, FaPlay, FaPause, FaEllipsisH } from 'react-icons/fa';
+import { FaTimes, FaPlay, FaPause, FaEllipsisH, FaTrash } from 'react-icons/fa';
 import {
   DndContext,
   closestCenter,
@@ -20,7 +20,7 @@ import { CSS } from '@dnd-kit/utilities';
 import './CurrentPlaylistPopup.css';
 
 // SortableTrack component for individual draggable tracks
-const SortableTrack = ({ track, index, isCurrentSong, isPlaying, onPlaySong }) => {
+const SortableTrack = ({ track, index, isCurrentSong, isPlaying, onPlaySong, onRemoveTrack }) => {
   const {
     attributes,
     listeners,
@@ -79,6 +79,16 @@ const SortableTrack = ({ track, index, isCurrentSong, isPlaying, onPlaySong }) =
       <div className="track-duration">{formatTime(track.duration || 0)}</div>
       <div className="track-actions">
         <button 
+          className="track-action-btn track-remove-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemoveTrack(track.id);
+          }}
+          title="Xóa khỏi danh sách phát"
+        >
+          <FaTrash size={12} />
+        </button>
+        <button 
           className="track-action-btn"
           onClick={(e) => {
             e.stopPropagation();
@@ -99,7 +109,8 @@ const CurrentPlaylistPopup = ({
   currentSong, 
   isPlaying,
   onPlaySong,
-  onReorderPlaylist
+  onReorderPlaylist,
+  onRemoveTrack
 }) => {
   // Sensors for drag-and-drop
   const sensors = useSensors(
@@ -195,6 +206,7 @@ const CurrentPlaylistPopup = ({
                         isCurrentSong={currentSong && currentSong.id === track.id}
                         isPlaying={isPlaying && currentSong && currentSong.id === track.id}
                         onPlaySong={onPlaySong}
+                        onRemoveTrack={onRemoveTrack}
                       />
                     ))}
                   </div>

@@ -159,7 +159,7 @@ const Navbar = () => {
             <FaSearch style={{ position: "absolute", left: "10px", top: "10px", color: "#b3b3b3" }} />
             <input
               type="text"
-              placeholder="Tìm kiếm theo bài hát, nghệ sĩ hoặc album"
+              placeholder="Tìm kiếm theo bài hát hoặc nghệ sĩ"
               style={{
                 backgroundColor: "white",
                 border: "none",

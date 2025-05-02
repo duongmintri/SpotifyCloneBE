@@ -61,6 +61,7 @@ const MusicPlayer = () => {
     toggleRepeat,
     reorderQueue,
     setCurrentSong,
+    removeFromQueue
   } = usePlayerStore();
 
   // Hàm toggle play/pause với xử lý trực tiếp audio element
@@ -256,6 +257,11 @@ const MusicPlayer = () => {
   const handlePlaySong = (song, index) => {
     setCurrentSong(song);
     setIsPlaying(true);
+  };
+
+  const handleRemoveTrack = (trackId) => {
+    // Xóa bài hát khỏi queue
+    removeFromQueue(trackId);
   };
 
   useEffect(() => {
@@ -647,6 +653,7 @@ const MusicPlayer = () => {
         isPlaying={isPlaying}
         onPlaySong={handlePlaySong}
         onReorderPlaylist={handleReorderPlaylist}
+        onRemoveTrack={handleRemoveTrack}
       />
     </>
   );
