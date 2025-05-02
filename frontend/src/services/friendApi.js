@@ -6,8 +6,8 @@ const API_URL = 'http://localhost:8000';
 // Tìm kiếm người dùng
 export const searchUsers = async (query) => {
   try {
-    if (!query || query.length < 3) {
-      return { error: 'Vui lòng nhập ít nhất 3 ký tự để tìm kiếm' };
+    if (!query) {
+      return { error: 'Vui lòng nhập từ khóa để tìm kiếm' };
     }
 
     const response = await fetchWithAuth(`${API_URL}/api/accounts/search/?q=${encodeURIComponent(query)}`);

@@ -4,7 +4,8 @@ from .views import (
     SongListView, SongDetailView, SongDownloadView,
     PlaylistListView, PlaylistDetailView, PlaylistAddSongView, PlaylistRemoveSongView,
     AlbumListView, AlbumDetailView, AlbumAddSongView, AlbumRemoveSongView,
-    FavoriteSongListView, FavoriteSongToggleView, CheckFavoriteSongView
+    FavoriteSongListView, FavoriteSongToggleView, CheckFavoriteSongView,
+    SearchView, SongSearchView, AlbumSearchView, ArtistSearchView
 )
 from .media_views import serve_s3_file, serve_song_file, serve_song_video
 
@@ -36,4 +37,10 @@ urlpatterns = [
     path('media/<path:file_path>', serve_s3_file, name='serve-s3-file'),
     path('media/songs/<int:song_id>', serve_song_file, name='serve-song-file'),
     path('songs/<int:song_id>/video/', serve_song_video, name='song-video'),
+
+    # Search endpoints
+    path('search/', SearchView.as_view(), name='search'),
+    path('songs/search/', SongSearchView.as_view(), name='song-search'),
+    path('albums/search/', AlbumSearchView.as_view(), name='album-search'),
+    path('artists/search/', ArtistSearchView.as_view(), name='artist-search'),
 ]

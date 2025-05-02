@@ -160,7 +160,7 @@ export const createPlaylist = async (playlistData) => {
 
     const result = await response.json();
     console.log('Create playlist result:', result);
-    
+
     // Đảm bảo trả về dữ liệu đầy đủ
     return result;
   } catch (error) {
@@ -173,7 +173,7 @@ export const createPlaylist = async (playlistData) => {
 export const addSongToPlaylist = async (playlistId, songId) => {
   try {
     console.log(`Thêm bài hát ${songId} vào playlist ${playlistId}`);
-    
+
     const response = await fetchWithAuth(`${API_URL}/api/playlists/${playlistId}/add-song/`, {
       method: 'POST',
       headers: {
@@ -218,22 +218,22 @@ export const removeSongFromPlaylist = async (playlistId, songId) => {
 export const deletePlaylist = async (playlistId) => {
   try {
     console.log('Gọi deletePlaylist với playlistId:', playlistId);
-    
+
     const response = await fetchWithAuth(`${API_URL}/api/playlists/${playlistId}/`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
     });
-    
+
     console.log('Response status:', response.status);
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Error response:', errorText);
       throw new Error('Không thể xóa playlist');
     }
-    
+
     return true; // Trả về true nếu xóa thành công
   } catch (error) {
     console.error('Lỗi khi xóa playlist:', error);
@@ -448,5 +448,106 @@ export const checkFavoriteSong = async (songId) => {
   } catch (error) {
     console.error('Lỗi khi kiểm tra trạng thái yêu thích:', error);
     return { is_favorite: false };
+  }
+};
+
+// Tìm kiếm tổng hợp (bài hát, nghệ sĩ, album)
+export const search = async (query) => {
+  try {
+    if (!query) {
+      return {
+        songs: [],
+        albums: [],
+        artists: [],
+        error: 'Vui lòng nhập từ khóa để tìm kiếm'
+      };
+    }
+
+    console.log('Gọi API tìm kiếm tổng hợp với query:', query);
+    const response = await fetchWithAuth(`${API_URL}/api/search/?q=${encodeURIComponent(query)}`);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Không thể tìm kiếm');
+    }
+
+    const data = await response.json();
+    console.log('Kết quả tìm kiếm tổng hợp:', data);
+    return data;
+  } catch (error) {
+    console.error('Lỗi khi tìm kiếm:', error);
+    return { songs: [], albums: [], artists: [], error: error.message };
+  }
+};
+
+// Tìm kiếm bài hát
+export const searchSongs = async (query) => {
+  try {
+    if (!query) {
+      return { error: 'Vui lòng nhập từ khóa để tìm kiếm' };
+    }
+
+    console.log('Gọi API tìm kiếm bài hát với query:', query);
+    const response = await fetchWithAuth(`${API_URL}/api/songs/search/?q=${encodeURIComponent(query)}`);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Không thể tìm kiếm bài hát');
+    }
+
+    const data = await response.json();
+    console.log('Kết quả tìm kiếm bài hát:', data);
+    return data;
+  } catch (error) {
+    console.error('Lỗi khi tìm kiếm bài hát:', error);
+    return [];
+  }
+};
+
+// Tìm kiếm album
+export const searchAlbums = async (query) => {
+  try {
+    if (!query) {
+      return { error: 'Vui lòng nhập từ khóa để tìm kiếm' };
+    }
+
+    console.log('Gọi API tìm kiếm album với query:', query);
+    const response = await fetchWithAuth(`${API_URL}/api/albums/search/?q=${encodeURIComponent(query)}`);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Không thể tìm kiếm album');
+    }
+
+    const data = await response.json();
+    console.log('Kết quả tìm kiếm album:', data);
+    return data;
+  } catch (error) {
+    console.error('Lỗi khi tìm kiếm album:', error);
+    return [];
+  }
+};
+
+// Tìm kiếm nghệ sĩ
+export const searchArtists = async (query) => {
+  try {
+    if (!query) {
+      return { error: 'Vui lòng nhập từ khóa để tìm kiếm' };
+    }
+
+    console.log('Gọi API tìm kiếm nghệ sĩ với query:', query);
+    const response = await fetchWithAuth(`${API_URL}/api/artists/search/?q=${encodeURIComponent(query)}`);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Không thể tìm kiếm nghệ sĩ');
+    }
+
+    const data = await response.json();
+    console.log('Kết quả tìm kiếm nghệ sĩ:', data);
+    return data;
+  } catch (error) {
+    console.error('Lỗi khi tìm kiếm nghệ sĩ:', error);
+    return [];
   }
 };
