@@ -261,10 +261,11 @@ const MusicPlayer = () => {
   useEffect(() => {
     const checkPremium = async () => {
       try {
-        const response = await fetchWithAuth(`${API_URL}/api/accounts/premium-status/`);
+        const response = await fetchWithAuth(`http://localhost:8000/api/accounts/premium-status/`);
         if (response.ok) {
           const data = await response.json();
           setIsPremium(data.is_premium);
+          console.log("Trạng thái premium:", data.is_premium);
         }
       } catch (error) {
         console.error("Lỗi khi kiểm tra trạng thái premium:", error);
@@ -496,84 +497,69 @@ const MusicPlayer = () => {
             <FaPlus />
           </button>
 
-          {/* Nút download */}
-          <div className="dropdown">
-            <button
-              className="control-btn dropdown-toggle"
-              title="Tải xuống"
-              disabled={!currentSong}
-            >
-              <FaDownload />
-            </button>
-            <div className="dropdown-menu">
-              <button
-                className="dropdown-item"
-                onClick={() => {
-                  if (!currentSong) return;
-
-                  // Thêm timestamp để tránh cache
-                  const timestamp = new Date().getTime();
-                  const url = `http://localhost:8000/api/songs/${currentSong.id}/download/?t=${timestamp}`;
-
-                  // Sử dụng fetchWithAuth để tự động xử lý refresh token
-                  (async () => {
-                    try {
-                      const response = await fetchWithAuth(url, {
-                        method: 'GET',
-                      });
-
-                      console.log("Download response status:", response.status);
-                      console.log("Download response headers:", [...response.headers.entries()]);
-
-                      if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error("Download response error text:", errorText);
-                        throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
-                      }
-
-                      // Kiểm tra nếu response là JSON (trường hợp S3)
-                      const contentType = response.headers.get('content-type');
-
-                      if (contentType && contentType.includes('application/json')) {
-                        const data = await response.json();
-                        if (data.url && data.filename) {
-                          // Nếu là URL từ S3, mở cửa sổ mới để tải xuống
-                          const a = document.createElement('a');
-                          a.href = data.url;
-                          a.download = data.filename;
-                          a.target = '_blank';
-                          document.body.appendChild(a);
-                          a.click();
-                          document.body.removeChild(a);
-                        } else {
-                          throw new Error('Không tìm thấy URL trong response');
-                        }
-                      } else {
-                        // Nếu là blob từ backend, tạo objectURL
-                        const blob = await response.blob();
-                        const objectURL = URL.createObjectURL(blob);
-
-                        // Tạo một thẻ a tạm thời để tải xuống
-                        const a = document.createElement('a');
-                        a.href = objectURL;
-                        a.download = `${currentSong.title || 'song'}.mp3`;
-                        document.body.appendChild(a);
-                        a.click();
-
-                        // Dọn dẹp
-                        URL.revokeObjectURL(objectURL);
-                        document.body.removeChild(a);
-                      }
-                    } catch (error) {
-                      console.error("Lỗi khi tải xuống file audio:", error);
-                    }
-                  })();
-                }}
-              >
-                Tải nhạc
-              </button>
-            </div>
-          </div>
+          {/* Nút download - kiểm tra premium mỗi khi nhấn */}
+          <button
+            className="control-btn"
+            title={isPremium ? "Tải xuống" : "Chỉ người dùng premium mới có thể tải xuống"}
+            disabled={!currentSong}
+            onClick={async () => {
+              if (!currentSong) return;
+              
+              // Kiểm tra trạng thái premium mỗi khi nhấn nút
+              try {
+                const premiumResponse = await fetchWithAuth(`http://localhost:8000/api/accounts/premium-status/`);
+                const premiumData = await premiumResponse.json();
+                
+                // Cập nhật state
+                setIsPremium(premiumData.is_premium);
+                
+                if (!premiumData.is_premium) {
+                  alert("Chỉ người dùng premium mới có thể tải xuống bài hát. Vui lòng nâng cấp tài khoản của bạn.");
+                  return;
+                }
+                
+                // Thêm timestamp để tránh cache
+                const timestamp = new Date().getTime();
+                const url = `http://localhost:8000/api/songs/${currentSong.id}/download/?t=${timestamp}`;
+                
+                // Sử dụng fetchWithAuth để tự động xử lý xác thực
+                const response = await fetchWithAuth(url);
+                
+                if (!response.ok) {
+                  console.error("Lỗi khi tải xuống:", response.status);
+                  return;
+                }
+                
+                // Lấy blob từ response
+                const blob = await response.blob();
+                
+                // Tạo URL cho blob
+                const blobUrl = URL.createObjectURL(blob);
+                
+                // Tạo thẻ a để tải xuống
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = `${currentSong.title || 'song'}.mp3`;
+                a.style.display = 'none';
+                
+                // Thêm vào DOM, click và xóa
+                document.body.appendChild(a);
+                a.click();
+                
+                // Dọn dẹp
+                setTimeout(() => {
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(blobUrl);
+                }, 100);
+                
+                console.log("Đang tải xuống bài hát:", currentSong.title);
+              } catch (error) {
+                console.error("Lỗi khi tải xuống bài hát:", error);
+              }
+            }}
+          >
+            <FaDownload />
+          </button>
 
           {/* Nút mở canvas video */}
           <button
