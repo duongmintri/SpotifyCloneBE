@@ -97,6 +97,7 @@ class AdminArtistDetailView(APIView):
 # Album Management Views
 class AdminAlbumListView(APIView):
     permission_classes = [IsAuthenticated, IsSuperUser]
+    parser_classes = (MultiPartParser, FormParser)
 
     def get(self, request):
         albums = Album.objects.all()
@@ -104,14 +105,106 @@ class AdminAlbumListView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = AdminAlbumSerializer(data=request.data)
+        # Debug: In ra toàn bộ request data và files
+        print("Request data:", request.data)
+        print("Request FILES:", request.FILES)
+
+        # Xử lý file ảnh cover nếu có
+        cover_file = request.FILES.get('cover_image')
+
+        # Tạo dữ liệu cho serializer
+        data = {
+            'title': request.data.get('title'),
+            'artist': request.data.get('artist') or request.data.get('artist_id'),  # Thử lấy cả artist và artist_id
+            'release_date': request.data.get('release_date'),
+            'is_public': request.data.get('is_public', 'true').lower() == 'true',
+            'cover_image': ''  # Mặc định là chuỗi rỗng, sẽ được cập nhật nếu có file
+        }
+
+        # Debug: In ra artist_id và artist
+        print("Artist ID:", request.data.get('artist_id'))
+        print("Artist:", request.data.get('artist'))
+
+        # Nếu có file ảnh cover
+        if cover_file:
+            try:
+                # Tạo thư mục tạm nếu chưa tồn tại
+                temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp')
+                if not os.path.exists(temp_dir):
+                    os.makedirs(temp_dir)
+
+                # Lưu file tạm thời
+                cover_temp_path = os.path.join(temp_dir, cover_file.name)
+                with open(cover_temp_path, 'wb+') as destination:
+                    for chunk in cover_file.chunks():
+                        destination.write(chunk)
+
+                # Nếu sử dụng S3, upload file trực tiếp lên S3
+                if settings.USE_S3:
+                    import boto3
+                    from botocore.exceptions import ClientError
+                    import uuid
+
+                    # Tạo kết nối với S3
+                    s3_client = boto3.client(
+                        's3',
+                        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                        region_name=settings.AWS_S3_REGION_NAME
+                    )
+
+                    # Tạo một tên file ngẫu nhiên để tránh xung đột
+                    random_suffix = str(uuid.uuid4())[:8]
+                    cover_name = f"{os.path.splitext(cover_file.name)[0]}_{random_suffix}{os.path.splitext(cover_file.name)[1]}"
+                    cover_s3_key = f"media/images/{cover_name}"
+
+                    try:
+                        # Upload file ảnh cover lên S3
+                        print(f"Uploading cover image to S3: {cover_s3_key}")
+                        s3_client.upload_file(
+                            cover_temp_path,
+                            settings.AWS_STORAGE_BUCKET_NAME,
+                            cover_s3_key
+                        )
+                        print(f"Cover image uploaded successfully to S3: {cover_s3_key}")
+
+                        # Cập nhật URL ảnh cover
+                        cover_s3_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{cover_s3_key}"
+                        data['cover_image'] = cover_s3_url
+
+                        # Xóa file tạm
+                        if os.path.exists(cover_temp_path):
+                            os.remove(cover_temp_path)
+                    except ClientError as e:
+                        print(f"Error uploading cover image to S3: {e}")
+                        # Xóa file tạm
+                        if os.path.exists(cover_temp_path):
+                            os.remove(cover_temp_path)
+                        return Response({"error": f"Error uploading cover image to S3: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                else:
+                    # Nếu không sử dụng S3, sử dụng file gốc
+                    data['cover_image'] = cover_file
+            except Exception as e:
+                print(f"Error processing cover image: {e}")
+                import traceback
+                traceback.print_exc()
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Debug: In ra dữ liệu trước khi tạo serializer
+        print("Data for serializer:", data)
+
+        serializer = AdminAlbumSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        # Nếu serializer không hợp lệ
+        print("Serializer errors:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class AdminAlbumDetailView(APIView):
     permission_classes = [IsAuthenticated, IsSuperUser]
+    parser_classes = (MultiPartParser, FormParser)
 
     def get(self, request, pk):
         album = get_object_or_404(Album, pk=pk)
@@ -120,10 +213,102 @@ class AdminAlbumDetailView(APIView):
 
     def put(self, request, pk):
         album = get_object_or_404(Album, pk=pk)
-        serializer = AdminAlbumSerializer(album, data=request.data)
+
+        # Debug: In ra toàn bộ request data và files
+        print("Request data:", request.data)
+        print("Request FILES:", request.FILES)
+
+        # Xử lý file ảnh cover nếu có
+        cover_file = request.FILES.get('cover_image')
+
+        # Tạo dữ liệu cho serializer
+        data = {
+            'title': request.data.get('title', album.title),
+            'artist': request.data.get('artist') or request.data.get('artist_id', album.artist_id),  # Thử lấy cả artist và artist_id
+            'release_date': request.data.get('release_date', album.release_date),
+            'is_public': request.data.get('is_public', 'true').lower() == 'true',
+            'cover_image': album.cover_image or ''  # Đảm bảo không phải None
+        }
+
+        # Debug: In ra artist_id và artist
+        print("Artist ID:", request.data.get('artist_id'))
+        print("Artist:", request.data.get('artist'))
+
+        # Nếu có file ảnh cover
+        if cover_file:
+            try:
+                # Tạo thư mục tạm nếu chưa tồn tại
+                temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp')
+                if not os.path.exists(temp_dir):
+                    os.makedirs(temp_dir)
+
+                # Lưu file tạm thời
+                cover_temp_path = os.path.join(temp_dir, cover_file.name)
+                with open(cover_temp_path, 'wb+') as destination:
+                    for chunk in cover_file.chunks():
+                        destination.write(chunk)
+
+                # Nếu sử dụng S3, upload file trực tiếp lên S3
+                if settings.USE_S3:
+                    import boto3
+                    from botocore.exceptions import ClientError
+                    import uuid
+
+                    # Tạo kết nối với S3
+                    s3_client = boto3.client(
+                        's3',
+                        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                        region_name=settings.AWS_S3_REGION_NAME
+                    )
+
+                    # Tạo một tên file ngẫu nhiên để tránh xung đột
+                    random_suffix = str(uuid.uuid4())[:8]
+                    cover_name = f"{os.path.splitext(cover_file.name)[0]}_{random_suffix}{os.path.splitext(cover_file.name)[1]}"
+                    cover_s3_key = f"media/images/{cover_name}"
+
+                    try:
+                        # Upload file ảnh cover lên S3
+                        print(f"Uploading cover image to S3: {cover_s3_key}")
+                        s3_client.upload_file(
+                            cover_temp_path,
+                            settings.AWS_STORAGE_BUCKET_NAME,
+                            cover_s3_key
+                        )
+                        print(f"Cover image uploaded successfully to S3: {cover_s3_key}")
+
+                        # Cập nhật URL ảnh cover
+                        cover_s3_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{cover_s3_key}"
+                        data['cover_image'] = cover_s3_url
+
+                        # Xóa file tạm
+                        if os.path.exists(cover_temp_path):
+                            os.remove(cover_temp_path)
+                    except ClientError as e:
+                        print(f"Error uploading cover image to S3: {e}")
+                        # Xóa file tạm
+                        if os.path.exists(cover_temp_path):
+                            os.remove(cover_temp_path)
+                        return Response({"error": f"Error uploading cover image to S3: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                else:
+                    # Nếu không sử dụng S3, sử dụng file gốc
+                    data['cover_image'] = cover_file
+            except Exception as e:
+                print(f"Error processing cover image: {e}")
+                import traceback
+                traceback.print_exc()
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Debug: In ra dữ liệu trước khi tạo serializer
+        print("Data for serializer:", data)
+
+        serializer = AdminAlbumSerializer(album, data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
+
+        # Nếu serializer không hợp lệ
+        print("Serializer errors:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
