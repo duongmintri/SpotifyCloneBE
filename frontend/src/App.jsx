@@ -20,6 +20,7 @@ import FavoriteSongs from "./components/content/FavoriteSongs";
 import { isAuthenticated } from "./services/api";
 import CreatePlaylistPage from './pages/CreatePlaylistPage';
 import PlaylistDetailPage from './pages/PlaylistDetailPage';
+import useChatStore from './store/chatStore';
 
 // Admin imports
 import AdminLayout from "./components/admin/AdminLayout";
@@ -52,12 +53,31 @@ const RedirectToLogin = () => {
 // Layout chung cho tất cả các trang đã đăng nhập
 const AppLayout = () => {
   const navigate = useNavigate();
+  const { initWebSocket, closeWebSocket, fetchUnreadCount } = useChatStore();
 
   useEffect(() => {
     if (!isAuthenticated()) {
       navigate("/login");
+    } else {
+      // Khởi tạo WebSocket khi đã đăng nhập
+      initWebSocket();
+
+      // Lấy số lượng tin nhắn chưa đọc ban đầu
+      fetchUnreadCount();
+
+      // Thiết lập interval để cập nhật số lượng tin nhắn chưa đọc mỗi 10 giây
+      const intervalId = setInterval(() => {
+        fetchUnreadCount();
+      }, 10000);
+
+      return () => {
+        // Xóa interval khi component unmount
+        clearInterval(intervalId);
+        // Đóng WebSocket khi component unmount
+        closeWebSocket();
+      };
     }
-  }, [navigate]);
+  }, [navigate, initWebSocket, closeWebSocket, fetchUnreadCount]);
 
   return (
     <div className="app">
