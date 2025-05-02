@@ -31,7 +31,7 @@
 .playlist-info {
   display: flex;
   gap: 24px;
-  margin-top: 40px; /* Thêm margin-top để tạo khoảng cách cho nút back */
+  margin-top: 40px;
 }
 
 .playlist-image {

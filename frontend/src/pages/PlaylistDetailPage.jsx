@@ -5,32 +5,43 @@ import SongList from '../components/content/SongList';
 import { FaArrowLeft, FaPlay, FaPause, FaTrash } from 'react-icons/fa';
 import usePlayerStore from '../store/playerStore';
 import usePlaylistStore from '../store/playlistStore';
-import { getPlaylistCoverImage } from '../utils/imageUtils'; // Import hàm tiện ích
+import { getPlaylistCoverImage } from '../utils/imageUtils';
+import { showSuccessToast, showErrorToast, showConfirmToast } from '../utils/toast.jsx';
 import './PlaylistDetailPage.css';
 
-// Thêm các hàm thông báo
-const showSuccessToast = (message) => {
-  alert(message); // Tạm thời dùng alert, sau này có thể thay bằng toast đẹp hơn
-};
-
-const showErrorToast = (message) => {
-  alert(message); // Tạm thời dùng alert, sau này có thể thay bằng toast đẹp hơn
-};
+// Xóa các hàm thông báo cũ
+// const showSuccessToast = (message) => {
+//   alert(message);
+// };
+// 
+// const showErrorToast = (message) => {
+//   alert(message);
+// };
 
 // Thêm hàm xử lý xóa playlist
 const handleDeletePlaylist = async (playlistId, navigate, removePlaylist) => {
-  if (window.confirm('Bạn có chắc chắn muốn xóa playlist này không?')) {
-    try {
-      await deletePlaylist(playlistId);
-      // Cập nhật store để xóa playlist khỏi danh sách
-      removePlaylist(parseInt(playlistId));
-      console.log("Đã xóa playlist ID:", playlistId, "khỏi store");
-      navigate('/home'); // Chuyển hướng về trang chính
-    } catch (error) {
-      console.error('Lỗi khi xóa playlist:', error);
-      alert('Không thể xóa playlist. Vui lòng thử lại sau.');
+  showConfirmToast(
+    'Bạn có chắc chắn muốn xóa playlist này không?',
+    async () => {
+      try {
+        await deletePlaylist(playlistId);
+        // Cập nhật store để xóa playlist khỏi danh sách
+        removePlaylist(parseInt(playlistId));
+        console.log("Đã xóa playlist ID:", playlistId, "khỏi store");
+        showSuccessToast('Đã xóa playlist thành công!');
+        setTimeout(() => {
+          navigate('/home'); // Chuyển hướng về trang chính
+        }, 1000);
+      } catch (error) {
+        console.error('Lỗi khi xóa playlist:', error);
+        showErrorToast('Không thể xóa playlist. Vui lòng thử lại sau.');
+      }
+    },
+    () => {
+      // Hàm này sẽ được gọi khi người dùng nhấn "Hủy"
+      console.log("Đã hủy xóa playlist");
     }
-  }
+  );
 };
 
 const PlaylistDetailPage = () => {
@@ -45,18 +56,24 @@ const PlaylistDetailPage = () => {
 
   // Thêm hàm xử lý xóa bài hát khỏi playlist
   const handleRemoveSong = async (songId) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa bài hát này khỏi playlist?')) {
-      try {
-        await removeSongFromPlaylist(id, songId);
-        // Cập nhật lại danh sách bài hát
-        const updatedPlaylist = await getPlaylistDetails(id);
-        setPlaylist(updatedPlaylist);
-        showSuccessToast('Đã xóa bài hát khỏi playlist thành công!');
-      } catch (error) {
-        console.error('Lỗi khi xóa bài hát khỏi playlist:', error);
-        showErrorToast('Không thể xóa bài hát khỏi playlist. Vui lòng thử lại sau.');
+    showConfirmToast(
+      'Bạn có chắc chắn muốn xóa bài hát này khỏi playlist?',
+      async () => {
+        try {
+          await removeSongFromPlaylist(id, songId);
+          // Cập nhật lại danh sách bài hát
+          const updatedPlaylist = await getPlaylistDetails(id);
+          setPlaylist(updatedPlaylist);
+          showSuccessToast('Đã xóa bài hát khỏi playlist thành công!');
+        } catch (error) {
+          console.error('Lỗi khi xóa bài hát khỏi playlist:', error);
+          showErrorToast('Không thể xóa bài hát khỏi playlist. Vui lòng thử lại sau.');
+        }
+      },
+      () => {
+        console.log("Đã hủy xóa bài hát khỏi playlist");
       }
-    }
+    );
   };
 
   // Lấy thông tin chi tiết playlist

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaCheck, FaTimes } from 'react-icons/fa';
 import useFriendStore from '../../store/friendStore';
 import './FriendRequestItem.css';
+import { showErrorToast } from '../../utils/toast.jsx';
 
 const FriendRequestItem = ({ request }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +19,7 @@ const FriendRequestItem = ({ request }) => {
         setMessage(result.message);
       }
     } catch (error) {
-      setMessage('Đã xảy ra lỗi. Vui lòng thử lại.');
+      showErrorToast('Đã xảy ra lỗi. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }

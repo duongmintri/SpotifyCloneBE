@@ -6,6 +6,7 @@ import SongList from '../components/content/SongList';
 import AddSongToAlbumForm from '../components/forms/AddSongToAlbumForm';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import './AlbumDetailPage.css';
+import { showSuccessToast, showErrorToast, showConfirmToast } from '../utils/toast.jsx';
 
 // Hàm xóa album trực tiếp
 const deleteAlbum = async (albumId) => {
@@ -32,59 +33,6 @@ const deleteAlbum = async (albumId) => {
   } catch (error) {
     console.error('Lỗi khi xóa album:', error);
     throw error;
-  }
-};
-
-// Các hàm thông báo tạm thời
-const showSuccessToast = (message) => {
-  const toast = document.createElement('div');
-  toast.className = 'custom-toast success';
-  toast.innerHTML = `
-    <div class="toast-content">
-      <i class="fas fa-check-circle"></i>
-      <span>${message}</span>
-    </div>
-  `;
-  document.body.appendChild(toast);
-  
-  setTimeout(() => {
-    toast.classList.add('show');
-  }, 10);
-  
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => {
-      document.body.removeChild(toast);
-    }, 300);
-  }, 3000);
-};
-
-const showErrorToast = (message) => {
-  const toast = document.createElement('div');
-  toast.className = 'custom-toast error';
-  toast.innerHTML = `
-    <div class="toast-content">
-      <i class="fas fa-times-circle"></i>
-      <span>${message}</span>
-    </div>
-  `;
-  document.body.appendChild(toast);
-  
-  setTimeout(() => {
-    toast.classList.add('show');
-  }, 10);
-  
-  setTimeout(() => {
-    toast.classList.remove('show');
-    setTimeout(() => {
-      document.body.removeChild(toast);
-    }, 300);
-  }, 3000);
-};
-
-const showConfirmToast = (message, onConfirm) => {
-  if (window.confirm(message)) {
-    onConfirm();
   }
 };
 
