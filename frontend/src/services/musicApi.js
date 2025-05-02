@@ -121,18 +121,50 @@ export const getPlaylists = async () => {
   }
 };
 
-// Lấy thông tin chi tiết playlist
+// Lấy chi tiết playlist
 export const getPlaylistDetails = async (playlistId) => {
   try {
     const response = await fetchWithAuth(`${API_URL}/api/playlists/${playlistId}/`);
-
+    
     if (!response.ok) {
-      throw new Error('Không thể lấy thông tin playlist');
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-
-    return await response.json();
+    
+    const data = await response.json();
+    console.log("API response for playlist details:", data);
+    
+    // Đảm bảo songs là một mảng
+    if (!data.songs) {
+      data.songs = [];
+    }
+    
+    // Danh sách các URL mặc định hoặc không hợp lệ cần bỏ qua
+    const defaultOrInvalidUrls = [
+      "/src/assets/images/cover-images/11.jpg",
+      "http://example.com/playlist.jpg",
+      "https://example.com/playlist.jpg",
+      "http://example.com/cover.jpg",
+      "https://example.com/cover.jpg"
+    ];
+    
+    // Kiểm tra cover_image của playlist
+    if (defaultOrInvalidUrls.includes(data.cover_image)) {
+      data.cover_image = null;
+    }
+    
+    // Đảm bảo mỗi bài hát có cover_image hợp lệ
+    if (data.songs && Array.isArray(data.songs)) {
+      data.songs = data.songs.map(song => {
+        if (!song.cover_image || defaultOrInvalidUrls.includes(song.cover_image)) {
+          song.cover_image = "/src/assets/images/cover-images/3.jpg";
+        }
+        return song;
+      });
+    }
+    
+    return data;
   } catch (error) {
-    console.error('Lỗi khi lấy thông tin playlist:', error);
+    console.error('Error fetching playlist details:', error);
     throw error;
   }
 };

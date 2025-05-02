@@ -5,6 +5,7 @@ import SongList from '../components/content/SongList';
 import { FaArrowLeft, FaPlay, FaPause, FaTrash } from 'react-icons/fa';
 import usePlayerStore from '../store/playerStore';
 import usePlaylistStore from '../store/playlistStore';
+import { getPlaylistCoverImage } from '../utils/imageUtils'; // Import hàm tiện ích
 import './PlaylistDetailPage.css';
 
 // Thêm các hàm thông báo
@@ -64,6 +65,22 @@ const PlaylistDetailPage = () => {
       try {
         setLoading(true);
         const data = await getPlaylistDetails(id);
+        console.log("Playlist details fetched:", data);
+        console.log("Playlist songs:", data.songs);
+        
+        // Kiểm tra xem songs có phải là mảng không
+        if (data.songs && Array.isArray(data.songs)) {
+          console.log("Songs is an array with", data.songs.length, "items");
+          
+          // Kiểm tra từng bài hát
+          data.songs.forEach((song, index) => {
+            console.log(`Song ${index}:`, song);
+            console.log(`Song ${index} cover_image:`, song.cover_image);
+          });
+        } else {
+          console.log("Songs is not an array or is empty:", data.songs);
+        }
+        
         setPlaylist(data);
         setError(null);
       } catch (error) {
@@ -179,7 +196,19 @@ const PlaylistDetailPage = () => {
         
         <div className="playlist-info">
           <div className="playlist-image">
-            <img src={playlistImage} alt={name} />
+            {/* Log thông tin trước khi render */}
+            {console.log("Rendering playlist image for:", playlist)}
+            {console.log("Using getPlaylistCoverImage:", getPlaylistCoverImage(playlist))}
+            
+            <img 
+              src={getPlaylistCoverImage(playlist)} 
+              alt={name}
+              onError={(e) => {
+                console.log("Image error, using fallback");
+                e.target.onerror = null;
+                e.target.src = "/src/assets/images/cover-images/11.jpg";
+              }}
+            />
           </div>
           <div className="playlist-details">
             <h1>{name}</h1>

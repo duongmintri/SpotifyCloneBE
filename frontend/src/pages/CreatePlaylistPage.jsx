@@ -6,7 +6,6 @@ import './CreatePlaylistPage.css';
 const CreatePlaylistPage = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [isPublic, setIsPublic] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -29,7 +28,7 @@ const CreatePlaylistPage = () => {
       const playlistData = {
         name,
         description,
-        is_public: isPublic
+        is_public: true // Mặc định là công khai
       };
       
       console.log("Creating playlist with data:", playlistData);
@@ -73,16 +72,6 @@ const CreatePlaylistPage = () => {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Mô tả (tùy chọn)"
           />
-        </div>
-        
-        <div className="form-group checkbox-group">
-          <input
-            type="checkbox"
-            id="is-public"
-            checked={isPublic}
-            onChange={(e) => setIsPublic(e.target.checked)}
-          />
-          <label htmlFor="is-public">Công khai</label>
         </div>
         
         <div className="form-actions">

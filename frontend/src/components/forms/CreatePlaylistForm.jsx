@@ -7,17 +7,17 @@ const CreatePlaylistForm = ({ onSuccess, onCancel }) => {
   const [formData, setFormData] = useState({
     name: '',
     cover_image: '',
-    is_public: true
+    is_public: false // Mặc định là công khai
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   // Xử lý khi thay đổi input
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value
     });
   };
 
@@ -97,17 +97,6 @@ const CreatePlaylistForm = ({ onSuccess, onCancel }) => {
             onChange={handleChange}
             placeholder="Nhập URL ảnh bìa"
           />
-        </div>
-
-        <div className="form-group checkbox-group">
-          <input
-            type="checkbox"
-            id="is_public"
-            name="is_public"
-            checked={formData.is_public}
-            onChange={handleChange}
-          />
-          <label htmlFor="is_public">Công khai</label>
         </div>
 
         <div className="form-actions">

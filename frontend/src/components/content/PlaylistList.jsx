@@ -16,7 +16,35 @@ const PlaylistList = () => {
       try {
         setIsLoading(true);
         const data = await getPlaylists();
-        setPlaylists(data);
+        
+        // Xử lý dữ liệu playlist để lấy cover image từ bài hát
+        const processedPlaylists = data.map(playlist => {
+          // Nếu playlist đã có cover_image, giữ nguyên
+          if (playlist.cover_image && playlist.cover_image !== "/src/assets/images/cover-images/11.jpg") {
+            return playlist;
+          }
+          
+          // Nếu playlist có songs và có ít nhất 1 bài hát
+          if (playlist.songs && playlist.songs.length > 0) {
+            // Tìm bài hát đầu tiên có cover_image
+            const songWithCover = playlist.songs.find(song => 
+              song.cover_image && 
+              song.cover_image !== "/src/assets/images/cover-images/11.jpg"
+            );
+            
+            if (songWithCover) {
+              return {
+                ...playlist,
+                cover_image: songWithCover.cover_image
+              };
+            }
+          }
+          
+          // Nếu không tìm thấy ảnh bìa từ bài hát, giữ nguyên
+          return playlist;
+        });
+        
+        setPlaylists(processedPlaylists);
         setError('');
       } catch (error) {
         console.error('Lỗi khi lấy danh sách playlist:', error);
@@ -72,20 +100,25 @@ const PlaylistList = () => {
         </Link>
       </div>
       <div className="playlist-grid">
-        {playlists.map(playlist => (
-          <Link to={`/playlists/${playlist.id}`} key={playlist.id} className="playlist-card-link">
-            <MusicCard
-              song={{
-                id: `playlist-${playlist.id}`,
-                title: playlist.name,
-                artist: playlist.user?.username || 'Bạn',
-                cover_image: playlist.cover_image || "/src/assets/images/cover-images/11.jpg"
-              }}
-              isPlaying={false}
-              showPlayButton={false}
-            />
-          </Link>
-        ))}
+        {playlists.map(playlist => {
+          // Tạo một collage từ 4 bài hát đầu tiên nếu có
+          let coverImage = playlist.cover_image || "/src/assets/images/cover-images/11.jpg";
+          
+          return (
+            <Link to={`/playlists/${playlist.id}`} key={playlist.id} className="playlist-card-link">
+              <MusicCard
+                song={{
+                  id: `playlist-${playlist.id}`,
+                  title: playlist.name,
+                  artist: playlist.user?.username || 'Bạn',
+                  cover_image: coverImage
+                }}
+                isPlaying={false}
+                showPlayButton={false}
+              />
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
