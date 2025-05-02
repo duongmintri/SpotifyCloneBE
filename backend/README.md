@@ -35,4 +35,5 @@ python manage.py migrate
 python manage.py seed_data
 
 # Khởi động server Django
-python manage.py runserver
+daphne spotify_clone.asgi:application (dùng này để chat hoạt động)
+<!-- python manage.py runserver -->
