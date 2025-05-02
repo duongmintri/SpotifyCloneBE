@@ -35,6 +35,7 @@ const MusicPlayer = () => {
   const progressRef = useRef(null);
   const volumeRef = useRef(null);
   const [audioUrl, setAudioUrl] = useState(null);
+  const [isPremium, setIsPremium] = useState(false);
 
   // Lấy state và actions từ canvasStore
   const { toggleCanvas, isCanvasVisible } = useCanvasStore();
@@ -256,6 +257,22 @@ const MusicPlayer = () => {
     setCurrentSong(song);
     setIsPlaying(true);
   };
+
+  useEffect(() => {
+    const checkPremium = async () => {
+      try {
+        const response = await fetchWithAuth(`${API_URL}/api/accounts/premium-status/`);
+        if (response.ok) {
+          const data = await response.json();
+          setIsPremium(data.is_premium);
+        }
+      } catch (error) {
+        console.error("Lỗi khi kiểm tra trạng thái premium:", error);
+      }
+    };
+    
+    checkPremium();
+  }, []);
 
   return (
     <>
