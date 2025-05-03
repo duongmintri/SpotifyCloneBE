@@ -254,9 +254,15 @@ const MusicPlayer = () => {
     reorderQueue(oldIndex, newIndex);
   };
 
-  const handlePlaySong = (song, index) => {
-    setCurrentSong(song);
-    setIsPlaying(true);
+  const handlePlaySong = (song, index, toggleOnly = false) => {
+    // Nếu toggleOnly = true và đây là bài hát đang phát, chỉ toggle play/pause
+    if (toggleOnly && currentSong && currentSong.id === song.id) {
+      setIsPlaying(!isPlaying);
+    } else {
+      // Nếu không, phát bài hát mới
+      setCurrentSong(song);
+      setIsPlaying(true);
+    }
   };
 
   const handleRemoveTrack = (trackId) => {
