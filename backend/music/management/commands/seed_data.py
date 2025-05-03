@@ -19,12 +19,12 @@ class Command(BaseCommand):
         Song.objects.all().delete()
         Album.objects.all().delete()
         Artist.objects.all().delete()
-        User.objects.exclude(is_superuser=True).delete()
+        User.objects.all().delete()
 
         # Create users
         users = [
-            {'username': 'testuser1', 'email': 'test1@example.com', 'password': 'password123', 'is_premium': False},
-            {'username': 'testuser2', 'email': 'test2@example.com', 'password': 'password123', 'is_premium': True},
+            {'username': 'testuser1', 'email': 'test1@example.com', 'password': 'password123', 'is_premium': False, 'is_superuser': True},
+            {'username': 'testuser2', 'email': 'test2@example.com', 'password': 'password123', 'is_premium': True, 'is_superuser': True},
         ]
         user_objects = []
         for user_data in users:

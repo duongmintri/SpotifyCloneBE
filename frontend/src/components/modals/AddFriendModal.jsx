@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaTimes, FaUserPlus, FaCheck } from 'react-icons/fa';
 import useFriendStore from '../../store/friendStore';
 import './AddFriendModal.css';
+import { showErrorToast } from '../../utils/toast.jsx';
 
 const AddFriendModal = ({ isOpen, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -30,10 +31,9 @@ const AddFriendModal = ({ isOpen, onClose }) => {
   const handleSearch = (e) => {
     e.preventDefault();
     setMessage('');
-
+    
     if (!searchTerm.trim()) {
-      setMessage('Vui lòng nhập từ khóa để tìm kiếm');
-      setMessageType('error');
+      showErrorToast('Vui lòng nhập ít nhất 3 ký tự để tìm kiếm');
       return;
     }
 
@@ -63,6 +63,7 @@ const AddFriendModal = ({ isOpen, onClose }) => {
         <div className="modal-content">
           <form onSubmit={handleSearch} className="add-friend-form">
             <div className="form-group search-input-container">
+
               <input
                 type="text"
                 placeholder="Nhập tên người dùng hoặc tên đầy đủ"

@@ -1,7 +1,7 @@
 from django.http import HttpResponseRedirect
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.conf import settings
 from rest_framework.response import Response
 from rest_framework import status
@@ -84,7 +84,7 @@ def serve_song_file(request, song_id):
 
 @csrf_exempt
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])  # Thay đổi từ AllowAny sang IsAuthenticated
 def serve_song_video(request, song_id):
     """
     Phục vụ file video của bài hát dựa trên ID của bài hát
@@ -96,6 +96,11 @@ def serve_song_video(request, song_id):
         # Kiểm tra xem bài hát có video không
         if not song.video:
             return Response({"detail": "Bài hát này không có video"}, status=status.HTTP_404_NOT_FOUND)
+            
+        # Kiểm tra quyền premium
+        if not request.user.is_premium:
+            return Response({"detail": "Chỉ người dùng premium mới có thể tải video"}, 
+                           status=status.HTTP_403_FORBIDDEN)
 
         if settings.USE_S3:
             # Lấy đường dẫn file video từ database

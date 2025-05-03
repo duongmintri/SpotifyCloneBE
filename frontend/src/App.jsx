@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, Outlet } from "rea
 import "./styles/App.css";
 import "./styles/AuthStyles.css";
 import "./styles/AdminStyles.css";
+import "./styles/Toast.css"; // Import CSS cho toast
 import Navbar from "./components/layout/Navbar";
 import LeftSidebar from "./components/layout/LeftSidebar";
 import RightSidebar from "./components/layout/RightSidebar";
@@ -23,6 +24,8 @@ import PlaylistDetailPage from './pages/PlaylistDetailPage';
 import PlaylistList from './components/content/PlaylistList';
 import SearchPage from './components/pages/SearchPage';
 import useChatStore from './store/chatStore';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Admin imports
 import AdminLayout from "./components/admin/AdminLayout";
@@ -135,82 +138,85 @@ const RedirectToAdminLogin = () => {
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        {/* Trang chính (home), chỉ hiển thị nếu đã đăng nhập */}
-        <Route path="/" element={<RedirectToLogin />} />
+    <>
+      <Router>
+        <Routes>
+          {/* Trang chính (home), chỉ hiển thị nếu đã đăng nhập */}
+          <Route path="/" element={<RedirectToLogin />} />
 
-        {/* Layout chung cho các trang đã đăng nhập */}
-        <Route path="/" element={<AppLayout />}>
-          <Route path="home" element={<HomePage />} />
-          <Route path="albums" element={<AlbumsPage />} />
-          <Route path="albums/create" element={<CreateAlbumPage />} />
-          <Route path="albums/:id" element={<AlbumDetailPage />} />
-          {/* <Route path="albums/:id/edit" element={<EditAlbumPage />} /> */}
-          <Route path="favorites" element={<FavoritesPage />} />
-          <Route path="playlists" element={<PlaylistList />} />
-          <Route path="playlists/create" element={<CreatePlaylistPage />} />
-          <Route path="playlists/:id" element={<PlaylistDetailPage />} />
-          <Route path="search" element={<SearchPage />} />
-        </Route>
+          {/* Layout chung cho các trang đã đăng nhập */}
+          <Route path="/" element={<AppLayout />}>
+            <Route path="home" element={<HomePage />} />
+            <Route path="albums" element={<AlbumsPage />} />
+            <Route path="albums/create" element={<CreateAlbumPage />} />
+            <Route path="albums/:id" element={<AlbumDetailPage />} />
+            {/* <Route path="albums/:id/edit" element={<EditAlbumPage />} /> */}
+            <Route path="favorites" element={<FavoritesPage />} />
+            <Route path="playlists" element={<PlaylistList />} />
+            <Route path="playlists/create" element={<CreatePlaylistPage />} />
+            <Route path="playlists/:id" element={<PlaylistDetailPage />} />
+            <Route path="search" element={<SearchPage />} />
+          </Route>
 
-        {/* Trang đăng nhập */}
-        <Route path="/login" element={<LoginPage />} />
-        {/* Trang đăng ký */}
-        <Route path="/signup" element={<SignupPage />} />
-        {/* Trang test */}
-        <Route path="/test" element={<TestPage />} />
+          {/* Trang đăng nhập */}
+          <Route path="/login" element={<LoginPage />} />
+          {/* Trang đăng ký */}
+          <Route path="/signup" element={<SignupPage />} />
+          {/* Trang test */}
+          <Route path="/test" element={<TestPage />} />
 
-        {/* Admin routes */}
-        <Route path="/admin" element={<RedirectToAdminLogin />} />
-        <Route path="/admin/login" element={<AdminLoginPage />} />
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route path="dashboard" element={<AdminDashboard />} />
+          {/* Admin routes */}
+          <Route path="/admin" element={<RedirectToAdminLogin />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<AdminDashboard />} />
 
-          {/* Song routes */}
-          <Route path="songs" element={<SongList />} />
-          <Route path="songs/create" element={
-            <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
-              <SongForm />
-            </Suspense>
-          } />
-          <Route path="songs/edit/:id" element={
-            <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
-              <SongForm />
-            </Suspense>
-          } />
+            {/* Song routes */}
+            <Route path="songs" element={<SongList />} />
+            <Route path="songs/create" element={
+              <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
+                <SongForm />
+              </Suspense>
+            } />
+            <Route path="songs/edit/:id" element={
+              <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
+                <SongForm />
+              </Suspense>
+            } />
 
-          {/* Artist routes */}
-          <Route path="artists" element={<ArtistList />} />
-          <Route path="artists/create" element={
-            <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
-              <ArtistForm />
-            </Suspense>
-          } />
-          <Route path="artists/edit/:id" element={
-            <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
-              <ArtistForm />
-            </Suspense>
-          } />
+            {/* Artist routes */}
+            <Route path="artists" element={<ArtistList />} />
+            <Route path="artists/create" element={
+              <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
+                <ArtistForm />
+              </Suspense>
+            } />
+            <Route path="artists/edit/:id" element={
+              <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
+                <ArtistForm />
+              </Suspense>
+            } />
 
-          {/* Album routes */}
-          <Route path="albums" element={<AdminAlbumList />} />
-          <Route path="albums/create" element={
-            <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
-              <AlbumForm />
-            </Suspense>
-          } />
-          <Route path="albums/edit/:id" element={
-            <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
-              <AlbumForm />
-            </Suspense>
-          } />
+            {/* Album routes */}
+            <Route path="albums" element={<AdminAlbumList />} />
+            <Route path="albums/create" element={
+              <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
+                <AlbumForm />
+              </Suspense>
+            } />
+            <Route path="albums/edit/:id" element={
+              <Suspense fallback={<div className="admin-loading">Đang tải...</div>}>
+                <AlbumForm />
+              </Suspense>
+            } />
 
-          {/* User routes */}
-          <Route path="users" element={<UserList />} />
-        </Route>
-      </Routes>
-    </Router>
+            {/* User routes */}
+            <Route path="users" element={<UserList />} />
+          </Route>
+        </Routes>
+      </Router>
+      <ToastContainer />
+    </>
   );
 };
 

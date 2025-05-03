@@ -299,3 +299,21 @@
 .current-playlist-content::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.5);
 }
+
+/* Thêm style cho nút xóa */
+.track-remove-btn {
+  color: #b3b3b3;
+  margin-right: 8px;
+}
+
+.track-remove-btn:hover {
+  color: #e84e40;
+}
+
+/* Đảm bảo track-actions có đủ không gian cho 2 nút */
+.track-actions {
+  display: flex;
+  align-items: center;
+  min-width: 60px;
+  justify-content: flex-end;
+}

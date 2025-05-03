@@ -5,6 +5,9 @@ import usePlayerStore from '../../store/playerStore';
 import { fetchWithAuth } from '../../services/api';
 import './Canvas.css';
 
+// Thêm định nghĩa API_URL
+const API_URL = 'http://localhost:8000';
+
 const Canvas = () => {
   const videoRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -100,66 +103,80 @@ const Canvas = () => {
   };
 
   // Xử lý tải xuống video
-  const handleDownloadVideo = () => {
+  const handleDownloadVideo = async () => {
     if (!currentSong || !currentVideoUrl) return;
 
-    // Thêm timestamp để tránh cache
-    const timestamp = new Date().getTime();
-    const url = `http://localhost:8000/api/songs/${currentSong.id}/video/?t=${timestamp}`;
+    // Kiểm tra trạng thái premium trước khi tải
+    try {
+      const premiumResponse = await fetchWithAuth(`${API_URL}/api/accounts/premium-status/`);
+      const premiumData = await premiumResponse.json();
+      
+      if (!premiumData.is_premium) {
+        alert("Chỉ người dùng premium mới có thể tải video. Vui lòng nâng cấp tài khoản của bạn.");
+        return;
+      }
+      
+      // Thêm timestamp để tránh cache
+      const timestamp = new Date().getTime();
+      const url = `http://localhost:8000/api/songs/${currentSong.id}/video/?t=${timestamp}`;
+      
+      // Phần code tải xuống giữ nguyên
+      (async () => {
+        try {
+          const response = await fetchWithAuth(url, {
+            method: 'GET',
+          });
 
-    // Sử dụng fetchWithAuth để tự động xử lý refresh token
-    (async () => {
-      try {
-        const response = await fetchWithAuth(url, {
-          method: 'GET',
-        });
+          console.log("Download video response status:", response.status);
+          console.log("Download video response headers:", [...response.headers.entries()]);
 
-        console.log("Download video response status:", response.status);
-        console.log("Download video response headers:", [...response.headers.entries()]);
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Download video response error text:", errorText);
+            throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
+          }
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Download video response error text:", errorText);
-          throw new Error(`HTTP error! Status: ${response.status}, Message: ${errorText}`);
-        }
+          // Kiểm tra nếu response là JSON (trường hợp S3)
+          const contentType = response.headers.get('content-type');
 
-        // Kiểm tra nếu response là JSON (trường hợp S3)
-        const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            if (data.url) {
+              // Nếu là URL từ S3, mở cửa sổ mới để tải xuống
+              const a = document.createElement('a');
+              a.href = data.url;
+              a.download = `${currentSong.title || 'video'}.mp4`;
+              a.target = '_blank';
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+            } else {
+              throw new Error('Không tìm thấy URL trong response');
+            }
+          } else {
+            // Nếu là blob từ backend, tạo objectURL
+            const blob = await response.blob();
+            const objectURL = URL.createObjectURL(blob);
 
-        if (contentType && contentType.includes('application/json')) {
-          const data = await response.json();
-          if (data.url) {
-            // Nếu là URL từ S3, mở cửa sổ mới để tải xuống
+            // Tạo một thẻ a tạm thời để tải xuống
             const a = document.createElement('a');
-            a.href = data.url;
+            a.href = objectURL;
             a.download = `${currentSong.title || 'video'}.mp4`;
-            a.target = '_blank';
             document.body.appendChild(a);
             a.click();
+
+            // Dọn dẹp
+            URL.revokeObjectURL(objectURL);
             document.body.removeChild(a);
-          } else {
-            throw new Error('Không tìm thấy URL trong response');
           }
-        } else {
-          // Nếu là blob từ backend, tạo objectURL
-          const blob = await response.blob();
-          const objectURL = URL.createObjectURL(blob);
-
-          // Tạo một thẻ a tạm thời để tải xuống
-          const a = document.createElement('a');
-          a.href = objectURL;
-          a.download = `${currentSong.title || 'video'}.mp4`;
-          document.body.appendChild(a);
-          a.click();
-
-          // Dọn dẹp
-          URL.revokeObjectURL(objectURL);
-          document.body.removeChild(a);
+        } catch (error) {
+          console.error("Lỗi khi tải xuống file video:", error);
         }
-      } catch (error) {
-        console.error("Lỗi khi tải xuống file video:", error);
-      }
-    })();
+      })();
+    } catch (error) {
+      console.error("Lỗi khi kiểm tra trạng thái premium:", error);
+      alert("Không thể kiểm tra trạng thái premium. Vui lòng thử lại sau.");
+    }
   };
 
   // Theo dõi trạng thái fullscreen

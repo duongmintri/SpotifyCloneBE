@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { FaHome, FaPlus, FaHeart, FaCompactDisc } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import usePlaylistStore from "../../store/playlistStore";
+import { getPlaylistCoverImage } from "../../utils/imageUtils"; // Import hàm tiện ích
 
 const LeftSidebar = () => {
   const { playlists, loading, error, fetchPlaylists } = usePlaylistStore();
@@ -67,13 +68,6 @@ const LeftSidebar = () => {
 
       <div className="playlists-section">
         <h2>Playlists</h2>
-        {/* <button 
-          onClick={() => fetchPlaylists()} 
-          className="refresh-button"
-          style={{ background: 'none', border: 'none', color: '#b3b3b3', cursor: 'pointer', fontSize: '12px' }}
-        >
-          Làm mới
-        </button> */}
         <div className="playlist-card-container">
           {loading ? (
             <div className="loading-playlists">Đang tải...</div>
@@ -87,7 +81,7 @@ const LeftSidebar = () => {
                 <div className="playlist-card">
                   <div className="playlist-card-img-container">
                     <img
-                      src={playlist.cover_image || "/src/assets/images/cover-images/11.jpg"}
+                      src={getPlaylistCoverImage(playlist)}
                       alt={playlist.name}
                       className="playlist-card-img"
                       onError={(e) => {

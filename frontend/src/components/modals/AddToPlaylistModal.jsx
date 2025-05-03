@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes, FaPlus } from 'react-icons/fa';
 import { getPlaylists, addSongToPlaylist } from '../../services/musicApi';
+import { showSuccessToast, showErrorToast } from '../../utils/toast.jsx';
+import { getPlaylistCoverImage } from '../../utils/imageUtils';
 import './AddToPlaylistModal.css';
 
 const AddToPlaylistModal = ({ isOpen, onClose, songId }) => {
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
   const [addingToPlaylist, setAddingToPlaylist] = useState(null);
 
   // Lấy danh sách playlist khi modal được mở
@@ -21,12 +21,11 @@ const AddToPlaylistModal = ({ isOpen, onClose, songId }) => {
   const fetchPlaylists = async () => {
     try {
       setLoading(true);
-      setError('');
       const data = await getPlaylists();
       setPlaylists(data);
     } catch (error) {
       console.error('Lỗi khi lấy danh sách playlist:', error);
-      setError('Không thể tải danh sách playlist. Vui lòng thử lại sau.');
+      showErrorToast('Không thể tải danh sách playlist. Vui lòng thử lại sau.');
     } finally {
       setLoading(false);
     }
@@ -39,20 +38,10 @@ const AddToPlaylistModal = ({ isOpen, onClose, songId }) => {
     try {
       setAddingToPlaylist(playlistId);
       await addSongToPlaylist(playlistId, songId);
-      setSuccessMessage('Đã thêm bài hát vào playlist thành công!');
-      
-      // Tự động ẩn thông báo thành công sau 3 giây
-      setTimeout(() => {
-        setSuccessMessage('');
-      }, 3000);
+      showSuccessToast('Đã thêm bài hát vào playlist thành công!');
     } catch (error) {
       console.error('Lỗi khi thêm bài hát vào playlist:', error);
-      setError('Không thể thêm bài hát vào playlist. Vui lòng thử lại sau.');
-      
-      // Tự động ẩn thông báo lỗi sau 3 giây
-      setTimeout(() => {
-        setError('');
-      }, 3000);
+      showErrorToast('Không thể thêm bài hát vào playlist. Vui lòng thử lại sau.');
     } finally {
       setAddingToPlaylist(null);
     }
@@ -68,11 +57,6 @@ const AddToPlaylistModal = ({ isOpen, onClose, songId }) => {
           <button className="close-button" onClick={onClose}>
             <FaTimes />
           </button>
-        </div>
-
-        <div className='error-message-container'>
-          {error && <div className="error-message">{error}</div>}
-          {successMessage && <div className="success-message">{successMessage}</div>}
         </div>
 
         <div className="add-to-playlist-modal-content">
@@ -96,7 +80,7 @@ const AddToPlaylistModal = ({ isOpen, onClose, songId }) => {
                   <div className="playlist-info">
                     <div className="playlist-image">
                       <img 
-                        src={playlist.cover_image || "/src/assets/images/cover-images/11.jpg"} 
+                        src={getPlaylistCoverImage(playlist)} 
                         alt={playlist.name} 
                         onError={(e) => {
                           e.target.onerror = null;

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes, FaUser } from 'react-icons/fa';
 import { updateUserProfile, getUser } from '../../services/api';
+import { showSuccessToast, showErrorToast } from '../../utils/toast.jsx';
 import './UserProfileModal.css';
 
 const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
@@ -15,8 +16,6 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
   
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   // Cập nhật formData khi modal mở hoặc user thay đổi
   useEffect(() => {
@@ -45,8 +44,6 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    setSuccess('');
 
     try {
       // Chuyển đổi dữ liệu để phù hợp với API
@@ -71,15 +68,11 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
         dateOfBirth: updatedUser.date_of_birth || '',
       });
       
-      setSuccess('Cập nhật thông tin thành công!');
+      showSuccessToast('Cập nhật thông tin thành công!');
       setIsEditing(false);
-      
-      setTimeout(() => {
-        setSuccess('');
-      }, 3000);
     } catch (error) {
       console.error('Lỗi submit form:', error);
-      setError(error.message || 'Không thể cập nhật thông tin. Vui lòng thử lại sau.');
+      showErrorToast(error.message || 'Không thể cập nhật thông tin. Vui lòng thử lại sau.');
     } finally {
       setLoading(false);
     }
@@ -87,8 +80,6 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
 
   const toggleEdit = () => {
     setIsEditing(!isEditing);
-    setError('');
-    setSuccess('');
   };
 
   // Format ngày sinh để hiển thị
@@ -111,9 +102,6 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
         </div>
         
         <div className="modal-content">
-          {error && <div className="error-message">{error}</div>}
-          {success && <div className="success-message">{success}</div>}
-          
           <div className="user-avatar-container">
             <div className="user-avatar">
               <FaUser size={60} />

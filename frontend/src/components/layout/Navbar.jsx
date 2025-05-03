@@ -6,6 +6,7 @@ import spotifyLogo from "../../assets/images/spotify.png";
 import { clearAuthData, getUser, fetchWithAuth, checkPremiumStatus, updateUserInfo } from "../../services/api";
 import UserProfileModal from "../modals/UserProfileModal";
 import PremiumModal from "../modals/PremiumModal";
+import { showSuccessToast, showErrorToast } from "../../utils/toast.jsx";
 import "./Navbar.css";
 
 // Import API_URL from services/api.js
@@ -123,14 +124,14 @@ const Navbar = () => {
         setShowPremiumModal(false);
 
         // Hiển thị thông báo thành công
-        alert(data.is_premium ? 'Đã nâng cấp lên tài khoản Premium!' : 'Đã hủy gói Premium!');
+        showSuccessToast(data.is_premium ? 'Đã nâng cấp lên tài khoản Premium!' : 'Đã hủy gói Premium!');
       } else {
         console.error('Error response status:', response.status);
-        alert('Không thể thay đổi trạng thái Premium. Vui lòng thử lại sau.');
+        showErrorToast('Không thể thay đổi trạng thái Premium. Vui lòng thử lại sau.');
       }
     } catch (error) {
       console.error('Lỗi khi thay đổi trạng thái premium:', error);
-      alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
+      showErrorToast('Đã xảy ra lỗi. Vui lòng thử lại sau.');
     } finally {
       setIsPremiumLoading(false);
     }

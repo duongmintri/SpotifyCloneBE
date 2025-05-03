@@ -99,19 +99,5 @@ textarea.input-field {
 }
 
 .error-message, .success-message {
-  padding: 12px;
-  margin-bottom: 16px;
-  border-radius: 4px;
-  text-align: center;
-  max-height: 50px;
-}
-
-.error-message {
-  background-color: rgba(232, 44, 44, 0.2);
-  color: #e82c2c;
-}
-
-.success-message {
-  background-color: rgba(29, 185, 84, 0.2);
-  color: #1db954;
+  display: none; /* Ẩn các thông báo vì đã dùng toast */
 }

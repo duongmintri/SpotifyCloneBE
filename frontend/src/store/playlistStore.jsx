@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { fetchWithAuth } from '../services/api';
+import { getPlaylists } from '../services/musicApi';
 
 const API_URL = 'http://localhost:8000';
 
@@ -10,22 +11,41 @@ const usePlaylistStore = create((set, get) => ({
   
   // Fetch playlists from API
   fetchPlaylists: async () => {
+    set({ loading: true, error: null });
     try {
-      set({ loading: true, error: null });
-      const response = await fetchWithAuth(`${API_URL}/api/playlists/`);
+      const data = await getPlaylists();
       
-      if (!response.ok) {
-        throw new Error("Không thể tải danh sách playlist");
-      }
+      // Xử lý dữ liệu playlist để lấy cover image từ bài hát
+      const processedPlaylists = data.map(playlist => {
+        // Nếu playlist đã có cover_image, giữ nguyên
+        if (playlist.cover_image && playlist.cover_image !== "/src/assets/images/cover-images/11.jpg") {
+          return playlist;
+        }
+        
+        // Nếu playlist có songs và có ít nhất 1 bài hát
+        if (playlist.songs && playlist.songs.length > 0) {
+          // Tìm bài hát đầu tiên có cover_image
+          const songWithCover = playlist.songs.find(song => 
+            song.cover_image && 
+            song.cover_image !== "/src/assets/images/cover-images/11.jpg"
+          );
+          
+          if (songWithCover) {
+            return {
+              ...playlist,
+              cover_image: songWithCover.cover_image
+            };
+          }
+        }
+        
+        // Nếu không tìm thấy ảnh bìa từ bài hát, giữ nguyên
+        return playlist;
+      });
       
-      const data = await response.json();
-      console.log("Fetched playlists:", data);
-      set({ playlists: data, loading: false });
-      return data;
-    } catch (err) {
-      console.error("Error fetching playlists:", err);
-      set({ error: "Không thể tải danh sách playlist", loading: false });
-      return [];
+      set({ playlists: processedPlaylists, loading: false });
+    } catch (error) {
+      console.error('Error fetching playlists:', error);
+      set({ error: 'Failed to load playlists', loading: false });
     }
   },
   

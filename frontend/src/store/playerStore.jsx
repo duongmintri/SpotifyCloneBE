@@ -178,19 +178,57 @@ const usePlayerStore = create((set, get) => ({
 
   // Xóa bài hát khỏi danh sách phát
   removeFromQueue: (songId) => {
-    const { queue, currentIndex } = get();
-    const newQueue = queue.filter(song => song.id !== songId);
-
-    // Điều chỉnh currentIndex nếu cần
+    const { queue, currentIndex, currentSong } = get();
+    
+    // Tìm vị trí của bài hát cần xóa
+    const indexToRemove = queue.findIndex(song => song.id === songId);
+    
+    // Nếu không tìm thấy, không làm gì cả
+    if (indexToRemove === -1) return;
+    
+    // Tạo queue mới không có bài hát cần xóa
+    const newQueue = queue.filter((_, index) => index !== indexToRemove);
+    
+    // Xác định currentIndex mới
     let newIndex = currentIndex;
-    if (currentIndex >= newQueue.length) {
-      newIndex = Math.max(0, newQueue.length - 1);
+    
+    // Nếu xóa bài hát trước currentIndex, giảm currentIndex
+    if (indexToRemove < currentIndex) {
+      newIndex--;
     }
-
-    set({
-      queue: newQueue,
-      currentIndex: newIndex
-    });
+    
+    // Nếu xóa bài hát đang phát
+    if (currentSong && currentSong.id === songId) {
+      // Nếu còn bài hát trong queue
+      if (newQueue.length > 0) {
+        // Nếu xóa bài cuối cùng, chuyển về bài đầu tiên
+        if (newIndex >= newQueue.length) {
+          newIndex = 0;
+        }
+        
+        // Cập nhật bài hát hiện tại
+        const nextSong = newQueue[newIndex];
+        set({ 
+          queue: newQueue,
+          currentIndex: newIndex,
+          currentSong: nextSong
+        });
+      } else {
+        // Nếu không còn bài hát nào, reset player
+        set({ 
+          queue: [],
+          currentIndex: 0,
+          currentSong: null,
+          isPlaying: false
+        });
+      }
+    } else {
+      // Nếu không phải bài hát đang phát, chỉ cập nhật queue và currentIndex
+      set({ 
+        queue: newQueue,
+        currentIndex: newIndex
+      });
+    }
   },
 
   // Sắp xếp lại danh sách phát

@@ -27,8 +27,17 @@ const SongList = ({ songs, onSongRemoved }) => {
     }
 
     // Nếu là bài hát mới, đặt làm bài hát hiện tại và phát
-    setQueue(songs, songs.findIndex(s => s.id === song.id));
-    setCurrentSong(song);
+    // Đảm bảo mỗi bài hát trong queue có artist là string, không phải object
+    const processedSongs = songs.map(s => ({
+      ...s,
+      artist: typeof s.artist === 'object' ? s.artist.name : s.artist
+    }));
+    
+    setQueue(processedSongs, processedSongs.findIndex(s => s.id === song.id));
+    setCurrentSong({
+      ...song,
+      artist: typeof song.artist === 'object' ? song.artist.name : song.artist
+    });
     setIsPlaying(true);
   };
 
