@@ -93,35 +93,90 @@ class FriendRequestView(APIView):
             if request.user.friends.filter(id=to_user.id).exists():
                 return Response({"detail": "Đã là bạn bè"}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Kiểm tra xem đã gửi lời mời chưa
+            # Kiểm tra xem đã gửi lời mời chưa (bất kể trạng thái)
             existing_request = FriendRequest.objects.filter(
                 from_user=request.user,
-                to_user=to_user,
-                status='pending'
+                to_user=to_user
             ).first()
 
             if existing_request:
-                return Response({"detail": "Đã gửi lời mời kết bạn trước đó"}, status=status.HTTP_400_BAD_REQUEST)
+                if existing_request.status == 'pending':
+                    return Response({"detail": "Đã gửi lời mời kết bạn trước đó"}, status=status.HTTP_400_BAD_REQUEST)
+                elif existing_request.status == 'rejected':
+                    # Nếu lời mời đã bị từ chối trước đó, cập nhật lại thành pending
+                    existing_request.status = 'pending'
+                    existing_request.save()
+                    return Response({
+                        "detail": "Đã gửi lời mời kết bạn",
+                        "request": FriendRequestSerializer(existing_request).data
+                    }, status=status.HTTP_201_CREATED)
+                elif existing_request.status == 'accepted':
+                    # Nếu lời mời đã được chấp nhận trước đó (đã từng là bạn bè), cập nhật lại thành pending
+                    existing_request.status = 'pending'
+                    existing_request.save()
+                    return Response({
+                        "detail": "Đã gửi lời mời kết bạn",
+                        "request": FriendRequestSerializer(existing_request).data
+                    }, status=status.HTTP_201_CREATED)
 
-            # Kiểm tra xem có lời mời từ người kia không
+            # Kiểm tra xem có lời mời từ người kia không (bất kể trạng thái)
             reverse_request = FriendRequest.objects.filter(
                 from_user=to_user,
-                to_user=request.user,
-                status='pending'
+                to_user=request.user
             ).first()
 
             if reverse_request:
-                # Tự động chấp nhận lời mời
-                reverse_request.status = 'accepted'
-                reverse_request.save()
+                if reverse_request.status == 'pending':
+                    # Tự động chấp nhận lời mời
+                    reverse_request.status = 'accepted'
+                    reverse_request.save()
 
-                # Thêm vào danh sách bạn bè
-                request.user.friends.add(to_user)
+                    # Thêm vào danh sách bạn bè
+                    request.user.friends.add(to_user)
 
-                return Response({
-                    "detail": "Đã chấp nhận lời mời kết bạn",
-                    "request": FriendRequestSerializer(reverse_request).data
-                })
+                    return Response({
+                        "detail": "Đã chấp nhận lời mời kết bạn",
+                        "request": FriendRequestSerializer(reverse_request).data
+                    })
+                elif reverse_request.status == 'rejected':
+                    # Nếu lời mời đã bị từ chối trước đó, tạo lời mời mới
+                    # Cập nhật trạng thái của lời mời cũ
+                    reverse_request.status = 'pending'
+                    reverse_request.save()
+
+                    # Đổi ngược người gửi và người nhận
+                    friend_request = FriendRequest.objects.create(
+                        from_user=request.user,
+                        to_user=to_user
+                    )
+
+                    return Response({
+                        "detail": "Đã gửi lời mời kết bạn",
+                        "request": FriendRequestSerializer(friend_request).data
+                    }, status=status.HTTP_201_CREATED)
+                elif reverse_request.status == 'accepted':
+                    # Nếu đã từng chấp nhận lời mời trước đó (đã từng là bạn bè)
+                    # Cập nhật lại thành pending
+                    reverse_request.status = 'pending'
+                    reverse_request.save()
+
+                    # Tạo lời mời mới từ người dùng hiện tại
+                    try:
+                        friend_request = FriendRequest.objects.create(
+                            from_user=request.user,
+                            to_user=to_user
+                        )
+
+                        return Response({
+                            "detail": "Đã gửi lời mời kết bạn",
+                            "request": FriendRequestSerializer(friend_request).data
+                        }, status=status.HTTP_201_CREATED)
+                    except Exception as e:
+                        # Nếu không thể tạo lời mời mới do ràng buộc unique_together
+                        return Response({
+                            "detail": "Đã gửi lời mời kết bạn",
+                            "request": FriendRequestSerializer(reverse_request).data
+                        }, status=status.HTTP_201_CREATED)
 
             # Tạo lời mời kết bạn mới
             friend_request = FriendRequest.objects.create(
