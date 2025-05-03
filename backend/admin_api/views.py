@@ -795,6 +795,7 @@ class AdminSongDetailView(APIView):
                 'album': request.data.get('album') if request.data.get('album') else song.album_id,
                 'is_premium': request.data.get('is_premium', 'false').lower() == 'true',
                 'cover_image': request.data.get('cover_image', song.cover_image or '')
+                # Không đưa trường video vào đây để tránh lỗi serializer
             }
 
             # Xử lý file ảnh cover nếu có
@@ -856,7 +857,8 @@ class AdminSongDetailView(APIView):
                     # Nếu không sử dụng S3, sử dụng file gốc
                     data['cover_image'] = cover_file
 
-            # Xử lý file video nếu có
+            # Xử lý file video nếu có - Tách biệt hoàn toàn khỏi serializer
+            video_updated = False
             if video_file:
                 # Tạo thư mục tạm nếu chưa tồn tại
                 temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp')
@@ -899,12 +901,13 @@ class AdminSongDetailView(APIView):
                         )
                         print(f"Video uploaded successfully to S3: {video_s3_key}")
 
-                        # Cập nhật trường video
-                        data['video'] = video_s3_key
-
                         # Xóa file tạm
                         if os.path.exists(video_temp_path):
                             os.remove(video_temp_path)
+
+                        # Đánh dấu video đã được cập nhật
+                        video_updated = True
+                        video_s3_key_to_save = video_s3_key
                     except ClientError as e:
                         print(f"Error uploading video to S3: {e}")
                         # Xóa file tạm
@@ -913,15 +916,40 @@ class AdminSongDetailView(APIView):
                         return Response({"error": f"Error uploading video to S3: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 else:
                     # Nếu không sử dụng S3, sử dụng file gốc
-                    data['video'] = video_file
+                    # Không xử lý ở đây, sẽ cập nhật trực tiếp vào database sau
+                    video_updated = True
+                    video_s3_key_to_save = video_file.name
 
             # Debug
             print("Partial update data:", data)
+            print("Video file present:", bool(video_file))
+            print("Current song video:", song.video)
 
             # Sử dụng partial=True để chỉ cập nhật các trường được cung cấp
             serializer = AdminSongSerializer(song, data=data, partial=True)
             if serializer.is_valid():
-                serializer.save()
+                updated_song = serializer.save()
+
+                # Cập nhật video trực tiếp vào database nếu có video mới
+                if video_updated:
+                    from django.db import connection
+                    with connection.cursor() as cursor:
+                        cursor.execute(
+                            """
+                            UPDATE songs
+                            SET video = %s
+                            WHERE id = %s
+                            """,
+                            [video_s3_key_to_save, song.id]
+                        )
+                    print(f"Video updated directly in database: {video_s3_key_to_save}")
+
+                # Lấy bài hát mới nhất từ database để đảm bảo dữ liệu mới nhất
+                refreshed_song = Song.objects.get(id=song.id)
+                print("Updated song video:", refreshed_song.video)
+
+                # Sử dụng refreshed_song để trả về dữ liệu mới nhất
+                serializer = AdminSongSerializer(refreshed_song)
                 return Response(serializer.data)
 
             print("Serializer errors:", serializer.errors)
