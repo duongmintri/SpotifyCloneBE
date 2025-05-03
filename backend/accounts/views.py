@@ -408,13 +408,17 @@ class ChangePasswordView(APIView):
         new_password = request.data.get('new_password')
         confirm_password = request.data.get('confirm_password')
 
-        # Kiểm tra dữ liệu đầu vào
+        # Kiểm tra các trường bắt buộc
         if not old_password or not new_password or not confirm_password:
             return Response({"detail": "Vui lòng điền đầy đủ thông tin"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Kiểm tra mật khẩu mới và xác nhận mật khẩu có khớp không
         if new_password != confirm_password:
             return Response({"detail": "Mật khẩu mới và xác nhận mật khẩu không khớp"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Kiểm tra độ dài mật khẩu mới
+        if len(new_password) < 8:
+            return Response({"detail": "Mật khẩu mới phải có ít nhất 8 ký tự"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Kiểm tra mật khẩu cũ có đúng không
         user = request.user

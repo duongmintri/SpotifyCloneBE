@@ -134,3 +134,29 @@
 .auth-footer a:hover {
   text-decoration: underline;
 }
+
+/* Thêm style cho thông báo lỗi trong form đăng ký */
+.error-message {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 5px;
+  margin-bottom: 0;
+  display: block;
+  font-weight: 500;
+}
+
+.birth-date-error {
+  margin-top: 8px;
+  clear: both;
+}
+
+.input-field.error {
+  border-color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.05);
+}
+
+.birth-date-inputs input.error,
+.birth-date-inputs select.error {
+  border-color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.05);
+}
