@@ -9,3 +9,4 @@ redis==5.0.8
 django-filter==24.3
 gunicorn==23.0.0
 djangorestframework-simplejwt
+requests==2.31.0

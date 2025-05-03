@@ -119,32 +119,72 @@ class SongDownloadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
-        song = get_object_or_404(Song, pk=pk)
-        if song.is_premium and not request.user.is_premium:
-            return Response({"detail": "Premium content"}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            song = get_object_or_404(Song, pk=pk)
+            
+            # Kiểm tra quyền premium
+            if song.is_premium and not request.user.is_premium:
+                return Response({"detail": "Premium content"}, status=status.HTTP_403_FORBIDDEN)
 
-        from django.conf import settings
+            from django.conf import settings
 
-        if settings.USE_S3:
-            # Nếu sử dụng S3, trả về URL trực tiếp
-            file_url = song.file_path.url
-            return Response({"url": file_url, "filename": f"{song.title}.mp3"}, status=status.HTTP_200_OK)
-        else:
-            # Nếu không sử dụng S3, sử dụng phương pháp cũ
-            file_path = song.file_path.path
-            if not os.path.exists(file_path):
-                return Response({"detail": "File not found"}, status=status.HTTP_404_NOT_FOUND)
+            if settings.USE_S3:
+                # Nếu sử dụng S3, lấy URL từ S3 và trả về file
+                import requests
+                from django.db import connection
+                
+                # Lấy đường dẫn file từ database
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT file_path FROM songs WHERE id = %s",
+                        [song.id]
+                    )
+                    result = cursor.fetchone()
+                    
+                if result and result[0]:
+                    file_path_db = result[0]
+                    if not file_path_db.startswith('media/songs'):
+                        if not file_path_db.startswith('songs'):
+                            file_path_db = f"media/songs/{file_path_db}"
+                        else:
+                            file_path_db = f"media/{file_path_db}"
+                    
+                    # Tạo URL trực tiếp đến file trên S3
+                    file_url = f"https://{settings.AWS_S3_CUSTOM_DOMAIN}/{file_path_db}"
+                    
+                    # Tải file từ S3
+                    s3_response = requests.get(file_url)
+                    if s3_response.status_code != 200:
+                        return Response({"detail": "Could not retrieve file from storage"}, 
+                                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    
+                    # Trả về file như một response
+                    response = HttpResponse(s3_response.content, content_type='audio/mpeg')
+                    response['Content-Disposition'] = f'attachment; filename="{song.title}.mp3"'
+                    return response
+                else:
+                    return Response({"detail": "File path not found"}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                # Nếu không sử dụng S3, sử dụng phương pháp cũ
+                file_path = song.file_path.path
+                if not os.path.exists(file_path):
+                    return Response({"detail": "File not found"}, status=status.HTTP_404_NOT_FOUND)
 
-            try:
-                return FileResponse(
-                    open(file_path, 'rb'),
-                    content_type='application/octet-stream',
-                    as_attachment=True,
-                    filename=f"{song.title}.mp3"
-                )
-            except Exception as e:
-                print(f"Download error: {e}")
-                return Response({"detail": "Error while downloading file"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                try:
+                    response = FileResponse(
+                        open(file_path, 'rb'),
+                        content_type='audio/mpeg',
+                        as_attachment=True,
+                        filename=f"{song.title}.mp3"
+                    )
+                    return response
+                except Exception as e:
+                    print(f"Download error: {e}")
+                    return Response({"detail": "Error while downloading file"}, 
+                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            print(f"General download error: {e}")
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class PlaylistListView(APIView):
