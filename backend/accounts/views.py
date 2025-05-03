@@ -397,3 +397,32 @@ def toggle_premium(request):
         'username': user.username,
         'email': user.email
     })
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ChangePasswordView(APIView):
+    """API để đổi mật khẩu người dùng"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+        confirm_password = request.data.get('confirm_password')
+
+        # Kiểm tra dữ liệu đầu vào
+        if not old_password or not new_password or not confirm_password:
+            return Response({"detail": "Vui lòng điền đầy đủ thông tin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Kiểm tra mật khẩu mới và xác nhận mật khẩu có khớp không
+        if new_password != confirm_password:
+            return Response({"detail": "Mật khẩu mới và xác nhận mật khẩu không khớp"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Kiểm tra mật khẩu cũ có đúng không
+        user = request.user
+        if not user.check_password(old_password):
+            return Response({"detail": "Mật khẩu hiện tại không đúng"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Đổi mật khẩu
+        user.set_password(new_password)
+        user.save()
+
+        return Response({"detail": "Đổi mật khẩu thành công"}, status=status.HTTP_200_OK)

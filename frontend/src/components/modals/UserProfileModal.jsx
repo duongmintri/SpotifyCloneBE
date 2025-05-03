@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FaTimes, FaUser } from 'react-icons/fa';
+import { FaTimes, FaUser, FaKey } from 'react-icons/fa';
 import { updateUserProfile, getUser } from '../../services/api';
 import { showSuccessToast, showErrorToast } from '../../utils/toast.jsx';
+import ChangePasswordModal from './ChangePasswordModal';
 import './UserProfileModal.css';
 
 const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
@@ -16,6 +17,7 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
   
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
 
   // Cập nhật formData khi modal mở hoặc user thay đổi
   useEffect(() => {
@@ -82,6 +84,14 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
     setIsEditing(!isEditing);
   };
 
+  const openChangePasswordModal = () => {
+    setIsChangePasswordModalOpen(true);
+  };
+
+  const closeChangePasswordModal = () => {
+    setIsChangePasswordModalOpen(false);
+  };
+
   // Format ngày sinh để hiển thị
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -92,118 +102,135 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={(e) => e.target.classList.contains('modal-overlay') && onClose()}>
-      <div className="modal-container user-profile-modal">
-        <div className="modal-header">
-          <h2 className="modal-title">Thông tin người dùng</h2>
-          <button className="modal-close-btn" onClick={onClose}>
-            <FaTimes />
-          </button>
-        </div>
-        
-        <div className="modal-content">
-          <div className="user-avatar-container">
-            <div className="user-avatar">
-              <FaUser size={60} />
-            </div>
+    <>
+      <div className="modal-overlay" onClick={(e) => e.target.classList.contains('modal-overlay') && onClose()}>
+        <div className="modal-container user-profile-modal">
+          <div className="modal-header">
+            <h2 className="modal-title">Thông tin người dùng</h2>
+            <button className="modal-close-btn" onClick={onClose}>
+              <FaTimes />
+            </button>
           </div>
           
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="username">Tên người dùng</label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                value={formData.username}
-                disabled={true}
-                className="input-field disabled"
-              />
+          <div className="modal-content">
+            <div className="user-avatar-container">
+              <div className="user-avatar">
+                <FaUser size={60} />
+              </div>
             </div>
             
-            <div className="form-group">
-              <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className={isEditing ? 'input-field' : 'input-field disabled'}
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="fullName">Họ và tên</label>
-              <input
-                type="text"
-                id="fullName"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className={isEditing ? 'input-field' : 'input-field disabled'}
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="gender">Giới tính</label>
-              <input
-                type="text"
-                id="gender"
-                name="gender"
-                value={formData.gender === 'male' ? 'Nam' : formData.gender === 'female' ? 'Nữ' : ''}
-                disabled={true}
-                className="input-field disabled"
-              />
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="dateOfBirth">Ngày sinh</label>
-              <input
-                type="text"
-                id="dateOfBirth"
-                name="dateOfBirth"
-                value={formatDate(formData.dateOfBirth)}
-                disabled={true}
-                className="input-field disabled"
-              />
-            </div>
-            
-            <div className="profile-actions">
-              {isEditing ? (
-                <>
-                  <button 
-                    type="button" 
-                    className="cancel-btn" 
-                    onClick={toggleEdit}
-                    disabled={loading}
-                  >
-                    Hủy
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="save-btn" 
-                    disabled={loading}
-                  >
-                    {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
-                  </button>
-                </>
-              ) : (
-                <button 
-                  type="button" 
-                  className="edit-btn" 
-                  onClick={toggleEdit}
-                >
-                  Chỉnh sửa thông tin
-                </button>
-              )}
-            </div>
-          </form>
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="username">Tên người dùng</label>
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  value={formData.username}
+                  disabled={true}
+                  className="input-field disabled"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="email">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className={isEditing ? 'input-field' : 'input-field disabled'}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="fullName">Họ và tên</label>
+                <input
+                  type="text"
+                  id="fullName"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  className={isEditing ? 'input-field' : 'input-field disabled'}
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="gender">Giới tính</label>
+                <input
+                  type="text"
+                  id="gender"
+                  name="gender"
+                  value={formData.gender === 'male' ? 'Nam' : formData.gender === 'female' ? 'Nữ' : ''}
+                  disabled={true}
+                  className="input-field disabled"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="dateOfBirth">Ngày sinh</label>
+                <input
+                  type="text"
+                  id="dateOfBirth"
+                  name="dateOfBirth"
+                  value={formatDate(formData.dateOfBirth)}
+                  disabled={true}
+                  className="input-field disabled"
+                />
+              </div>
+              
+              <div className="profile-actions">
+                {isEditing ? (
+                  <>
+                    <button 
+                      type="button" 
+                      className="cancel-btn" 
+                      onClick={toggleEdit}
+                      disabled={loading}
+                    >
+                      Hủy
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="save-btn" 
+                      disabled={loading}
+                    >
+                      {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button 
+                      type="button" 
+                      className="change-password-btn" 
+                      onClick={openChangePasswordModal}
+                    >
+                      <FaKey /> Đổi mật khẩu
+                    </button>
+                    <button 
+                      type="button" 
+                      className="edit-btn" 
+                      onClick={toggleEdit}
+                    >
+                      Chỉnh sửa thông tin
+                    </button>
+                  </>
+                )}
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+      
+      {/* Modal đổi mật khẩu */}
+      <ChangePasswordModal 
+        isOpen={isChangePasswordModalOpen} 
+        onClose={closeChangePasswordModal} 
+      />
+    </>
   );
 };
 

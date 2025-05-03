@@ -395,3 +395,26 @@ export const checkPremiumStatus = async () => {
     return false;
   }
 };
+
+// Đổi mật khẩu
+export const changePassword = async (passwordData) => {
+  try {
+    const response = await fetchWithAuth(`${API_URL}/api/accounts/change-password/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(passwordData),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Đổi mật khẩu thất bại');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Lỗi khi đổi mật khẩu:', error);
+    throw error;
+  }
+};
