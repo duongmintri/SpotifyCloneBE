@@ -129,3 +129,26 @@ textarea.input-field {
 .error-message, .success-message {
   display: none; /* Ẩn các thông báo vì đã dùng toast */
 }
+
+/* Thêm style cho hiển thị lỗi */
+.profile-error-text {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 5px;
+  margin-bottom: 0;
+  display: block;
+  font-weight: 500;
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  text-align: left;
+  line-height: 1.2;
+  height: auto;
+  width: auto;
+  box-shadow: none;
+}
+
+.input-field.error {
+  border-color: #e74c3c !important;
+  background-color: rgba(231, 76, 60, 0.05) !important;
+}

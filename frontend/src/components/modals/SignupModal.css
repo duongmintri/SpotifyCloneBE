@@ -1,0 +1,207 @@
+/* SignupModal.css */
+
+/* Tùy chỉnh form đăng ký */
+.signup-form {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 15px !important;
+  width: 100% !important;
+}
+
+/* Chia cột cho form */
+.signup-form-columns {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 20px !important;
+  width: 100% !important;
+  margin-bottom: 10px !important;
+}
+
+.signup-form-column {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 15px !important;
+  width: 48% !important;
+}
+
+.signup-form .form-group {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  margin-bottom: 16px !important;
+  position: relative !important;
+}
+
+.signup-form .form-group label {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  display: block !important;
+  margin-bottom: 6px !important;
+}
+
+/* Thông báo lỗi cho từng trường */
+.signup-field-error {
+  color: #e74c3c !important;
+  font-size: 12px !important;
+  margin-top: 5px !important;
+  margin-bottom: 0 !important;
+  display: block !important;
+  font-weight: 500 !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  text-align: left !important;
+  line-height: 1.2 !important;
+  height: auto !important;
+  width: auto !important;
+  box-shadow: none !important;
+}
+
+/* Lỗi chung */
+.general-error {
+  text-align: center !important;
+  margin-top: 0 !important;
+  margin-bottom: 10px !important;
+  font-size: 13px !important;
+  padding: 8px !important;
+  background-color: rgba(231, 76, 60, 0.1) !important;
+  border-radius: 4px !important;
+}
+
+/* Trường input có lỗi */
+.signup-error-field {
+  border-color: #e74c3c !important;
+  background-color: rgba(231, 76, 60, 0.05) !important;
+}
+
+/* Lỗi ngày sinh */
+.birth-date-error {
+  margin-top: 8px !important;
+  clear: both;
+}
+
+/* Tùy chỉnh input */
+.signup-form .input-field {
+  padding: 12px !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background-color: #333 !important;
+  color: white !important;
+  font-size: 14px !important;
+  width: 100% !important;
+  transition: border-color 0.2s ease !important;
+}
+
+.signup-form .input-field:focus {
+  outline: none;
+  border-color: #1db954;
+}
+
+/* Tùy chỉnh nút submit */
+.signup-form .submit-btn {
+  background-color: #1db954;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.signup-form .submit-btn:hover {
+  background-color: #17a34a;
+}
+
+.signup-form .submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Tùy chỉnh ngày sinh */
+.birth-date-inputs {
+  display: flex !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+.birth-date-select {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+}
+
+.birth-date-select label {
+  font-size: 12px !important;
+  color: #b3b3b3 !important;
+}
+
+.birth-date-select input,
+.birth-date-select select {
+  padding: 10px !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background-color: #333 !important;
+  color: white !important;
+  font-size: 14px !important;
+  width: 100% !important;
+}
+
+.birth-date-select input:focus,
+.birth-date-select select:focus {
+  outline: none;
+  border-color: #1db954;
+}
+
+/* Tùy chỉnh link đăng nhập */
+.login-link {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.login-link p {
+  font-size: 14px;
+  color: #b3b3b3;
+}
+
+.login-link a {
+  color: #1db954;
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+/* Tùy chỉnh container mật khẩu */
+.password-input-container {
+  position: relative !important;
+  width: 100% !important;
+}
+
+.password-toggle-btn {
+  position: absolute !important;
+  right: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  background: none !important;
+  border: none !important;
+  color: #b3b3b3 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.password-toggle-btn:hover {
+  color: white !important;
+}
+
+/* Tùy chỉnh modal */
+.signup-modal {
+  max-width: 700px !important;
+  width: 90% !important;
+}
