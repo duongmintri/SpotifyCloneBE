@@ -11,7 +11,6 @@ const ArtistForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     bio: "",
-    cover_image: "",
   });
 
   const [loading, setLoading] = useState(isEditMode);
@@ -21,13 +20,12 @@ const ArtistForm = () => {
   useEffect(() => {
     const fetchArtist = async () => {
       if (!isEditMode) return;
-      
+
       try {
         const artistData = await getArtistDetails(id);
         setFormData({
           name: artistData.name,
           bio: artistData.bio || "",
-          cover_image: artistData.cover_image || "",
         });
         setLoading(false);
       } catch (error) {
@@ -36,7 +34,7 @@ const ArtistForm = () => {
         setLoading(false);
       }
     };
-    
+
     fetchArtist();
   }, [id, isEditMode]);
 
@@ -50,16 +48,16 @@ const ArtistForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       setSaving(true);
-      
+
       if (isEditMode) {
         await updateArtist(id, formData);
       } else {
         await createArtist(formData);
       }
-      
+
       navigate("/admin/artists");
     } catch (error) {
       console.error("Lỗi khi lưu nghệ sĩ:", error);
@@ -121,17 +119,7 @@ const ArtistForm = () => {
             />
           </div>
 
-          <div className="admin-form-group admin-form-group-full">
-            <label htmlFor="cover_image">Ảnh bìa (URL)</label>
-            <input
-              type="text"
-              id="cover_image"
-              name="cover_image"
-              value={formData.cover_image}
-              onChange={handleChange}
-              className="admin-input-field"
-            />
-          </div>
+
 
           <div className="admin-form-actions">
             <button

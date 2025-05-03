@@ -1,19 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaUpload, FaImage } from "react-icons/fa";
 import { getAlbumDetails, createAlbum, updateAlbum, getArtists } from "../../../services/adminApi";
 
 const AlbumForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditMode = !!id;
+  const coverImageInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     title: "",
     artist: "",
-    cover_image: "",
+    cover_image: null,
     release_date: "",
     is_public: true,
+  });
+
+  const [coverImageInfo, setCoverImageInfo] = useState({
+    name: "",
+    size: 0,
   });
 
   const [artists, setArtists] = useState([]);
@@ -25,23 +31,30 @@ const AlbumForm = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         // Lấy danh sách nghệ sĩ
         const artistsData = await getArtists();
         setArtists(artistsData);
-        
+
         // Nếu là chế độ chỉnh sửa, lấy thông tin album
         if (isEditMode) {
           const albumData = await getAlbumDetails(id);
           setFormData({
             title: albumData.title,
             artist: albumData.artist.id,
-            cover_image: albumData.cover_image || "",
+            cover_image: null,
             release_date: albumData.release_date ? albumData.release_date.substring(0, 10) : "",
             is_public: albumData.is_public,
           });
+
+          if (albumData.cover_image) {
+            setCoverImageInfo({
+              name: albumData.cover_image.split('/').pop(),
+              size: 0,
+            });
+          }
         }
-        
+
         setLoading(false);
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu:", error);
@@ -49,7 +62,7 @@ const AlbumForm = () => {
         setLoading(false);
       }
     };
-    
+
     fetchData();
   }, [id, isEditMode]);
 
@@ -61,23 +74,65 @@ const AlbumForm = () => {
     });
   };
 
+  const handleCoverImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Kiểm tra xem file có phải là ảnh không
+    if (!file.type.includes('image/')) {
+      setError("Chỉ chấp nhận file ảnh");
+      return;
+    }
+
+    // Cập nhật formData với file ảnh mới
+    setFormData({
+      ...formData,
+      cover_image: file,
+    });
+
+    // Cập nhật thông tin file ảnh
+    setCoverImageInfo({
+      name: file.name,
+      size: (file.size / (1024 * 1024)).toFixed(2), // Kích thước tính bằng MB
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       setSaving(true);
-      
-      const albumData = {
-        ...formData,
-        artist_id: formData.artist,
-      };
-      
-      if (isEditMode) {
-        await updateAlbum(id, albumData);
-      } else {
-        await createAlbum(albumData);
+
+      // Sử dụng FormData để gửi file
+      const formDataToSend = new FormData();
+
+      // Thêm các trường dữ liệu
+      formDataToSend.append('title', formData.title);
+
+      // Đảm bảo artist_id được gửi đúng cách
+      if (formData.artist) {
+        formDataToSend.append('artist_id', formData.artist);
+        // Thêm cả trường artist để đảm bảo tương thích
+        formDataToSend.append('artist', formData.artist);
       }
-      
+
+      if (formData.release_date) {
+        formDataToSend.append('release_date', formData.release_date);
+      }
+
+      formDataToSend.append('is_public', 'true'); // Đảm bảo album luôn công khai
+
+      // Thêm file ảnh bìa nếu có
+      if (formData.cover_image) {
+        formDataToSend.append('cover_image', formData.cover_image);
+      }
+
+      if (isEditMode) {
+        await updateAlbum(id, formDataToSend);
+      } else {
+        await createAlbum(formDataToSend);
+      }
+
       navigate("/admin/albums");
     } catch (error) {
       console.error("Lỗi khi lưu album:", error);
@@ -159,29 +214,42 @@ const AlbumForm = () => {
           </div>
 
           <div className="admin-form-group">
-            <label htmlFor="cover_image">Ảnh bìa (URL)</label>
-            <input
-              type="text"
-              id="cover_image"
-              name="cover_image"
-              value={formData.cover_image}
-              onChange={handleChange}
-              className="admin-input-field"
-            />
-          </div>
-
-          <div className="admin-form-group">
-            <div className="admin-checkbox-group">
+            <label>Ảnh bìa</label>
+            <div className="admin-file-upload">
               <input
-                type="checkbox"
-                id="is_public"
-                name="is_public"
-                checked={formData.is_public}
-                onChange={handleChange}
+                type="file"
+                ref={coverImageInputRef}
+                onChange={handleCoverImageChange}
+                accept="image/*"
+                style={{ display: 'none' }}
               />
-              <label htmlFor="is_public">Album công khai</label>
+              <button
+                type="button"
+                className="admin-file-upload-btn"
+                onClick={() => coverImageInputRef.current.click()}
+              >
+                <FaImage /> Chọn file ảnh
+              </button>
+              {coverImageInfo.name && (
+                <div className="admin-file-info">
+                  <FaImage className="admin-file-icon" />
+                  <div className="admin-file-details">
+                    <div className="admin-file-name">{coverImageInfo.name}</div>
+                    <div className="admin-file-meta">
+                      {coverImageInfo.size > 0 && <span>{coverImageInfo.size} MB</span>}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {isEditMode && !formData.cover_image && coverImageInfo.name && (
+                <div className="admin-file-note">
+                  * Chỉ cần chọn file mới nếu muốn thay thế ảnh hiện tại
+                </div>
+              )}
             </div>
           </div>
+
+
 
           <div className="admin-form-actions">
             <button

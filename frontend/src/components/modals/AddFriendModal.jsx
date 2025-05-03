@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaSearch, FaTimes, FaUserPlus, FaCheck } from 'react-icons/fa';
+import { FaTimes, FaUserPlus, FaCheck } from 'react-icons/fa';
 import useFriendStore from '../../store/friendStore';
 import './AddFriendModal.css';
 import { showErrorToast } from '../../utils/toast.jsx';
@@ -31,8 +31,8 @@ const AddFriendModal = ({ isOpen, onClose }) => {
   const handleSearch = (e) => {
     e.preventDefault();
     setMessage('');
-
-    if (searchTerm.trim().length < 3) {
+    
+    if (!searchTerm.trim()) {
       showErrorToast('Vui lòng nhập ít nhất 3 ký tự để tìm kiếm');
       return;
     }
@@ -63,7 +63,7 @@ const AddFriendModal = ({ isOpen, onClose }) => {
         <div className="modal-content">
           <form onSubmit={handleSearch} className="add-friend-form">
             <div className="form-group search-input-container">
-              
+
               <input
                 type="text"
                 placeholder="Nhập tên người dùng hoặc tên đầy đủ"
@@ -76,7 +76,7 @@ const AddFriendModal = ({ isOpen, onClose }) => {
             <button
               type="submit"
               className="search-button"
-              disabled={isSearching || searchTerm.trim().length < 3}
+              disabled={isSearching || !searchTerm.trim()}
             >
               {isSearching ? 'Đang tìm kiếm...' : 'Tìm kiếm'}
             </button>
@@ -128,7 +128,7 @@ const AddFriendModal = ({ isOpen, onClose }) => {
                   </div>
                 </div>
               ))
-            ) : searchTerm.length >= 3 && !isSearching && !searchError ? (
+            ) : searchTerm.trim() && !isSearching && !searchError ? (
               <div className="no-results">Không tìm thấy người dùng nào</div>
             ) : null}
           </div>

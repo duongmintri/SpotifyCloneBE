@@ -43,14 +43,14 @@ class UserProfileView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
-        
+
     def put(self, request):
         serializer = UserSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
     def patch(self, request):
         serializer = UserSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
@@ -65,8 +65,8 @@ class UserSearchView(APIView):
 
     def get(self, request):
         query = request.query_params.get('q', '')
-        if not query or len(query) < 3:
-            return Response({"detail": "Vui lòng nhập ít nhất 3 ký tự để tìm kiếm"}, status=status.HTTP_400_BAD_REQUEST)
+        if not query:
+            return Response({"detail": "Vui lòng nhập từ khóa để tìm kiếm"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Tìm kiếm người dùng theo username hoặc full_name
         users = User.objects.filter(
@@ -299,14 +299,14 @@ class ChatUnreadCountView(APIView):
             "total_unread": unread_count,
             "unread_by_sender": unread_dict
         })
-        
+
     def put(self, request):
         serializer = UserSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
     def patch(self, request):
         serializer = UserSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
@@ -336,7 +336,7 @@ def toggle_premium(request):
     user = request.user
     user.is_premium = not user.is_premium
     user.save()
-    
+
     return Response({
         'is_premium': user.is_premium,
         'username': user.username,

@@ -67,10 +67,10 @@ const MusicPlayer = () => {
   // Hàm toggle play/pause với xử lý trực tiếp audio element
   const togglePlay = () => {
     console.log("Toggle play/pause, trạng thái hiện tại:", isPlaying);
-    
+
     // Lấy audio element từ window (đã expose ở AudioPlayer)
     const audioElement = window._audioElement;
-    
+
     if (isPlaying) {
       // Nếu đang phát, dừng lại
       setIsPlaying(false);
@@ -210,28 +210,28 @@ const MusicPlayer = () => {
   useEffect(() => {
     const loadAudio = async () => {
       if (!currentSong) return;
-      
+
       try {
         console.log("Đang tải audio cho bài hát:", currentSong.title);
-        
+
         // Lưu vị trí hiện tại nếu có audio element
         let currentPosition = 0;
         const audioElement = window._audioElement;
         if (audioElement) {
           currentPosition = audioElement.currentTime;
         }
-        
+
         // Lấy URL stream từ API
         const streamUrl = await getSongStreamUrl(currentSong.id);
         if (streamUrl) {
           console.log("Đã nhận URL stream:", streamUrl);
-          
+
           // Kiểm tra xem URL có thay đổi không
           const isSameUrl = audioElement && audioElement.src === streamUrl;
-          
+
           // Cập nhật URL cho AudioPlayer
           setAudioUrl(streamUrl);
-          
+
           // Nếu là cùng URL, giữ nguyên vị trí phát
           if (isSameUrl && audioElement) {
             setTimeout(() => {
@@ -245,7 +245,7 @@ const MusicPlayer = () => {
         console.error("Lỗi khi lấy URL stream:", error);
       }
     };
-    
+
     loadAudio();
   }, [currentSong]);
 
@@ -329,7 +329,7 @@ const MusicPlayer = () => {
           />
           <div className="song-details">
             <div className="song-title">{currentSong?.title || "No song playing"}</div>
-            <div className="song-artist">{currentSong?.artist || "Unknown artist"}</div>
+            <div className="song-artist">{currentSong?.artist?.name || "Unknown artist"}</div>
           </div>
         </div>
 
@@ -476,8 +476,8 @@ const MusicPlayer = () => {
           {/* Nút yêu thích */}
           {currentSong && (
             <div className="control-btn">
-              <FavoriteButton 
-                songId={currentSong.id} 
+              <FavoriteButton
+                songId={currentSong.id}
                 size="md"
                 className="player-favorite-btn"
               />
@@ -645,7 +645,7 @@ const MusicPlayer = () => {
         songId={currentSong?.id}
       />
 
-      <CurrentPlaylistPopup 
+      <CurrentPlaylistPopup
         isOpen={showPlaylistPopup}
         onClose={() => setShowPlaylistPopup(false)}
         playlist={queue}
