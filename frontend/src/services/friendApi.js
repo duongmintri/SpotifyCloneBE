@@ -36,8 +36,22 @@ export const sendFriendRequest = async (userId) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Không thể gửi lời mời kết bạn');
+      try {
+        // Kiểm tra content-type trước khi parse JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Không thể gửi lời mời kết bạn');
+        } else {
+          // Nếu không phải JSON, đọc text
+          const text = await response.text();
+          console.error('Response không phải JSON:', text);
+          throw new Error('Lỗi server: Không thể gửi lời mời kết bạn');
+        }
+      } catch (parseError) {
+        console.error('Lỗi khi parse response:', parseError);
+        throw new Error('Lỗi server: Không thể gửi lời mời kết bạn');
+      }
     }
 
     return await response.json();

@@ -115,6 +115,15 @@
   color: #ff4d4d;
 }
 
+/* CSS cho nút yêu thích trong tab bài hát yêu thích */
+.favorite-btn-active {
+  color: #1db954 !important;
+}
+
+.favorite-btn-active:hover {
+  color: #1ed760 !important;
+}
+
 @media (max-width: 768px) {
   .song-duration-col, .song-duration-cell {
     display: none;

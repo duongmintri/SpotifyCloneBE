@@ -1,6 +1,7 @@
 import React from 'react';
-import { FaPlay, FaPause, FaTrash } from 'react-icons/fa';
+import { FaPlay, FaPause } from 'react-icons/fa';
 import usePlayerStore from '../../store/playerStore';
+import FavoriteButton from '../common/FavoriteButton';
 import './SongList.css';
 
 const SongList = ({ songs, onSongRemoved }) => {
@@ -32,7 +33,7 @@ const SongList = ({ songs, onSongRemoved }) => {
       ...s,
       artist: typeof s.artist === 'object' ? s.artist.name : s.artist
     }));
-    
+
     setQueue(processedSongs, processedSongs.findIndex(s => s.id === song.id));
     setCurrentSong({
       ...song,
@@ -80,8 +81,8 @@ const SongList = ({ songs, onSongRemoved }) => {
             const artistName = song.artist?.name || song.artist || 'Unknown Artist';
 
             return (
-              <tr 
-                key={song.id} 
+              <tr
+                key={song.id}
                 className={`song-row ${isCurrentSong ? 'active' : ''}`}
                 onClick={() => handlePlaySong(song, index)}
               >
@@ -94,8 +95,8 @@ const SongList = ({ songs, onSongRemoved }) => {
                 </td>
                 <td className="song-image-cell">
                   <div className="song-image">
-                    <img 
-                      src={song.cover_image || "/src/assets/images/cover-images/3.jpg"} 
+                    <img
+                      src={song.cover_image || "/src/assets/images/cover-images/3.jpg"}
                       alt={song.title}
                       onError={(e) => {
                         e.target.onerror = null;
@@ -110,14 +111,19 @@ const SongList = ({ songs, onSongRemoved }) => {
                 <td className="song-artist-cell">{artistName}</td>
                 <td className="song-duration-cell">{formattedDuration}</td>
                 <td className="song-actions-cell">
-                  <button 
-                    className="song-action-btn remove-btn"
-                    onClick={(e) => handleRemoveSong(e, song.id)}
-                    title="Xóa khỏi playlist"
-                    disabled={!onSongRemoved}
-                  >
-                    <FaTrash />
-                  </button>
+                  <FavoriteButton
+                    songId={song.id}
+                    size="md"
+                    className="song-action-btn favorite-btn-active"
+                    onToggle={(newStatus) => {
+                      // Khi bỏ yêu thích (newStatus = false), gọi hàm xóa
+                      if (!newStatus) {
+                        // Tạo một event giả để truyền vào handleRemoveSong
+                        const fakeEvent = { stopPropagation: () => {} };
+                        handleRemoveSong(fakeEvent, song.id);
+                      }
+                    }}
+                  />
                 </td>
               </tr>
             );
