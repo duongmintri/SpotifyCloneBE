@@ -16,6 +16,8 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
   
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [originalData, setOriginalData] = useState({}); // Lưu trữ dữ liệu ban đầu
+  const [errors, setErrors] = useState({}); // Thêm state để lưu lỗi
 
   // Cập nhật formData khi modal mở hoặc user thay đổi
   useEffect(() => {
@@ -23,13 +25,18 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
       // Lấy user mới nhất từ localStorage
       const currentUser = initialUser || getUser() || {};
       
-      setFormData({
+      const newFormData = {
         username: currentUser.username || '',
         email: currentUser.email || '',
         fullName: currentUser.full_name || '',
         gender: currentUser.gender || '',
         dateOfBirth: currentUser.date_of_birth || '',
-      });
+      };
+      
+      setFormData(newFormData);
+      setOriginalData(newFormData); // Lưu trữ dữ liệu ban đầu
+      setIsEditing(false); // Reset trạng thái chỉnh sửa khi mở modal
+      setErrors({}); // Reset lỗi khi mở modal
     }
   }, [isOpen, initialUser]);
 
@@ -39,10 +46,52 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
       ...prev,
       [name]: value
     }));
+    
+    // Xóa lỗi khi người dùng bắt đầu nhập lại
+    if (errors[name]) {
+      setErrors({...errors, [name]: ""});
+    }
+  };
+
+  // Kiểm tra email hợp lệ
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Validate form
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Kiểm tra email
+    if (!formData.email) {
+      newErrors.email = "Vui lòng nhập email";
+    } else if (!isValidEmail(formData.email)) {
+      newErrors.email = "Email không hợp lệ";
+    }
+    
+    // Kiểm tra họ và tên
+    if (!formData.fullName) {
+      newErrors.fullName = "Vui lòng nhập họ và tên";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Chỉ xử lý submit khi đang ở chế độ chỉnh sửa
+    if (!isEditing) {
+      return;
+    }
+    
+    // Validate form trước khi submit
+    if (!validateForm()) {
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -60,25 +109,53 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
       console.log('Nhận dữ liệu cập nhật:', updatedUser);
       
       // Cập nhật state với dữ liệu mới
-      setFormData({
+      const newFormData = {
         username: updatedUser.username || '',
         email: updatedUser.email || '',
         fullName: updatedUser.full_name || '',
         gender: updatedUser.gender || '',
         dateOfBirth: updatedUser.date_of_birth || '',
-      });
+      };
+      
+      setFormData(newFormData);
+      setOriginalData(newFormData); // Cập nhật dữ liệu gốc
       
       showSuccessToast('Cập nhật thông tin thành công!');
       setIsEditing(false);
     } catch (error) {
       console.error('Lỗi submit form:', error);
-      showErrorToast(error.message || 'Không thể cập nhật thông tin. Vui lòng thử lại sau.');
+      
+      // Xử lý lỗi từ API
+      if (error.response && error.response.data) {
+        const apiErrors = {};
+        const errorData = error.response.data;
+        
+        if (errorData.email) {
+          apiErrors.email = errorData.email[0];
+        }
+        if (errorData.full_name) {
+          apiErrors.fullName = errorData.full_name[0];
+        }
+        
+        if (Object.keys(apiErrors).length > 0) {
+          setErrors(apiErrors);
+        } else {
+          showErrorToast(error.message || 'Không thể cập nhật thông tin. Vui lòng thử lại sau.');
+        }
+      } else {
+        showErrorToast(error.message || 'Không thể cập nhật thông tin. Vui lòng thử lại sau.');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const toggleEdit = () => {
+    if (isEditing) {
+      // Nếu đang ở chế độ chỉnh sửa, hủy bỏ và khôi phục dữ liệu ban đầu
+      setFormData(originalData);
+      setErrors({}); // Reset lỗi khi hủy chỉnh sửa
+    }
     setIsEditing(!isEditing);
   };
 
@@ -102,12 +179,6 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
         </div>
         
         <div className="modal-content">
-          <div className="user-avatar-container">
-            <div className="user-avatar">
-              <FaUser size={60} />
-            </div>
-          </div>
-          
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="username">Tên người dùng</label>
@@ -130,8 +201,9 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
                 value={formData.email}
                 onChange={handleChange}
                 disabled={!isEditing}
-                className={isEditing ? 'input-field' : 'input-field disabled'}
+                className={`${isEditing ? 'input-field' : 'input-field disabled'} ${errors.email ? 'error' : ''}`}
               />
+              {errors.email && <p className="profile-error-text">{errors.email}</p>}
             </div>
             
             <div className="form-group">
@@ -143,8 +215,9 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
                 value={formData.fullName}
                 onChange={handleChange}
                 disabled={!isEditing}
-                className={isEditing ? 'input-field' : 'input-field disabled'}
+                className={`${isEditing ? 'input-field' : 'input-field disabled'} ${errors.fullName ? 'error' : ''}`}
               />
+              {errors.fullName && <p className="profile-error-text">{errors.fullName}</p>}
             </div>
             
             <div className="form-group">

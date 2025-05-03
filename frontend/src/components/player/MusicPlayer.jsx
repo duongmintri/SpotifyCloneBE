@@ -254,9 +254,15 @@ const MusicPlayer = () => {
     reorderQueue(oldIndex, newIndex);
   };
 
-  const handlePlaySong = (song, index) => {
-    setCurrentSong(song);
-    setIsPlaying(true);
+  const handlePlaySong = (song, index, toggleOnly = false) => {
+    // Nếu toggleOnly = true và đây là bài hát đang phát, chỉ toggle play/pause
+    if (toggleOnly && currentSong && currentSong.id === song.id) {
+      setIsPlaying(!isPlaying);
+    } else {
+      // Nếu không, phát bài hát mới
+      setCurrentSong(song);
+      setIsPlaying(true);
+    }
   };
 
   const handleRemoveTrack = (trackId) => {
@@ -511,12 +517,11 @@ const MusicPlayer = () => {
             onClick={async () => {
               if (!currentSong) return;
               
-              // Kiểm tra trạng thái premium mỗi khi nhấn nút
               try {
+                // Kiểm tra trạng thái premium
                 const premiumResponse = await fetchWithAuth(`http://localhost:8000/api/accounts/premium-status/`);
                 const premiumData = await premiumResponse.json();
                 
-                // Cập nhật state
                 setIsPremium(premiumData.is_premium);
                 
                 if (!premiumData.is_premium) {
@@ -524,43 +529,52 @@ const MusicPlayer = () => {
                   return;
                 }
                 
-                // Thêm timestamp để tránh cache
+                // Lấy token xác thực
+                const token = localStorage.getItem('access_token');
+                if (!token) {
+                  alert("Bạn cần đăng nhập lại để tải xuống bài hát.");
+                  return;
+                }
+                
+                // Tạo URL tải xuống với token
                 const timestamp = new Date().getTime();
                 const url = `http://localhost:8000/api/songs/${currentSong.id}/download/?t=${timestamp}`;
                 
-                // Sử dụng fetchWithAuth để tự động xử lý xác thực
-                const response = await fetchWithAuth(url);
+                // Sử dụng fetch với token để tải xuống
+                const response = await fetch(url, {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': `Bearer ${token}`
+                  }
+                });
                 
                 if (!response.ok) {
-                  console.error("Lỗi khi tải xuống:", response.status);
-                  return;
+                  throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 // Lấy blob từ response
                 const blob = await response.blob();
                 
                 // Tạo URL cho blob
-                const blobUrl = URL.createObjectURL(blob);
+                const downloadUrl = window.URL.createObjectURL(blob);
                 
                 // Tạo thẻ a để tải xuống
                 const a = document.createElement('a');
-                a.href = blobUrl;
+                a.href = downloadUrl;
                 a.download = `${currentSong.title || 'song'}.mp3`;
-                a.style.display = 'none';
-                
-                // Thêm vào DOM, click và xóa
                 document.body.appendChild(a);
                 a.click();
                 
                 // Dọn dẹp
                 setTimeout(() => {
+                  window.URL.revokeObjectURL(downloadUrl);
                   document.body.removeChild(a);
-                  URL.revokeObjectURL(blobUrl);
                 }, 100);
                 
                 console.log("Đang tải xuống bài hát:", currentSong.title);
               } catch (error) {
                 console.error("Lỗi khi tải xuống bài hát:", error);
+                alert("Có lỗi xảy ra khi tải xuống. Vui lòng thử lại sau.");
               }
             }}
           >

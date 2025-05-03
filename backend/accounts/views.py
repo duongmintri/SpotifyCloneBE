@@ -7,7 +7,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.db.models import Q, Count
-from .models import User, FriendRequest, FriendActivity, ChatMessage
+from .models import User, FriendRequest, FriendActivity, ChatMessage, PasswordResetOTP
 from .serializers import (
     UserSerializer, RegisterSerializer, CustomTokenObtainPairSerializer,
     UserSearchSerializer, FriendRequestSerializer, FriendActivitySerializer,
@@ -15,6 +15,8 @@ from .serializers import (
 )
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from django.core.mail import send_mail
+from django.conf import settings
 
 @method_decorator(csrf_exempt, name='dispatch')
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -397,3 +399,151 @@ def toggle_premium(request):
         'username': user.username,
         'email': user.email
     })
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ChangePasswordView(APIView):
+    """API để đổi mật khẩu người dùng"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+        confirm_password = request.data.get('confirm_password')
+
+        # Kiểm tra các trường bắt buộc
+        if not old_password or not new_password or not confirm_password:
+            return Response({"detail": "Vui lòng điền đầy đủ thông tin"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Kiểm tra mật khẩu mới và xác nhận mật khẩu có khớp không
+        if new_password != confirm_password:
+            return Response({"detail": "Mật khẩu mới và xác nhận mật khẩu không khớp"}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Kiểm tra độ dài mật khẩu mới
+        if len(new_password) < 8:
+            return Response({"detail": "Mật khẩu mới phải có ít nhất 8 ký tự"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Kiểm tra mật khẩu cũ có đúng không
+        user = request.user
+        if not user.check_password(old_password):
+            return Response({"detail": "Mật khẩu hiện tại không đúng"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Đổi mật khẩu
+        user.set_password(new_password)
+        user.save()
+
+        return Response({"detail": "Đổi mật khẩu thành công"}, status=status.HTTP_200_OK)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({"detail": "Email là bắt buộc"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(email=email)
+            
+            # Tạo OTP mới
+            otp_obj = PasswordResetOTP.generate_otp(user)
+
+            # In OTP ra console để dễ kiểm tra trong đồ án
+            print("\n" + "="*50)
+            print(f"OTP CHO {email}: {otp_obj.otp}")
+            print("="*50 + "\n")
+            
+            # Gửi email với OTP
+            subject = 'Mã OTP đặt lại mật khẩu Spotify Clone'
+            message = f'Mã OTP của bạn là: {otp_obj.otp}. Mã này có hiệu lực trong 10 phút.'
+            from_email = settings.DEFAULT_FROM_EMAIL
+            recipient_list = [email]
+            
+            try:
+                from django.core.mail import send_mail
+                send_mail(subject, message, from_email, recipient_list)
+                print(f"Email đã được gửi thành công đến {email}")
+                return Response({"detail": "Mã OTP đã được gửi đến email của bạn"}, status=status.HTTP_200_OK)
+            except Exception as e:
+                print(f"Lỗi khi gửi email: {str(e)}")
+                # Vẫn trả về thành công vì chúng ta đã in OTP ra console
+                return Response({"detail": "Mã OTP đã được gửi đến email của bạn"}, status=status.HTTP_200_OK)
+                
+        except User.DoesNotExist:
+            # Trả về thông báo thành công để tránh liệt kê email (security best practice)
+            return Response({"detail": "Mã OTP đã được gửi đến email của bạn"}, status=status.HTTP_200_OK)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PasswordResetVerifyOTPView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        email = request.data.get('email')
+        otp = request.data.get('otp')
+        
+        if not email or not otp:
+            return Response({"detail": "Email và OTP là bắt buộc"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = User.objects.get(email=email)
+            otp_obj = PasswordResetOTP.objects.filter(user=user, otp=otp, is_used=False).latest('created_at')
+            
+            if not otp_obj.is_valid():
+                return Response({"detail": "OTP không hợp lệ hoặc đã hết hạn"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Đánh dấu OTP đã được sử dụng
+            otp_obj.is_used = True
+            otp_obj.save()
+            
+            # Tạo token để xác thực bước tiếp theo
+            from django.contrib.auth.tokens import default_token_generator
+            from django.utils.http import urlsafe_base64_encode
+            from django.utils.encoding import force_bytes
+            
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            
+            return Response({
+                "detail": "Xác thực OTP thành công",
+                "uid": uid,
+                "token": token
+            }, status=status.HTTP_200_OK)
+            
+        except (User.DoesNotExist, PasswordResetOTP.DoesNotExist):
+            return Response({"detail": "OTP không hợp lệ hoặc đã hết hạn"}, status=status.HTTP_400_BAD_REQUEST)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        uid = request.data.get('uid')
+        token = request.data.get('token')
+        new_password = request.data.get('new_password')
+        
+        if not uid or not token or not new_password:
+            return Response({"detail": "Thiếu thông tin cần thiết"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if len(new_password) < 8:
+            return Response({"detail": "Mật khẩu mới phải có ít nhất 8 ký tự"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            from django.utils.http import urlsafe_base64_decode
+            from django.contrib.auth.tokens import default_token_generator
+            
+            # Giải mã user id
+            user_id = urlsafe_base64_decode(uid).decode()
+            user = User.objects.get(pk=user_id)
+            
+            # Kiểm tra token
+            if not default_token_generator.check_token(user, token):
+                return Response({"detail": "Token không hợp lệ hoặc đã hết hạn"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Đặt mật khẩu mới
+            user.set_password(new_password)
+            user.save()
+            
+            return Response({"detail": "Đặt lại mật khẩu thành công"}, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({"detail": "Đặt lại mật khẩu thất bại"}, status=status.HTTP_400_BAD_REQUEST)

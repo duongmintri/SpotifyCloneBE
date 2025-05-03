@@ -1,5 +1,6 @@
 .user-profile-modal {
   max-width: 500px;
+  max-height: 95vh;
 }
 
 .user-avatar-container {
@@ -61,43 +62,93 @@ textarea.input-field {
 
 .profile-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
+  justify-content: space-between;
+  margin-top: 20px;
+  gap: 10px;
 }
 
-.edit-btn, .save-btn {
-  background-color: #1db954;
-  color: white;
+.edit-btn, .save-btn, .cancel-btn, .change-password-btn {
+  padding: 10px 15px;
+  border-radius: 20px;
   border: none;
-  border-radius: 30px;
-  padding: 10px 20px;
-  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-.edit-btn:hover, .save-btn:hover {
+.edit-btn {
+  background-color: #1db954;
+  color: white;
+  flex: 1;
+}
+
+.change-password-btn {
+  background-color: #535353;
+  color: white;
+  flex: 1;
+}
+
+.change-password-btn:hover {
+  background-color: #6d6d6d;
+}
+
+.edit-btn:hover {
+  background-color: #1ed760;
+}
+
+.save-btn {
+  background-color: #1db954;
+  color: white;
+  flex: 1;
+}
+
+.save-btn:hover {
   background-color: #1ed760;
 }
 
 .cancel-btn {
-  background-color: transparent;
+  background-color: #535353;
   color: white;
-  border: 1px solid #b3b3b3;
-  border-radius: 30px;
-  padding: 10px 20px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  flex: 1;
 }
 
 .cancel-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #6d6d6d;
+}
+
+.disabled {
+  background-color: #333;
+  color: #b3b3b3;
+  cursor: not-allowed;
 }
 
 .error-message, .success-message {
   display: none; /* Ẩn các thông báo vì đã dùng toast */
+}
+
+/* Thêm style cho hiển thị lỗi */
+.profile-error-text {
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 5px;
+  margin-bottom: 0;
+  display: block;
+  font-weight: 500;
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  text-align: left;
+  line-height: 1.2;
+  height: auto;
+  width: auto;
+  box-shadow: none;
+}
+
+.input-field.error {
+  border-color: #e74c3c !important;
+  background-color: rgba(231, 76, 60, 0.05) !important;
 }

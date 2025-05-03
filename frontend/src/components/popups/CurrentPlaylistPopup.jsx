@@ -69,7 +69,15 @@ const SortableTrack = ({ track, index, isCurrentSong, isPlaying, onPlaySong, onR
       </div>
       <div 
         className="track-info" 
-        onClick={() => onPlaySong(track, index)}
+        onClick={() => {
+          // Nếu là bài hát đang phát, chỉ toggle play/pause
+          // Nếu không, phát bài hát mới
+          if (isCurrentSong) {
+            onPlaySong(track, index, true); // Thêm tham số để chỉ định toggle
+          } else {
+            onPlaySong(track, index);
+          }
+        }}
       >
         <div className="track-title">{track.title}</div>
         <div className="track-artist">

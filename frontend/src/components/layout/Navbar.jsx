@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from 'react-dom';
-import { FaSearch, FaUser, FaUserPlus, FaMoneyBill, FaBell, FaSignOutAlt, FaCog, FaUserEdit, FaCrown } from "react-icons/fa";
+import { FaSearch, FaUser, FaUserPlus, FaMoneyBill, FaBell, FaSignOutAlt, FaCog, FaUserEdit, FaCrown, FaKey } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import spotifyLogo from "../../assets/images/spotify.png";
 import { clearAuthData, getUser, fetchWithAuth, checkPremiumStatus, updateUserInfo } from "../../services/api";
 import UserProfileModal from "../modals/UserProfileModal";
 import PremiumModal from "../modals/PremiumModal";
+import ChangePasswordModal from "../modals/ChangePasswordModal";
 import { showSuccessToast, showErrorToast } from "../../utils/toast.jsx";
 import "./Navbar.css";
 
@@ -19,6 +20,7 @@ const Navbar = () => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [isPremiumLoading, setIsPremiumLoading] = useState(false);
   const [user, setUser] = useState(getUser());
   const [isPremium, setIsPremium] = useState(user?.is_premium || false);
@@ -80,6 +82,11 @@ const Navbar = () => {
 
   const openProfileModal = () => {
     setShowProfileModal(true);
+    setShowProfileMenu(false);
+  };
+
+  const openChangePasswordModal = () => {
+    setShowChangePasswordModal(true);
     setShowProfileMenu(false);
   };
 
@@ -258,6 +265,11 @@ const Navbar = () => {
                     <span>Thông tin người dùng</span>
                   </button>
 
+                  <button className="profile-menu-item" onClick={openChangePasswordModal}>
+                    <FaKey />
+                    <span>Đổi mật khẩu</span>
+                  </button>
+
                   <button className="profile-menu-item" onClick={handlePremiumAction}>
                     {user?.is_premium ? (
                       <>
@@ -302,6 +314,15 @@ const Navbar = () => {
           isPremium={user?.is_premium}
           onTogglePremium={togglePremiumStatus}
           isLoading={isPremiumLoading}
+        />,
+        document.body
+      )}
+
+      {/* Change Password Modal */}
+      {showChangePasswordModal && createPortal(
+        <ChangePasswordModal
+          isOpen={showChangePasswordModal}
+          onClose={() => setShowChangePasswordModal(false)}
         />,
         document.body
       )}
