@@ -136,6 +136,10 @@ const RedirectToAdminLogin = () => {
   return null;
 };
 
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import VerifyOTPPage from "./pages/VerifyOTPPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+
 const App = () => {
   return (
     <>
@@ -164,6 +168,11 @@ const App = () => {
           <Route path="/signup" element={<SignupPage />} />
           {/* Trang test */}
           <Route path="/test" element={<TestPage />} />
+          
+          {/* Thêm routes cho quên mật khẩu */}
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/verify-otp" element={<VerifyOTPPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Admin routes */}
           <Route path="/admin" element={<RedirectToAdminLogin />} />

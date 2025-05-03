@@ -120,12 +120,6 @@ const UserProfileModal = ({ isOpen, onClose, user: initialUser }) => {
         </div>
         
         <div className="modal-content">
-          <div className="user-avatar-container">
-            <div className="user-avatar">
-              <FaUser size={60} />
-            </div>
-          </div>
-          
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="username">Tên người dùng</label>

@@ -4,7 +4,8 @@ from .views import (
     UserSearchView, FriendRequestView, FriendRequestListView,
     FriendRequestResponseView, FriendListView, FriendRemoveView,
     ChatMessageListView, ChatMessageCreateView, ChatUnreadCountView,
-    premium_status, toggle_premium, ChangePasswordView
+    premium_status, toggle_premium, ChangePasswordView,
+    PasswordResetRequestView, PasswordResetVerifyOTPView, PasswordResetConfirmView
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -36,4 +37,9 @@ urlpatterns = [
     path('chat/messages/', ChatMessageListView.as_view(), name='chat-messages'),
     path('chat/messages/create/', ChatMessageCreateView.as_view(), name='chat-create'),
     path('chat/unread/', ChatUnreadCountView.as_view(), name='chat-unread'),
+
+    # Password reset URLs
+    path('password-reset/request/', PasswordResetRequestView.as_view(), name='password_reset_request'),
+    path('password-reset/verify-otp/', PasswordResetVerifyOTPView.as_view(), name='password_reset_verify_otp'),
+    path('password-reset/confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
 ]

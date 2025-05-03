@@ -1,5 +1,6 @@
 .user-profile-modal {
   max-width: 500px;
+  max-height: 95vh;
 }
 
 .user-avatar-container {

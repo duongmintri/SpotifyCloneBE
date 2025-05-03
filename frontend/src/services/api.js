@@ -418,3 +418,72 @@ export const changePassword = async (passwordData) => {
     throw error;
   }
 };
+
+// Yêu cầu đặt lại mật khẩu (gửi OTP)
+export const requestPasswordReset = async (data) => {
+  try {
+    const response = await fetch(`${API_URL}/api/accounts/password-reset/request/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Yêu cầu đặt lại mật khẩu thất bại');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Lỗi khi yêu cầu đặt lại mật khẩu:', error);
+    throw error;
+  }
+};
+
+// Xác thực OTP
+export const verifyOTP = async (data) => {
+  try {
+    const response = await fetch(`${API_URL}/api/accounts/password-reset/verify-otp/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Xác thực OTP thất bại');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Lỗi khi xác thực OTP:', error);
+    throw error;
+  }
+};
+
+// Đặt lại mật khẩu
+export const resetPassword = async (data) => {
+  try {
+    const response = await fetch(`${API_URL}/api/accounts/password-reset/confirm/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Đặt lại mật khẩu thất bại');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Lỗi khi đặt lại mật khẩu:', error);
+    throw error;
+  }
+};

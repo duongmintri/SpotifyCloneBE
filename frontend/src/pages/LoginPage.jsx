@@ -95,7 +95,7 @@ const LoginPage = () => {
           </button>
 
           <div className="forgot-password">
-            <Link to="#">Quên mật khẩu?</Link>
+            <Link to="/forgot-password">Quên mật khẩu?</Link>
           </div>
         </form>
 
