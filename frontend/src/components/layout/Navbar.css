@@ -172,3 +172,38 @@
 .profile-trigger:hover FaCrown {
   transform: rotate(15deg);
 }
+
+/* Mobile menu button */
+.mobile-menu-button {
+  display: none;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-button {
+    display: block;
+  }
+  
+  .left-sidebar {
+    position: fixed;
+    top: var(--navbar-height);
+    left: 0;
+    width: 100%;
+    height: auto;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    z-index: 1000;
+    background-color: #1F1F1F;
+  }
+  
+  .left-sidebar.open {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+}

@@ -28,6 +28,18 @@ const Navbar = () => {
   const [isPremium, setIsPremium] = useState(user?.is_premium || false);
   const [searchTerm, setSearchTerm] = useState('');
   const profileMenuRef = useRef(null);
+  // Thêm state cho mobile menu
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Thêm hàm toggleMobileMenu
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+    // Thêm class vào sidebar để hiển thị/ẩn
+    const sidebar = document.querySelector('.left-sidebar');
+    if (sidebar) {
+      sidebar.classList.toggle('open');
+    }
+  };
 
   // Cập nhật thông tin người dùng khi component mount
   useEffect(() => {
