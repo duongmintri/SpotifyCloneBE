@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaTimes, FaUserPlus, FaCheck } from 'react-icons/fa';
+import { FaTimes, FaUserPlus, FaCheck, FaUser } from 'react-icons/fa';
 import useFriendStore from '../../store/friendStore';
 import './AddFriendModal.css';
 import { showErrorToast } from '../../utils/toast.jsx';
@@ -99,12 +99,12 @@ const AddFriendModal = ({ isOpen, onClose }) => {
               searchResults.map(user => (
                 <div key={user.id} className="user-result">
                   <div className="user-info">
+                  <div className="user-info">
                     <div className="user-avatar">
-                      <img
-                        src={user.profile_image || './src/assets/images/default-avatar.jpg'}
-                        alt={user.username}
-                      />
+                      <FaUser size={40} />
                     </div>
+                    <span className="user-name">{user.username}</span>
+                  </div>
                     <div className="user-details">
                       <div className="user-name">{user.username}</div>
                       {user.full_name && <div className="user-fullname">{user.full_name}</div>}
