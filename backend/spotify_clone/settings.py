@@ -65,11 +65,6 @@ MIDDLEWARE = [
 # Cấu hình CORS
 CORS_ALLOW_ALL_ORIGINS = True  # Tạm thời cho phép tất cả để test
 
-# Hoặc chỉ định cụ thể
-CORS_ALLOWED_ORIGINS = [
-    'http://13.238.97.197:5173',
-    'http://localhost:5173',
-]
 
 # Cho phép credentials
 CORS_ALLOW_CREDENTIALS = True
