@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes, FaPlus } from 'react-icons/fa';
-import { getPlaylists, addSongToPlaylist } from '../../services/musicApi';
+import { getPlaylists, addSongToPlaylist, getPlaylistDetails } from '../../services/musicApi';
 import { showSuccessToast, showErrorToast } from '../../utils/toast.jsx';
 import { getPlaylistCoverImage } from '../../utils/imageUtils';
+import usePlaylistStore from '../../store/playlistStore';
 import './AddToPlaylistModal.css';
 
 const AddToPlaylistModal = ({ isOpen, onClose, songId }) => {
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addingToPlaylist, setAddingToPlaylist] = useState(null);
+  const { updatePlaylist, playlists: storePlaylistsData } = usePlaylistStore();
 
   // Lấy danh sách playlist khi modal được mở
   useEffect(() => {
     if (isOpen && songId) {
       fetchPlaylists();
     }
-  }, [isOpen, songId]);
+  }, [isOpen, songId, storePlaylistsData]);
 
   // Lấy danh sách playlist
   const fetchPlaylists = async () => {
@@ -38,6 +40,20 @@ const AddToPlaylistModal = ({ isOpen, onClose, songId }) => {
     try {
       setAddingToPlaylist(playlistId);
       await addSongToPlaylist(playlistId, songId);
+      
+      // Lấy thông tin playlist đã cập nhật để cập nhật store
+      const updatedPlaylist = await getPlaylistDetails(playlistId);
+      
+      // Cập nhật playlist trong store
+      updatePlaylist(updatedPlaylist);
+      
+      // Cập nhật danh sách playlists trong modal
+      setPlaylists(prevPlaylists => 
+        prevPlaylists.map(playlist => 
+          playlist.id === updatedPlaylist.id ? updatedPlaylist : playlist
+        )
+      );
+      
       showSuccessToast('Đã thêm bài hát vào playlist thành công!');
     } catch (error) {
       console.error('Lỗi khi thêm bài hát vào playlist:', error);

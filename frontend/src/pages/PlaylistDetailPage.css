@@ -199,3 +199,75 @@
     font-size: 24px;
   }
 }
+
+/* Thêm CSS cho chức năng chỉnh sửa tên playlist */
+.edit-playlist-name {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.playlist-name-input {
+  font-size: 1.8rem;
+  font-weight: bold;
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: white;
+  padding: 8px 12px;
+  width: 100%;
+  margin-right: 10px;
+}
+
+.edit-name-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.save-name-button,
+.cancel-edit-button,
+.edit-name-button {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+}
+
+.save-name-button:hover,
+.edit-name-button:hover {
+  color: #1db954;
+  background-color: rgba(29, 185, 84, 0.1);
+}
+
+.cancel-edit-button:hover {
+  color: #ff5555;
+  background-color: rgba(255, 85, 85, 0.1);
+}
+
+.edit-name-button {
+  margin-left: 10px;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+h1 {
+  display: flex;
+  align-items: center;
+}
+
+h1 .edit-name-button {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+h1:hover .edit-name-button {
+  opacity: 0.7;
+}

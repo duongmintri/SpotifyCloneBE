@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getPlaylistDetails, deletePlaylist, removeSongFromPlaylist } from '../services/musicApi';
 import SongList from '../components/content/SongList';
-import { FaArrowLeft, FaPlay, FaPause, FaTrash } from 'react-icons/fa';
+import { FaArrowLeft, FaPlay, FaPause, FaTrash, FaEdit, FaCheck, FaTimes } from 'react-icons/fa';
 import usePlayerStore from '../store/playerStore';
 import usePlaylistStore from '../store/playlistStore';
 import { getPlaylistCoverImage } from '../utils/imageUtils';
@@ -50,9 +50,12 @@ const PlaylistDetailPage = () => {
   const [playlist, setPlaylist] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [newPlaylistName, setNewPlaylistName] = useState('');
+  const nameInputRef = useRef(null);
   
   const { setQueue, setCurrentSong, setIsPlaying, isPlaying, currentSong } = usePlayerStore();
-  const { removePlaylist } = usePlaylistStore();
+  const { removePlaylist, updatePlaylistName } = usePlaylistStore();
 
   // Thêm hàm xử lý xóa bài hát khỏi playlist
   const handleRemoveSong = async (songId) => {
@@ -165,6 +168,41 @@ const PlaylistDetailPage = () => {
     }
   };
 
+  // Xử lý chỉnh sửa tên playlist
+  const handleEditName = () => {
+    setNewPlaylistName(playlist.name);
+    setIsEditingName(true);
+    // Focus vào input sau khi render
+    setTimeout(() => {
+      if (nameInputRef.current) {
+        nameInputRef.current.focus();
+      }
+    }, 0);
+  };
+
+  // Xử lý lưu tên playlist mới
+  const handleSaveName = async () => {
+    if (!newPlaylistName.trim()) {
+      showErrorToast('Tên playlist không được để trống');
+      return;
+    }
+
+    try {
+      await updatePlaylistName(id, newPlaylistName);
+      setPlaylist({...playlist, name: newPlaylistName});
+      setIsEditingName(false);
+      showSuccessToast('Đã cập nhật tên playlist thành công!');
+    } catch (error) {
+      console.error('Lỗi khi cập nhật tên playlist:', error);
+      showErrorToast('Không thể cập nhật tên playlist. Vui lòng thử lại sau.');
+    }
+  };
+
+  // Xử lý hủy chỉnh sửa tên
+  const handleCancelEdit = () => {
+    setIsEditingName(false);
+  };
+
   // Hiển thị loading
   if (loading) {
     return (
@@ -228,7 +266,49 @@ const PlaylistDetailPage = () => {
             />
           </div>
           <div className="playlist-details">
-            <h1>{name}</h1>
+            {isEditingName ? (
+              <div className="edit-playlist-name">
+                <input
+                  ref={nameInputRef}
+                  type="text"
+                  value={newPlaylistName}
+                  onChange={(e) => setNewPlaylistName(e.target.value)}
+                  className="playlist-name-input"
+                  placeholder="Nhập tên playlist"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSaveName();
+                    if (e.key === 'Escape') handleCancelEdit();
+                  }}
+                />
+                <div className="edit-name-actions">
+                  <button 
+                    className="save-name-button"
+                    onClick={handleSaveName}
+                    title="Lưu"
+                  >
+                    <FaCheck />
+                  </button>
+                  <button 
+                    className="cancel-edit-button"
+                    onClick={handleCancelEdit}
+                    title="Hủy"
+                  >
+                    <FaTimes />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <h1>
+                {name}
+                <button 
+                  className="edit-name-button"
+                  onClick={handleEditName}
+                  title="Chỉnh sửa tên"
+                >
+                  <FaEdit />
+                </button>
+              </h1>
+            )}
             <p className="playlist-creator">Tạo bởi: {createdBy}</p>
             <p className="playlist-stats">{songCount} bài hát</p>
             
