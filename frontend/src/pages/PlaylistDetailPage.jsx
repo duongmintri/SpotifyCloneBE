@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getPlaylistDetails, deletePlaylist, removeSongFromPlaylist } from '../services/musicApi';
-import SongList from '../components/content/SongList';
+import SongPlaylist from '../components/content/SongPlaylist';
 import { FaArrowLeft, FaPlay, FaPause, FaTrash, FaEdit, FaCheck, FaTimes } from 'react-icons/fa';
 import usePlayerStore from '../store/playerStore';
 import usePlaylistStore from '../store/playlistStore';
@@ -337,7 +337,7 @@ const PlaylistDetailPage = () => {
 
       <div className="playlist-content">
         {songs.length > 0 ? (
-          <SongList 
+          <SongPlaylist 
             songs={songs} 
             onSongRemoved={handleRemoveSong} 
           />
