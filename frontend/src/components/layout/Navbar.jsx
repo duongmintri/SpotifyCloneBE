@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from 'react-dom';
-import { FaSearch, FaUser, FaUserPlus, FaMoneyBill, FaBell, FaSignOutAlt, FaCog, FaUserEdit, FaCrown, FaKey } from "react-icons/fa";
+import { FaSearch, FaUser, FaUserPlus, FaMoneyBill, FaBell, FaSignOutAlt, FaCog, FaUserEdit, FaCrown, FaKey, FaBars } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import spotifyLogo from "../../assets/images/spotify.png";
 import { clearAuthData, getUser, fetchWithAuth, checkPremiumStatus, updateUserInfo } from "../../services/api";
 import UserProfileModal from "../modals/UserProfileModal";
@@ -179,7 +180,26 @@ const Navbar = () => {
     <>
       <div className="spotify-navbar">
         <div className="logo-container">
-          <img src={spotifyLogo} alt="Spotify Logo" className="spotify-logo" />
+          <Link to="/home">
+            <img src={spotifyLogo} alt="Spotify Logo" className="spotify-logo" />
+          </Link>
+          <button 
+            className="mobile-menu-button" 
+            onClick={toggleMobileMenu}
+            style={{ 
+              display: 'none', 
+              background: 'transparent', 
+              border: 'none',
+              color: 'white',
+              fontSize: '24px',
+              cursor: 'pointer',
+              '@media (max-width: 768px)': {
+                display: 'block'
+              }
+            }}
+          >
+            <FaBars />
+          </button>
         </div>
         <div className="search-container" style={{ flex: 1, marginLeft: "1rem" }}>
           <form onSubmit={handleSearch}>
