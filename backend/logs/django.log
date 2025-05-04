@@ -1,0 +1,9 @@
+WARNING 2025-05-04 07:48:04,201 log 32806 140251985069760 Not Found: /api/songs/9/video/
+WARNING 2025-05-04 07:48:21,527 log 32806 140251985069760 Unauthorized: /api/admin/songs/
+WARNING 2025-05-04 07:48:21,534 log 32806 140251985069760 Unauthorized: /api/admin/songs/
+WARNING 2025-05-04 07:48:21,555 log 32806 140251985069760 Unauthorized: /api/admin/albums/
+WARNING 2025-05-04 07:48:21,565 log 32806 140251985069760 Unauthorized: /api/admin/albums/
+WARNING 2025-05-04 07:48:21,570 log 32806 140251985069760 Unauthorized: /api/admin/artists/
+WARNING 2025-05-04 07:48:21,601 log 32806 140251985069760 Unauthorized: /api/admin/artists/
+WARNING 2025-05-04 07:48:21,603 log 32806 140251985069760 Unauthorized: /api/admin/users/
+WARNING 2025-05-04 07:48:21,609 log 32806 140251985069760 Unauthorized: /api/admin/users/

@@ -1,7 +1,7 @@
 // API service for admin
 import { fetchWithAuth } from './api';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = 'http://13.238.97.197:8000';
 
 // Admin login
 export const adminLogin = async (credentials) => {

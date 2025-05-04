@@ -1,7 +1,7 @@
 // API service for chat
 import { fetchWithAuth } from './api';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = 'http://13.238.97.197:8000';
 
 // Lấy danh sách tin nhắn với một người dùng
 export const getChatMessages = async (userId) => {
@@ -65,7 +65,7 @@ export const getUnreadCount = async () => {
 
 // Tạo kết nối WebSocket
 export const createWebSocketConnection = (token) => {
-  const wsUrl = `ws://localhost:8000/ws/chat/?token=${token}`;
+  const wsUrl = `ws://13.238.97.197:8000/ws/chat/?token=${token}`;
   console.log(`Tạo kết nối WebSocket đến: ${wsUrl}`);
   return new WebSocket(wsUrl);
 };

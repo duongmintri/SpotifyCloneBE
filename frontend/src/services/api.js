@@ -1,6 +1,6 @@
 // API service for authentication
 // Sử dụng URL đầy đủ của backend
-const API_URL = 'http://localhost:8000';
+const API_URL = 'http://13.238.97.197:8000';
 
 // Hàm để lấy CSRF token từ cookie
 function getCsrfToken() {

@@ -1,7 +1,7 @@
 // API service for friend functionality
 import { fetchWithAuth } from './api';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = 'http://13.238.97.197:8000';
 
 // Tìm kiếm người dùng
 export const searchUsers = async (query) => {
