@@ -26,6 +26,7 @@ import ImageLoader from "./ImageLoader";
 import "./MusicPlayer.css";
 import FavoriteButton from "../common/FavoriteButton";
 import CurrentPlaylistPopup from '../popups/CurrentPlaylistPopup';
+import { showSuccessToast, showErrorToast, showWarningToast } from "../../utils/toast";
 
 const MusicPlayer = () => {
   const [showPlaylistPopup, setShowPlaylistPopup] = useState(false);
@@ -525,14 +526,14 @@ const MusicPlayer = () => {
                 setIsPremium(premiumData.is_premium);
                 
                 if (!premiumData.is_premium) {
-                  alert("Chỉ người dùng premium mới có thể tải xuống bài hát. Vui lòng nâng cấp tài khoản của bạn.");
+                  showWarningToast("Chỉ người dùng premium mới có thể tải xuống bài hát. Vui lòng nâng cấp tài khoản của bạn.");
                   return;
                 }
                 
                 // Lấy token xác thực
                 const token = localStorage.getItem('access_token');
                 if (!token) {
-                  alert("Bạn cần đăng nhập lại để tải xuống bài hát.");
+                  showErrorToast("Bạn cần đăng nhập lại để tải xuống bài hát.");
                   return;
                 }
                 
@@ -571,10 +572,10 @@ const MusicPlayer = () => {
                   document.body.removeChild(a);
                 }, 100);
                 
-                console.log("Đang tải xuống bài hát:", currentSong.title);
+                showSuccessToast(`Đang tải xuống "${currentSong.title}"`);
               } catch (error) {
                 console.error("Lỗi khi tải xuống bài hát:", error);
-                alert("Có lỗi xảy ra khi tải xuống. Vui lòng thử lại sau.");
+                showErrorToast("Có lỗi xảy ra khi tải xuống. Vui lòng thử lại sau.");
               }
             }}
           >

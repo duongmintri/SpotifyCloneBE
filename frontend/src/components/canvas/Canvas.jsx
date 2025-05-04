@@ -3,6 +3,7 @@ import { FaTimes, FaExpand, FaCompress, FaPlay, FaPause, FaDownload } from 'reac
 import useCanvasStore from '../../store/canvasStore';
 import usePlayerStore from '../../store/playerStore';
 import { fetchWithAuth } from '../../services/api';
+import { showErrorToast, showInfoToast } from '../../utils/toast';
 import './Canvas.css';
 
 // Thêm định nghĩa API_URL
@@ -112,7 +113,7 @@ const Canvas = () => {
       const premiumData = await premiumResponse.json();
       
       if (!premiumData.is_premium) {
-        alert("Chỉ người dùng premium mới có thể tải video. Vui lòng nâng cấp tài khoản của bạn.");
+        showInfoToast("Chỉ người dùng premium mới có thể tải video. Vui lòng nâng cấp tài khoản của bạn.");
         return;
       }
       
@@ -171,11 +172,12 @@ const Canvas = () => {
           }
         } catch (error) {
           console.error("Lỗi khi tải xuống file video:", error);
+          showErrorToast("Lỗi khi tải xuống video. Vui lòng thử lại sau.");
         }
       })();
     } catch (error) {
       console.error("Lỗi khi kiểm tra trạng thái premium:", error);
-      alert("Không thể kiểm tra trạng thái premium. Vui lòng thử lại sau.");
+      showErrorToast("Không thể kiểm tra trạng thái premium. Vui lòng thử lại sau.");
     }
   };
 
