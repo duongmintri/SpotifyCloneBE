@@ -62,10 +62,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# Cấu hình CORS cho domain frontend
+# Cấu hình CORS
+CORS_ALLOW_ALL_ORIGINS = True  # Tạm thời cho phép tất cả để test
+
+# Hoặc chỉ định cụ thể
 CORS_ALLOWED_ORIGINS = [
-    'http://13.238.97.197',
+    'http://13.238.97.197:5173',
+    'http://localhost:5173',
 ]
+
+# Cho phép credentials
+CORS_ALLOW_CREDENTIALS = True
 
 # Cấu hình CSRF
 CSRF_TRUSTED_ORIGINS = [

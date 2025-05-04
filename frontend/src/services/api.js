@@ -20,7 +20,7 @@ function getCsrfToken() {
 // Đăng ký người dùng mới
 export const registerUser = async (userData) => {
   try {
-    console.log('Gửi request đăng ký đến:', `${API_URL}/accounts/register/`);
+    console.log('Gửi request đăng ký đến:', `${API_URL}/api/accounts/register/`);
     console.log('Dữ liệu đăng ký:', userData);
 
     // Lấy CSRF token từ cookie (nếu có)
@@ -36,8 +36,9 @@ export const registerUser = async (userData) => {
       credentials: 'include',
     });
 
+    // Thêm log để debug
     console.log('Nhận response với status:', response.status);
-
+    
     // Kiểm tra response có phải là JSON không
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
