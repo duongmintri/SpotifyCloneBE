@@ -12,6 +12,7 @@ import "./Navbar.css";
 
 // Import API_URL from services/api.js
 // const API_URL = 'http://localhost:8000';
+const API_URL = 'http://13.238.97.197:8000';
 
 const Navbar = () => {
   const navigate = useNavigate();
