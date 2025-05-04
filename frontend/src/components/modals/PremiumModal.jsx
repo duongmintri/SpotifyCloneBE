@@ -97,7 +97,7 @@ const PremiumModal = ({ isOpen, onClose, isPremium, onTogglePremium, isLoading }
                 >
                   {isLoading ? "Đang xử lý..." : "Nâng cấp ngay"}
                 </button>
-                <button className="cancel-btn" onClick={onClose}>
+                <button className="premium-cancel-btn" onClick={onClose}>
                   Để sau
                 </button>
               </div>

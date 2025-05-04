@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import { getAlbums, deleteAlbum } from "../../../services/adminApi";
 import DeleteConfirmModal from "../../../components/admin/DeleteConfirmModal";
+import { showSuccessToast, showErrorToast } from "../../../utils/toast";
 
 const AlbumList = () => {
   const [albums, setAlbums] = useState([]);
@@ -50,9 +51,11 @@ const AlbumList = () => {
       setAlbums(albums.filter((album) => album.id !== albumToDelete.id));
       setShowDeleteModal(false);
       setAlbumToDelete(null);
+      showSuccessToast("Xóa album thành công!");
     } catch (error) {
       console.error("Lỗi khi xóa album:", error);
       setError("Không thể xóa album. Vui lòng thử lại sau.");
+      showErrorToast("Không thể xóa album. Vui lòng thử lại sau.");
     }
   };
 

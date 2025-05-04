@@ -155,6 +155,24 @@
   color: white;
 }
 
+/* Thêm style mới cho nút "Để sau" */
+.premium-cancel-btn {
+  background-color: transparent;
+  border: 1px solid #b3b3b3;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.premium-cancel-btn:hover {
+  border-color: white;
+  color: white;
+}
+
 .payment-options {
   margin: 20px 0;
 }

@@ -2,6 +2,7 @@ import React from 'react';
 import { FaComment, FaUserMinus } from 'react-icons/fa';
 import useFriendStore from '../../store/friendStore';
 import useChatStore from '../../store/chatStore';
+import { showConfirmToast, showSuccessToast, showErrorToast } from '../../utils/toast';
 import './FriendItem.css';
 
 const FriendItem = ({ friend, onChatClick }) => {
@@ -9,9 +10,18 @@ const FriendItem = ({ friend, onChatClick }) => {
   const { unreadByUser } = useChatStore();
   
   const handleRemoveFriend = async () => {
-    if (window.confirm(`Bạn có chắc muốn xóa ${friend.username} khỏi danh sách bạn bè?`)) {
-      await removeFriend(friend.id);
-    }
+    showConfirmToast(
+      `Bạn có chắc muốn xóa ${friend.username} khỏi danh sách bạn bè?`,
+      async () => {
+        try {
+          await removeFriend(friend.id);
+          showSuccessToast(`Đã xóa ${friend.username} khỏi danh sách bạn bè`);
+        } catch (error) {
+          console.error("Lỗi khi xóa bạn:", error);
+          showErrorToast("Không thể xóa bạn. Vui lòng thử lại sau.");
+        }
+      }
+    );
   };
   
   const handleChatClick = () => {

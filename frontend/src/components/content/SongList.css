@@ -111,8 +111,17 @@
   color: #fff;
 }
 
+.remove-btn {
+  color: #b3b3b3;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.2s;
+}
+
 .remove-btn:hover {
-  color: #ff4d4d;
+  color: #e74c3c;
 }
 
 /* CSS cho nút yêu thích trong tab bài hát yêu thích */

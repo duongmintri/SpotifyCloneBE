@@ -119,6 +119,39 @@ const usePlaylistStore = create((set, get) => ({
       set({ error: "Không thể tạo playlist", loading: false });
       throw err;
     }
+  },
+  
+  // Update a playlist name in the store and on the server
+  updatePlaylistName: async (playlistId, newName) => {
+    try {
+      set({ loading: true, error: null });
+      
+      const response = await fetchWithAuth(`${API_URL}/api/playlists/${playlistId}/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: newName }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error('Không thể cập nhật tên playlist');
+      }
+      
+      const updatedPlaylist = await response.json();
+      
+      // Update in store
+      get().updatePlaylist(updatedPlaylist);
+      
+      set({ loading: false });
+      return updatedPlaylist;
+    } catch (err) {
+      console.error("Error updating playlist name:", err);
+      set({ error: "Không thể cập nhật tên playlist", loading: false });
+      throw err;
+    }
   }
 }));
 

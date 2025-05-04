@@ -8,6 +8,7 @@ import {
   getArtists,
   getAlbums
 } from "../../../services/adminApi";
+import { showSuccessToast, showErrorToast } from "../../../utils/toast";
 
 const SongForm = () => {
   const { id } = useParams();
@@ -207,14 +208,17 @@ const SongForm = () => {
 
       if (isEditMode) {
         await updateSong(id, formData);
+        showSuccessToast("Cập nhật bài hát thành công!");
       } else {
         await createSong(formData);
+        showSuccessToast("Thêm bài hát mới thành công!");
       }
 
       navigate("/admin/songs");
     } catch (error) {
       console.error("Lỗi khi lưu bài hát:", error);
       setError(error.message || "Không thể lưu bài hát. Vui lòng thử lại sau.");
+      showErrorToast(error.message || "Không thể lưu bài hát. Vui lòng thử lại sau.");
       setSaving(false);
     }
   };

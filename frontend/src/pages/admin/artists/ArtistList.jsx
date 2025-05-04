@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import { getArtists, deleteArtist } from "../../../services/adminApi";
 import DeleteConfirmModal from "../../../components/admin/DeleteConfirmModal";
+import { showSuccessToast, showErrorToast } from "../../../utils/toast";
 
 const ArtistList = () => {
   const [artists, setArtists] = useState([]);
@@ -50,9 +51,11 @@ const ArtistList = () => {
       setArtists(artists.filter((artist) => artist.id !== artistToDelete.id));
       setShowDeleteModal(false);
       setArtistToDelete(null);
+      showSuccessToast("Xóa nghệ sĩ thành công!");
     } catch (error) {
       console.error("Lỗi khi xóa nghệ sĩ:", error);
       setError("Không thể xóa nghệ sĩ. Vui lòng thử lại sau.");
+      showErrorToast("Không thể xóa nghệ sĩ. Vui lòng thử lại sau.");
     }
   };
 
