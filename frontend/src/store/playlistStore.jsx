@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { fetchWithAuth } from '../services/api';
 import { getPlaylists } from '../services/musicApi';
 
-const API_URL = 'http://localhost:8000';
+// const API_URL = 'http://localhost:8000';
+const API_URL = 'http://13.238.97.197:8000';
 
 const usePlaylistStore = create((set, get) => ({
   playlists: [],
