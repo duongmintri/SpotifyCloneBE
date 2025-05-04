@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import { getArtistDetails, createArtist, updateArtist } from "../../../services/adminApi";
+import { showSuccessToast, showErrorToast } from "../../../utils/toast";
 
 const ArtistForm = () => {
   const { id } = useParams();
@@ -54,14 +55,17 @@ const ArtistForm = () => {
 
       if (isEditMode) {
         await updateArtist(id, formData);
+        showSuccessToast("Cập nhật nghệ sĩ thành công!");
       } else {
         await createArtist(formData);
+        showSuccessToast("Thêm nghệ sĩ mới thành công!");
       }
 
       navigate("/admin/artists");
     } catch (error) {
       console.error("Lỗi khi lưu nghệ sĩ:", error);
       setError("Không thể lưu nghệ sĩ. Vui lòng thử lại sau.");
+      showErrorToast("Không thể lưu nghệ sĩ. Vui lòng thử lại sau.");
       setSaving(false);
     }
   };

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import { getSongs, deleteSong } from "../../../services/adminApi";
 import DeleteConfirmModal from "../../../components/admin/DeleteConfirmModal";
+import { showSuccessToast, showErrorToast } from "../../../utils/toast";
 
 const SongList = () => {
   const [songs, setSongs] = useState([]);
@@ -50,9 +51,11 @@ const SongList = () => {
       setSongs(songs.filter((song) => song.id !== songToDelete.id));
       setShowDeleteModal(false);
       setSongToDelete(null);
+      showSuccessToast("Xóa bài hát thành công!");
     } catch (error) {
       console.error("Lỗi khi xóa bài hát:", error);
       setError("Không thể xóa bài hát. Vui lòng thử lại sau.");
+      showErrorToast("Không thể xóa bài hát. Vui lòng thử lại sau.");
     }
   };
 

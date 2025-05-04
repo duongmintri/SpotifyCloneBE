@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaArrowLeft, FaUpload, FaImage } from "react-icons/fa";
 import { getAlbumDetails, createAlbum, updateAlbum, getArtists } from "../../../services/adminApi";
+import { showSuccessToast, showErrorToast } from "../../../utils/toast";
 
 const AlbumForm = () => {
   const { id } = useParams();
@@ -129,14 +130,17 @@ const AlbumForm = () => {
 
       if (isEditMode) {
         await updateAlbum(id, formDataToSend);
+        showSuccessToast("Cập nhật album thành công!");
       } else {
         await createAlbum(formDataToSend);
+        showSuccessToast("Thêm album mới thành công!");
       }
 
       navigate("/admin/albums");
     } catch (error) {
       console.error("Lỗi khi lưu album:", error);
       setError("Không thể lưu album. Vui lòng thử lại sau.");
+      showErrorToast("Không thể lưu album. Vui lòng thử lại sau.");
       setSaving(false);
     }
   };
