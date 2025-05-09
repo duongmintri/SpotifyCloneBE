@@ -111,16 +111,16 @@ const Canvas = () => {
     try {
       const premiumResponse = await fetchWithAuth(`${API_URL}/api/accounts/premium-status/`);
       const premiumData = await premiumResponse.json();
-      
+
       if (!premiumData.is_premium) {
         showInfoToast("Chỉ người dùng premium mới có thể tải video. Vui lòng nâng cấp tài khoản của bạn.");
         return;
       }
-      
+
       // Thêm timestamp để tránh cache
       const timestamp = new Date().getTime();
-      const url = `http://localhost:8000/api/songs/${currentSong.id}/video/?t=${timestamp}`;
-      
+      const url = `${API_URL}/api/songs/${currentSong.id}/video/?t=${timestamp}`;
+
       // Phần code tải xuống giữ nguyên
       (async () => {
         try {
