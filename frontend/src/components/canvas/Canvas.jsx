@@ -7,7 +7,7 @@ import { showErrorToast, showInfoToast } from '../../utils/toast';
 import './Canvas.css';
 
 // Thêm định nghĩa API_URL
-const API_URL = 'http://localhost:8000';
+const API_URL = 'http://13.238.97.197:8000';
 
 const Canvas = () => {
   const videoRef = useRef(null);
