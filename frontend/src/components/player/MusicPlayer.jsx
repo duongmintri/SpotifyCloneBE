@@ -521,7 +521,7 @@ const MusicPlayer = () => {
               
               try {
                 // Kiểm tra trạng thái premium
-                const premiumResponse = await fetchWithAuth(`/api/accountspremium-status/`);
+                const premiumResponse = await fetchWithAuth(`/api/accounts/premium-status/`);
                 const premiumData = await premiumResponse.json();
                 
                 setIsPremium(premiumData.is_premium);
