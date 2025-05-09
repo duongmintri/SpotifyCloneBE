@@ -27,6 +27,7 @@ import "./MusicPlayer.css";
 import FavoriteButton from "../common/FavoriteButton";
 import CurrentPlaylistPopup from '../popups/CurrentPlaylistPopup';
 import { showSuccessToast, showErrorToast, showWarningToast } from "../../utils/toast";
+const API_URL = 'http://13.238.97.197:8000';
 
 const MusicPlayer = () => {
   const [showPlaylistPopup, setShowPlaylistPopup] = useState(false);
@@ -274,7 +275,7 @@ const MusicPlayer = () => {
   useEffect(() => {
     const checkPremium = async () => {
       try {
-        const response = await fetchWithAuth(`http://localhost:8000/api/accounts/premium-status/`);
+        const response = await fetchWithAuth(`/api/accounts/premium-status/`);
         if (response.ok) {
           const data = await response.json();
           setIsPremium(data.is_premium);
@@ -520,7 +521,7 @@ const MusicPlayer = () => {
               
               try {
                 // Kiểm tra trạng thái premium
-                const premiumResponse = await fetchWithAuth(`http://localhost:8000/api/accounts/premium-status/`);
+                const premiumResponse = await fetchWithAuth(`/api/accountspremium-status/`);
                 const premiumData = await premiumResponse.json();
                 
                 setIsPremium(premiumData.is_premium);
@@ -539,7 +540,7 @@ const MusicPlayer = () => {
                 
                 // Tạo URL tải xuống với token
                 const timestamp = new Date().getTime();
-                const url = `http://localhost:8000/api/songs/${currentSong.id}/download/?t=${timestamp}`;
+                const url = `/api/songs/${currentSong.id}/download/?t=${timestamp}`;
                 
                 // Sử dụng fetch với token để tải xuống
                 const response = await fetch(url, {
