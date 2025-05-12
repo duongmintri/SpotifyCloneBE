@@ -7,5 +7,6 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true, // Thêm dòng này để mở cho tất cả các địa chỉ IP
+    allowedHosts: ['spotifyclone.sytes.net']
   }
 })
