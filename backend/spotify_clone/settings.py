@@ -71,14 +71,17 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Cấu hình CSRF
 CSRF_TRUSTED_ORIGINS = [
-    'http://13.238.97.197',
-    'http://spotifyclone.sytes.net',
     'https://spotifyclone.sytes.net',
 ]
-CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = False
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_SAMESITE = None
+
+# Cấu hình HTTPS
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True  # Chuyển hướng HTTP sang HTTPS
+SESSION_COOKIE_SECURE = True
 
 ROOT_URLCONF = 'spotify_clone.urls'
 
