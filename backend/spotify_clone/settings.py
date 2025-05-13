@@ -79,9 +79,23 @@ CSRF_USE_SESSIONS = False
 CSRF_COOKIE_SAMESITE = None
 
 # Cấu hình HTTPS
+DEBUG = True  # Tạm thời bật debug để dễ xác định lỗi
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = True  # Chuyển hướng HTTP sang HTTPS
+SECURE_SSL_REDIRECT = False  # Tắt chuyển hướng SSL trong Django vì Nginx đã xử lý
 SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = False
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_SAMESITE = None
+
+# Cập nhật CSRF_TRUSTED_ORIGINS
+CSRF_TRUSTED_ORIGINS = [
+    'https://spotifyclone.sytes.net',
+]
+
+# Cấu hình CORS
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'spotify_clone.urls'
 
