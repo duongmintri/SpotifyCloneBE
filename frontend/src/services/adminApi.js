@@ -1,15 +1,16 @@
 // API service for admin
 import { fetchWithAuth } from './api';
 
-const API_URL = 'http://13.238.97.197:8000';
+// Sử dụng đường dẫn tương đối
+const API_URL = '';
 
 // Admin login
 export const adminLogin = async (credentials) => {
   try {
-    console.log('Gửi request đăng nhập admin đến:', `${API_URL}/api/admin/login/`);
+    console.log('Gửi request đăng nhập admin đến:', `/api/admin/login/`);
     console.log('Dữ liệu đăng nhập:', credentials);
 
-    const response = await fetch(`${API_URL}/api/admin/login/`, {
+    const response = await fetch(`/api/admin/login/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
