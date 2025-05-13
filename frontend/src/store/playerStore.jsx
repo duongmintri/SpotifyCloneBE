@@ -68,8 +68,24 @@ const usePlayerStore = create((set, get) => ({
     const isSameSong = currentSong && currentSong.id === song.id;
     const newTime = (isSameSong && !resetTime) ? currentTime : 0;
 
+    // Xử lý thông tin nghệ sĩ trước khi lưu vào store
+    let processedSong = { ...song };
+
+    // Xử lý artist có thể là đối tượng
+    if (processedSong.artist) {
+      if (typeof processedSong.artist === 'string') {
+        // Giữ nguyên nếu đã là chuỗi
+      } else if (typeof processedSong.artist === 'object' && processedSong.artist !== null) {
+        // Nếu artist là một đối tượng, chuyển đổi thành đối tượng có cấu trúc đầy đủ
+        // để đảm bảo hiển thị đúng ở mọi nơi
+        if (!processedSong.artist.name && processedSong.artist.id) {
+          processedSong.artist.name = `Artist ID: ${processedSong.artist.id}`;
+        }
+      }
+    }
+
     set({
-      currentSong: song,
+      currentSong: processedSong,
       isPlaying: false,
       currentTime: newTime
     });
