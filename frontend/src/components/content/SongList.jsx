@@ -28,17 +28,19 @@ const SongList = ({ songs, onSongRemoved }) => {
     }
 
     // Nếu là bài hát mới, đặt làm bài hát hiện tại và phát
-    // Đảm bảo mỗi bài hát trong queue có artist là string, không phải object
-    const processedSongs = songs.map(s => ({
-      ...s,
-      artist: typeof s.artist === 'object' ? s.artist.name : s.artist
-    }));
+    // Đảm bảo mỗi bài hát trong queue có artist được xử lý đúng cách
+    const processedSongs = songs.map(s => {
+      // Tạo bản sao của bài hát
+      const processedSong = { ...s };
+
+      // Giữ nguyên đối tượng artist để đảm bảo thông tin đầy đủ
+      // Việc xử lý hiển thị sẽ được thực hiện ở component hiển thị
+
+      return processedSong;
+    });
 
     setQueue(processedSongs, processedSongs.findIndex(s => s.id === song.id));
-    setCurrentSong({
-      ...song,
-      artist: typeof song.artist === 'object' ? song.artist.name : song.artist
-    });
+    setCurrentSong({ ...song });
     setIsPlaying(true);
   };
 
@@ -78,7 +80,14 @@ const SongList = ({ songs, onSongRemoved }) => {
           {songs.map((song, index) => {
             const isCurrentSong = currentSong && currentSong.id === song.id;
             const formattedDuration = formatDuration(song.duration);
-            const artistName = song.artist?.name || song.artist || 'Unknown Artist';
+            let artistName = 'Unknown Artist';
+            if (song.artist) {
+              if (typeof song.artist === 'string') {
+                artistName = song.artist;
+              } else if (typeof song.artist === 'object') {
+                artistName = song.artist.name || song.artist.id || 'Unknown Artist';
+              }
+            }
 
             return (
               <tr

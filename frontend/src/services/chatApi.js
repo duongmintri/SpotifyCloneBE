@@ -65,7 +65,12 @@ export const getUnreadCount = async () => {
 
 // Tạo kết nối WebSocket
 export const createWebSocketConnection = (token) => {
-  const wsUrl = `ws://13.238.97.197:8000/ws/chat/?token=${token}`;
+  // Sử dụng window.location.host để lấy hostname hiện tại (bao gồm cả port nếu có)
+  const host = window.location.host;
+  // Xác định protocol (ws hoặc wss)
+  const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  // Tạo URL WebSocket
+  const wsUrl = `${protocol}://${host}/ws/chat/?token=${token}`;
   console.log(`Tạo kết nối WebSocket đến: ${wsUrl}`);
   return new WebSocket(wsUrl);
 };

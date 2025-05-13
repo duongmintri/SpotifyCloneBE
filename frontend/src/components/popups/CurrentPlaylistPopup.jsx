@@ -67,8 +67,8 @@ const SortableTrack = ({ track, index, isCurrentSong, isPlaying, onPlaySong, onR
           index + 1
         )}
       </div>
-      <div 
-        className="track-info" 
+      <div
+        className="track-info"
         onClick={() => {
           // Nếu là bài hát đang phát, chỉ toggle play/pause
           // Nếu không, phát bài hát mới
@@ -81,12 +81,16 @@ const SortableTrack = ({ track, index, isCurrentSong, isPlaying, onPlaySong, onR
       >
         <div className="track-title">{track.title}</div>
         <div className="track-artist">
-          {typeof track.artist === 'object' ? track.artist.name : track.artist}
+          {track.artist
+            ? (typeof track.artist === 'string'
+                ? track.artist
+                : (track.artist.name || track.artist.id || "Unknown artist"))
+            : "Unknown artist"}
         </div>
       </div>
       <div className="track-duration">{formatTime(track.duration || 0)}</div>
       <div className="track-actions">
-        <button 
+        <button
           className="track-action-btn track-remove-btn"
           onClick={(e) => {
             e.stopPropagation();
@@ -96,7 +100,7 @@ const SortableTrack = ({ track, index, isCurrentSong, isPlaying, onPlaySong, onR
         >
           <FaTrash size={12} />
         </button>
-        <button 
+        <button
           className="track-action-btn"
           onClick={(e) => {
             e.stopPropagation();
@@ -110,11 +114,11 @@ const SortableTrack = ({ track, index, isCurrentSong, isPlaying, onPlaySong, onR
   );
 };
 
-const CurrentPlaylistPopup = ({ 
-  isOpen, 
-  onClose, 
-  playlist = [], 
-  currentSong, 
+const CurrentPlaylistPopup = ({
+  isOpen,
+  onClose,
+  playlist = [],
+  currentSong,
   isPlaying,
   onPlaySong,
   onReorderPlaylist,
@@ -135,11 +139,11 @@ const CurrentPlaylistPopup = ({
   // Handle drag end to reorder playlist
   const handleDragEnd = (event) => {
     const { active, over } = event;
-    
+
     if (active.id !== over.id) {
       const oldIndex = playlist.findIndex(item => item.id === active.id);
       const newIndex = playlist.findIndex(item => item.id === over.id);
-      
+
       if (onReorderPlaylist) {
         const newPlaylist = arrayMove(playlist, oldIndex, newIndex);
         onReorderPlaylist(newPlaylist, oldIndex, newIndex);
@@ -158,15 +162,15 @@ const CurrentPlaylistPopup = ({
             <FaTimes />
           </button>
         </div>
-        
+
         <div className="current-playlist-content">
           <div className="current-playlist-info">
             <div className="playlist-cover">
-              <img 
-                src={currentSong?.cover_image || '/src/assets/images/default-playlist.png'} 
-                alt="Playlist cover" 
+              <img
+                src={currentSong?.cover_image || '/src/assets/images/default-playlist.png'}
+                alt="Playlist cover"
               />
-              <button 
+              <button
                 className="playlist-play-btn"
                 onClick={() => {
                   if (playlist.length > 0 && onPlaySong) {
@@ -177,7 +181,7 @@ const CurrentPlaylistPopup = ({
                 {isPlaying ? <FaPause size={12} /> : <FaPlay size={12} />}
               </button>
             </div>
-            
+
             <div className="playlist-details">
               <h3 className="playlist-title">Danh sách phát</h3>
               <p className="playlist-subtitle">
@@ -185,7 +189,7 @@ const CurrentPlaylistPopup = ({
               </p>
             </div>
           </div>
-          
+
           <div className="current-playlist-tracks">
             <div className="playlist-table-header">
               <div className="track-number">#</div>
@@ -193,7 +197,7 @@ const CurrentPlaylistPopup = ({
               <div className="track-duration">Thời lượng</div>
               <div className="track-actions"></div>
             </div>
-            
+
             {playlist.length > 0 ? (
               <DndContext
                 sensors={sensors}

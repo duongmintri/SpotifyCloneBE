@@ -1,6 +1,9 @@
 // API service for authentication
-// Sử dụng URL đầy đủ của backend
-const API_URL = 'http://13.238.97.197:8000';
+// Sử dụng đường dẫn tương đối thay vì URL đầy đủ
+const API_URL = '';  // Để trống để sử dụng đường dẫn tương đối
+
+// Hoặc sử dụng window.location.origin để lấy gốc URL hiện tại
+// const API_URL = window.location.origin;
 
 // Hàm để lấy CSRF token từ cookie
 function getCsrfToken() {

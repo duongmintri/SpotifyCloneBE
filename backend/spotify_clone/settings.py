@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-key-for-development-only'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '13.238.97.197']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '13.238.97.197', 'spotifyclone.sytes.net']
 
 
 # Application definition
@@ -72,6 +72,8 @@ CORS_ALLOW_CREDENTIALS = True
 # Cấu hình CSRF
 CSRF_TRUSTED_ORIGINS = [
     'http://13.238.97.197',
+    'http://spotifyclone.sytes.net',
+    'https://spotifyclone.sytes.net',
 ]
 CSRF_COOKIE_SECURE = False
 CSRF_COOKIE_HTTPONLY = False
